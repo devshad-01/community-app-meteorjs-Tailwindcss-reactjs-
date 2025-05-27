@@ -1,2 +1,84 @@
-@import '../imports/styles/main.css';
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+    body {
+        @apply bg-white text-gray-900 font-body;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-display font-bold text-gray-900;
+    }
+
+    h1 {
+        @apply text-4xl md:text-5xl;
+    }
+
+    h2 {
+        @apply text-3xl md:text-4xl;
+    }
+
+    h3 {
+        @apply text-2xl md:text-3xl;
+    }
+
+    a {
+        @apply text-primary hover:opacity-80 transition-opacity duration-200;
+    }
+
+    code {
+        @apply font-mono text-sm bg-accent text-accent-foreground px-1.5 py-0.5 rounded;
+    }
+}
+
+/* Component styles */
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded font-medium transition-all duration-200;
+    }
+
+    .btn-primary {
+        @apply bg-primary text-primary-foreground hover:bg-primary-dark hover:shadow-glow;
+    }
+
+    .btn-outline {
+        @apply border border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow;
+    }
+
+    .card {
+        @apply bg-white backdrop-blur-sm rounded-lg p-6 border border-border shadow-sm;
+    }
+
+    .input {
+        @apply bg-white text-gray-900 border border-input rounded-md px-4 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-all duration-200;
+    }
+
+    /* Navigation styles for existing components */
+    .nav-link {
+        @apply text-gray-700 hover:text-primary transition-colors duration-200;
+    }
+
+    .nav-link-active {
+        @apply text-primary;
+    }
+
+    /* Override dark theme classes used in existing components */
+    .bg-dark {
+        @apply bg-white border-b border-border;
+    }
+
+    .text-white {
+        @apply text-gray-900;
+    }
+
+    .text-muted {
+        @apply text-gray-600;
+    }
+}
