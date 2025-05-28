@@ -82,7 +82,7 @@ export const HomePage = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-20 lg:py-32">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-10"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-10"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -131,7 +131,7 @@ export const HomePage = () => {
                   alt="Community worship and fellowship"
                   className="w-full h-64 lg:h-80 object-cover rounded-lg"
                 />
-                <div className="absolute -top-4 -right-4 bg-warm-500 dark:bg-orange-500 text-white p-3 rounded-full shadow-lg">
+                <div className="absolute -top-4 -right-4 bg-orange-500 dark:bg-orange-500 text-white p-3 rounded-full shadow-lg">
                   <Heart className="w-6 h-6" />
                 </div>
               </div>
@@ -343,12 +343,12 @@ export const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-warm-500 to-warm-600 dark:from-orange-600 dark:to-red-600">
+      <section className="py-20 bg-slate-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
             Ready to Join Our Community?
           </h2>
-          <p className="text-xl text-warm-100 dark:text-orange-100 mb-8">
+          <p className="text-xl text-orange-100 dark:text-orange-100 mb-8">
             Become part of our growing faith community and connect with fellow believers.
           </p>
           

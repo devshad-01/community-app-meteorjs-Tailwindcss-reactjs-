@@ -98,7 +98,7 @@ export const App = () => {
   return (
     <div className="app">
       <NavigationBar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <main className="max-w-7xl mx-auto p-4">
+      <main className="max-w-7xl mx-auto p-0">
         {renderContent()}
       </main>
       <Footer onNav={(pageName) => setCurrentPage(pageName)} />
