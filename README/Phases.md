@@ -37,12 +37,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 
 ## UI Components & Page Layout Breakdown
 
-### 1. Navigation Component (`components/navigation.tsx`)
+### 1. Navigation Component (`components/navigation.jsx`)
 
 **Purpose**: Primary navigation bar with user authentication and role-based menu items.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <nav>
   <div className="logo-section">
     <Link to="/">CommunityHub Logo</Link>
@@ -62,7 +62,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     <MobileNavigation />
   </div>
 </nav>
-\`\`\`
+```
 
 **Key Elements**:
 - **Logo & Branding**: Gradient logo with "CH" initials
@@ -72,12 +72,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Admin Access**: Conditional admin menu for privileged users
 - **Mobile Responsive**: Hamburger menu for smaller screens
 
-### 2. Home Page (`app/page.tsx`)
+### 2. Home Page (`app/page.jsx`)
 
 **Purpose**: Landing page showcasing platform features and encouraging user registration.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="home-page">
   <section className="hero-section">
     <h1>Welcome to CommunityHub</h1>
@@ -96,7 +96,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     {stats.map(stat => <StatCard />)}
   </section>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Hero Section**: Gradient background with compelling headline
@@ -104,12 +104,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Statistics**: User count, communities, messages, uptime metrics
 - **Call-to-Action**: Prominent buttons for registration/login
 
-### 3. Dashboard Page (`app/dashboard/page.tsx`)
+### 3. Dashboard Page (`app/dashboard/page.jsx`)
 
 **Purpose**: Personalized user dashboard showing activity, events, and quick actions.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="dashboard">
   <header className="welcome-header">
     <h1>Welcome back, {user.name}!</h1>
@@ -130,7 +130,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </div>
   </div>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Personal Stats**: Events attended, forum posts, connections, reputation
@@ -138,12 +138,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Recent Activity**: Community activity feed
 - **Quick Actions**: Shortcuts to create events, posts, join chat
 
-### 4. Admin Dashboard (`app/admin/page.tsx`)
+### 4. Admin Dashboard (`app/admin/page.jsx`)
 
 **Purpose**: Administrative interface for platform management and moderation.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="admin-dashboard">
   <header className="admin-header">
     <Shield icon />
@@ -168,7 +168,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     <AdminActionGrid />
   </div>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Admin Statistics**: Total users, active events, forum posts, reports
@@ -176,12 +176,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Content Moderation**: Pending reports with severity levels
 - **Quick Actions**: Grid of common administrative tasks
 
-### 5. Events Page (`app/events/page.tsx`)
+### 5. Events Page (`app/events/page.jsx`)
 
 **Purpose**: Event discovery and management interface with filtering and RSVP functionality.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="events-page">
   <header className="events-header">
     <h1>Events</h1>
@@ -201,7 +201,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     <EventGrid />
   </section>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Search & Filters**: Real-time search with category filtering
@@ -210,12 +210,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **RSVP System**: Interactive attendance tracking
 - **Event Types**: Color-coded badges (meeting, workshop, social)
 
-### 6. Forums Page (`app/forums/page.tsx`)
+### 6. Forums Page (`app/forums/page.jsx`)
 
 **Purpose**: Discussion forum with categories, voting, and moderation features.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="forums-page">
   <header className="forums-header">
     <h1>Community Forums</h1>
@@ -234,7 +234,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </main>
   </div>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Category Sidebar**: Filterable categories with post counts
@@ -243,12 +243,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Tags System**: Searchable tags for content organization
 - **Pinned Posts**: Admin-highlighted important discussions
 
-### 7. Chat Page (`app/chat/page.tsx`)
+### 7. Chat Page (`app/chat/page.jsx`)
 
 **Purpose**: Real-time chat interface with channels and user presence.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="chat-page">
   <aside className="chat-sidebar">
     <div className="channels-section">
@@ -275,7 +275,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </footer>
   </main>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Channel Navigation**: Hashtag-prefixed channels with unread indicators
@@ -284,12 +284,12 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 - **Typing Indicators**: Real-time typing status
 - **Message Composer**: Rich input with emoji and file attachment support
 
-### 8. Messages Page (`app/messages/page.tsx`)
+### 8. Messages Page (`app/messages/page.jsx`)
 
 **Purpose**: Private messaging interface for direct user communication.
 
 **Structure**:
-\`\`\`tsx
+```jsx
 <div className="messages-page">
   <aside className="conversations-sidebar">
     <header className="messages-header">
@@ -316,7 +316,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </footer>
   </main>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Conversation List**: Searchable list with unread indicators
@@ -327,8 +327,8 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 
 ### 9. Authentication Pages
 
-#### Sign In (`app/auth/signin/page.tsx`)
-\`\`\`tsx
+#### Sign In (`app/auth/signin/page.jsx`)
+```jsx
 <div className="auth-page">
   <Card className="auth-card">
     <CardHeader>
@@ -345,10 +345,10 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </CardContent>
   </Card>
 </div>
-\`\`\`
+```
 
-#### Register (`app/auth/register/page.tsx`)
-\`\`\`tsx
+#### Register (`app/auth/register/page.jsx`)
+```jsx
 <div className="auth-page">
   <Card className="auth-card">
     <CardHeader>
@@ -364,7 +364,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
     </CardContent>
   </Card>
 </div>
-\`\`\`
+```
 
 **Key Elements**:
 - **Social Authentication**: GitHub and Google OAuth buttons
@@ -379,7 +379,7 @@ CommunityHub is a modern, full-stack community platform built with Meteor.js and
 
 ### 1. Component Hierarchy
 
-\`\`\`
+```
 App (Layout)
 ├── Navigation (Global)
 ├── AuthProvider (Context)
@@ -394,7 +394,7 @@ App (Layout)
     └── Auth
         ├── SignIn
         └── Register
-\`\`\`
+```
 
 ### 2. Atomic Design Approach
 
@@ -425,7 +425,7 @@ App (Layout)
 ### 3. Tailwind CSS Integration
 
 **Design System**:
-\`\`\`css
+```css
 /* Color Palette */
 --warm-50: #FFF9F7
 --warm-100: #FFF1ED
@@ -443,7 +443,7 @@ text-lg: 18px
 text-xl: 20px
 text-2xl: 24px
 text-3xl: 30px
-\`\`\`
+```
 
 **Utility Classes**:
 - Layout: `flex`, `grid`, `container`
@@ -475,22 +475,21 @@ text-3xl: 30px
 ### Phase 1: Environment Setup
 
 #### 1.1 Install Meteor
-\`\`\`bash
+```bash
 # Install Meteor
 curl https://install.meteor.com/ | sh
 
 # Create new project
-meteor create communityhub --react --typescript
+meteor create communityhub --react
 
 # Navigate to project
 cd communityhub
-\`\`\`
+```
 
 #### 1.2 Install Dependencies
-\`\`\`bash
+```bash
 # Core dependencies
 meteor npm install react@18 react-dom@18
-meteor npm install @types/react @types/react-dom
 
 # UI Framework
 meteor npm install tailwindcss @tailwindcss/typography
@@ -498,22 +497,22 @@ meteor npm install @radix-ui/react-avatar @radix-ui/react-dropdown-menu
 meteor npm install lucide-react
 
 # Routing (if using React Router)
-meteor npm install react-router-dom @types/react-router-dom
+meteor npm install react-router-dom
 
 # Form handling
-meteor npm install react-hook-form @hookform/resolvers zod
-\`\`\`
+meteor npm install react-hook-form zod
+```
 
 #### 1.3 Configure Tailwind CSS
-\`\`\`bash
+```bash
 # Initialize Tailwind
 npx tailwindcss init -p
 
 # Create globals.css
 touch client/main.css
-\`\`\`
+```
 
-\`\`\`css
+```css
 /* client/main.css */
 @tailwind base;
 @tailwind components;
@@ -526,17 +525,17 @@ touch client/main.css
   --warm-500: #FF6B47;
   --warm-600: #E55A3D;
 }
-\`\`\`
+```
 
 #### 1.4 Project Structure
-\`\`\`
+```
 communityhub/
 ├── client/
 │   ├── main.html
-│   ├── main.tsx
+│   ├── main.jsx
 │   └── main.css
 ├── server/
-│   └── main.ts
+│   └── main.js
 ├── imports/
 │   ├── api/
 │   │   ├── users/
@@ -552,12 +551,12 @@ communityhub/
 │       └── server/
 ├── public/
 └── package.json
-\`\`\`
+```
 
 ### Phase 2: Authentication System
 
 #### 2.1 Install Meteor Accounts
-\`\`\`bash
+```bash
 # Core accounts packages
 meteor add accounts-base accounts-password accounts-ui
 
@@ -566,44 +565,26 @@ meteor add accounts-google accounts-github
 
 # Additional packages
 meteor add alanning:roles
-\`\`\`
+```
 
 #### 2.2 User Schema
-\`\`\`typescript
-// imports/api/users/users.ts
+```jsx
+// imports/api/users/users.js
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 
-export interface UserProfile {
-  name: string;
-  avatar?: string;
-  bio?: string;
-  location?: string;
-}
-
-export interface CommunityUser extends Meteor.User {
-  profile: UserProfile;
-  roles: string[];
-  createdAt: Date;
-  lastActive: Date;
-}
-
-export const Users = Meteor.users as Mongo.Collection<CommunityUser>;
-\`\`\`
+export const Users = Meteor.users;
+```
 
 #### 2.3 Authentication Methods
-\`\`\`typescript
-// imports/api/users/methods.ts
+```jsx
+// imports/api/users/methods.js
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 
 Meteor.methods({
-  'users.register'(userData: {
-    email: string;
-    password: string;
-    profile: UserProfile;
-  }) {
+  'users.register'(userData) {
     check(userData, {
       email: String,
       password: String,
@@ -626,7 +607,7 @@ Meteor.methods({
     return userId;
   },
 
-  'users.updateProfile'(profileData: Partial<UserProfile>) {
+  'users.updateProfile'(profileData) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
@@ -636,28 +617,28 @@ Meteor.methods({
     });
   }
 });
-\`\`\`
+```
 
 #### 2.4 Role-Based Access Control
-\`\`\`typescript
-// imports/api/users/roles.ts
+```jsx
+// imports/api/users/roles.js
 import { Roles } from 'meteor/alanning:roles';
 
 export const USER_ROLES = {
   ADMIN: 'admin',
   MODERATOR: 'moderator',
   MEMBER: 'member'
-} as const;
+};
 
-export const hasRole = (userId: string, role: string): boolean => {
+export const hasRole = (userId, role) => {
   return Roles.userIsInRole(userId, role);
 };
 
-export const requireRole = (role: string) => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+export const requireRole = (role) => {
+  return (target, propertyKey, descriptor) => {
     const originalMethod = descriptor.value;
     
-    descriptor.value = function(...args: any[]) {
+    descriptor.value = function(...args) {
       if (!this.userId || !hasRole(this.userId, role)) {
         throw new Meteor.Error('access-denied', 'Insufficient permissions');
       }
@@ -665,28 +646,20 @@ export const requireRole = (role: string) => {
     };
   };
 };
-\`\`\`
+```
 
 #### 2.5 Authentication Context
-\`\`\`typescript
-// imports/ui/contexts/AuthContext.tsx
-import React, { createContext, useContext, ReactNode } from 'react';
+```jsx
+// imports/ui/contexts/AuthContext.jsx
+import React, { createContext, useContext } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
-interface AuthContextType {
-  user: CommunityUser | null;
-  userId: string | null;
-  isLoggedIn: boolean;
-  isLoading: boolean;
-  hasRole: (role: string) => boolean;
-}
+const AuthContext = createContext(null);
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }) => {
   const { user, userId, isLoggedIn, isLoading } = useTracker(() => {
-    const user = Meteor.user() as CommunityUser | null;
+    const user = Meteor.user();
     const userId = Meteor.userId();
     const isLoading = Meteor.loggingIn();
     
@@ -698,7 +671,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const hasRole = (role: string): boolean => {
+  const hasRole = (role) => {
     return user ? Roles.userIsInRole(user._id, role) : false;
   };
 
@@ -722,33 +695,16 @@ export const useAuth = () => {
   }
   return context;
 };
-\`\`\`
+```
 
 ### Phase 3: Data Layer & Collections
 
 #### 3.1 Events Collection
-\`\`\`typescript
-// imports/api/events/events.ts
+```jsx
+// imports/api/events/events.js
 import { Mongo } from 'meteor/mongo';
 
-export interface Event {
-  _id?: string;
-  title: string;
-  description: string;
-  date: Date;
-  time: string;
-  duration: string;
-  location: string;
-  type: 'meeting' | 'workshop' | 'social';
-  organizerId: string;
-  attendees: string[];
-  maxAttendees: number;
-  featured: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export const Events = new Mongo.Collection<Event>('events');
+export const Events = new Mongo.Collection('events');
 
 // Publications
 if (Meteor.isServer) {
@@ -758,7 +714,7 @@ if (Meteor.isServer) {
     });
   });
 
-  Meteor.publish('events.byUser', function(userId: string) {
+  Meteor.publish('events.byUser', function(userId) {
     return Events.find({
       $or: [
         { organizerId: userId },
@@ -767,17 +723,17 @@ if (Meteor.isServer) {
     });
   });
 }
-\`\`\`
+```
 
 #### 3.2 Events Methods
-\`\`\`typescript
-// imports/api/events/methods.ts
+```jsx
+// imports/api/events/methods.js
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { Events } from './events';
 
 Meteor.methods({
-  'events.create'(eventData: Omit<Event, '_id' | 'createdAt' | 'updatedAt'>) {
+  'events.create'(eventData) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
@@ -805,7 +761,7 @@ Meteor.methods({
     return eventId;
   },
 
-  'events.rsvp'(eventId: string) {
+  'events.rsvp'(eventId) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
@@ -838,85 +794,36 @@ Meteor.methods({
     }
   }
 });
-\`\`\`
+```
 
 #### 3.3 Forums Collection
-\`\`\`typescript
-// imports/api/forums/forums.ts
-export interface ForumPost {
-  _id?: string;
-  title: string;
-  content: string;
-  authorId: string;
-  category: string;
-  tags: string[];
-  votes: {
-    up: string[];
-    down: string[];
-  };
-  replies: ForumReply[];
-  views: number;
-  isPinned: boolean;
-  isLocked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+```jsx
+// imports/api/forums/forums.js
+import { Mongo } from 'meteor/mongo';
 
-export interface ForumReply {
-  _id: string;
-  content: string;
-  authorId: string;
-  votes: {
-    up: string[];
-    down: string[];
-  };
-  createdAt: Date;
-}
-
-export const ForumPosts = new Mongo.Collection<ForumPost>('forumPosts');
-\`\`\`
+export const ForumPosts = new Mongo.Collection('forumPosts');
+```
 
 #### 3.4 Messages Collection
-\`\`\`typescript
-// imports/api/messages/messages.ts
-export interface Message {
-  _id?: string;
-  content: string;
-  senderId: string;
-  recipientId?: string; // For direct messages
-  channelId?: string;   // For channel messages
-  type: 'direct' | 'channel';
-  readBy: string[];
-  editedAt?: Date;
-  createdAt: Date;
-}
+```jsx
+// imports/api/messages/messages.js
+import { Mongo } from 'meteor/mongo';
 
-export interface Channel {
-  _id?: string;
-  name: string;
-  description: string;
-  type: 'public' | 'private';
-  members: string[];
-  createdBy: string;
-  createdAt: Date;
-}
-
-export const Messages = new Mongo.Collection<Message>('messages');
-export const Channels = new Mongo.Collection<Channel>('channels');
-\`\`\`
+export const Messages = new Mongo.Collection('messages');
+export const Channels = new Mongo.Collection('channels');
+```
 
 ### Phase 4: Real-time Features
 
 #### 4.1 Chat Implementation
-\`\`\`typescript
-// imports/api/messages/methods.ts
+```jsx
+// imports/api/messages/methods.js
+import { Meteor } from 'meteor/meteor';
+import { check } from 'meteor/check';
+import { Messages } from './messages';
+
 Meteor.methods({
-  'messages.send'(messageData: {
-    content: string;
-    recipientId?: string;
-    channelId?: string;
-    type: 'direct' | 'channel';
-  }) {
+  'messages.send'(messageData) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
@@ -931,7 +838,7 @@ Meteor.methods({
     return messageId;
   },
 
-  'messages.markAsRead'(messageIds: string[]) {
+  'messages.markAsRead'(messageIds) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
@@ -943,12 +850,15 @@ Meteor.methods({
     );
   }
 });
-\`\`\`
+```
 
 #### 4.2 Real-time Publications
-\`\`\`typescript
-// imports/api/messages/publications.ts
-Meteor.publish('messages.channel', function(channelId: string) {
+```jsx
+// imports/api/messages/publications.js
+import { Meteor } from 'meteor/meteor';
+import { Messages } from './messages';
+
+Meteor.publish('messages.channel', function(channelId) {
   if (!this.userId) {
     return this.ready();
   }
@@ -962,7 +872,7 @@ Meteor.publish('messages.channel', function(channelId: string) {
   });
 });
 
-Meteor.publish('messages.direct', function(otherUserId: string) {
+Meteor.publish('messages.direct', function(otherUserId) {
   if (!this.userId) {
     return this.ready();
   }
@@ -977,19 +887,14 @@ Meteor.publish('messages.direct', function(otherUserId: string) {
     sort: { createdAt: 1 }
   });
 });
-\`\`\`
+```
 
 #### 4.3 User Presence System
-\`\`\`typescript
-// imports/api/presence/presence.ts
-export interface UserPresence {
-  userId: string;
-  status: 'online' | 'away' | 'offline';
-  lastSeen: Date;
-  currentChannel?: string;
-}
+```jsx
+// imports/api/presence/presence.js
+import { Mongo } from 'meteor/mongo';
 
-export const Presence = new Mongo.Collection<UserPresence>('presence');
+export const Presence = new Mongo.Collection('presence');
 
 // Server-side presence tracking
 if (Meteor.isServer) {
@@ -1011,7 +916,7 @@ if (Meteor.isServer) {
   });
 
   Meteor.methods({
-    'presence.setStatus'(status: 'online' | 'away') {
+    'presence.setStatus'(status) {
       if (!this.userId) return;
 
       Presence.upsert(
@@ -1026,19 +931,19 @@ if (Meteor.isServer) {
     }
   });
 }
-\`\`\`
+```
 
 ### Phase 5: UI Components Implementation
 
 #### 5.1 Chat Component
-\`\`\`typescript
-// imports/ui/components/Chat.tsx
+```jsx
+// imports/ui/components/Chat.jsx
 import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Messages, Channels } from '/imports/api/messages/messages';
 
-export const Chat: React.FC = () => {
-  const [selectedChannel, setSelectedChannel] = useState<string>('general');
+export const Chat = () => {
+  const [selectedChannel, setSelectedChannel] = useState('general');
   const [messageText, setMessageText] = useState('');
 
   const { messages, channels, isLoading } = useTracker(() => {
@@ -1079,7 +984,7 @@ export const Chat: React.FC = () => {
         {channels.map(channel => (
           <button
             key={channel._id}
-            onClick={() => setSelectedChannel(channel._id!)}
+            onClick={() => setSelectedChannel(channel._id)}
             className={`block w-full text-left p-2 rounded ${
               selectedChannel === channel._id ? 'bg-blue-500 text-white' : ''
             }`}
@@ -1127,16 +1032,16 @@ export const Chat: React.FC = () => {
     </div>
   );
 };
-\`\`\`
+```
 
 #### 5.2 Event Management Component
-\`\`\`typescript
-// imports/ui/components/EventManager.tsx
+```jsx
+// imports/ui/components/EventManager.jsx
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Events } from '/imports/api/events/events';
 
-export const EventManager: React.FC = () => {
+export const EventManager = () => {
   const [filter, setFilter] = useState('all');
 
   const { events, isLoading } = useTracker(() => {
@@ -1148,8 +1053,8 @@ export const EventManager: React.FC = () => {
     };
   }, []);
 
-  const handleRSVP = (eventId: string) => {
-    Meteor.call('events.rsvp', eventId, (error: any) => {
+  const handleRSVP = (eventId) => {
+    Meteor.call('events.rsvp', eventId, (error) => {
       if (error) {
         console.error('RSVP failed:', error);
       }
@@ -1212,14 +1117,14 @@ export const EventManager: React.FC = () => {
             </div>
             
             <button
-              onClick={() => handleRSVP(event._id!)}
+              onClick={() => handleRSVP(event._id)}
               className={`w-full py-2 px-4 rounded font-semibold ${
-                event.attendees.includes(Meteor.userId()!)
+                event.attendees.includes(Meteor.userId())
                   ? 'bg-green-500 text-white'
                   : 'bg-blue-500 text-white hover:bg-blue-600'
               }`}
             >
-              {event.attendees.includes(Meteor.userId()!) ? 'Attending' : 'RSVP'}
+              {event.attendees.includes(Meteor.userId()) ? 'Attending' : 'RSVP'}
             </button>
           </div>
         ))}
@@ -1227,7 +1132,7 @@ export const EventManager: React.FC = () => {
     </div>
   );
 };
-\`\`\`
+```
 
 ---
 
@@ -1343,7 +1248,7 @@ export const EventManager: React.FC = () => {
 
 ### 1. User Authentication Flow
 
-\`\`\`mermaid
+```mermaid
 graph TD
     A[User visits site] --> B{Logged in?}
     B -->|No| C[Show login/register]
@@ -1359,11 +1264,11 @@ graph TD
     J --> K{Admin role?}
     K -->|Yes| L[Show admin menu]
     K -->|No| M[Show member menu]
-\`\`\`
+```
 
 ### 2. Real-time Chat Architecture
 
-\`\`\`mermaid
+```mermaid
 graph LR
     A[Client A] --> B[Meteor Server]
     C[Client B] --> B
@@ -1380,11 +1285,11 @@ graph LR
     E --> H[Messages Collection]
     E --> I[Channels Collection]
     E --> J[Presence Collection]
-\`\`\`
+```
 
 ### 3. Event Management Flow
 
-\`\`\`mermaid
+```mermaid
 graph TD
     A[User creates event] --> B[Validate event data]
     B --> C{Valid?}
@@ -1401,11 +1306,11 @@ graph TD
     K -->|Yes| M[Add to attendees]
     M --> N[Update event]
     N --> O[Notify organizer]
-\`\`\`
+```
 
 ### 4. Component Data Flow
 
-\`\`\`mermaid
+```mermaid
 graph TD
     A[App Component] --> B[AuthProvider]
     B --> C[Navigation]
@@ -1422,11 +1327,11 @@ graph TD
     G --> J[Reactive Updates]
     J --> E
     E --> D
-\`\`\`
+```
 
 ### 5. Database Schema Relationships
 
-\`\`\`mermaid
+```mermaid
 erDiagram
     USERS ||--o{ EVENTS : organizes
     USERS ||--o{ FORUM_POSTS : creates
@@ -1477,7 +1382,7 @@ erDiagram
         string description
         array members
     }
-\`\`\`
+```
 
 ---
 
@@ -1486,13 +1391,13 @@ erDiagram
 ### 1. Code Organization
 
 **File Structure Best Practices**:
-\`\`\`
+```
 imports/
 ├── api/                    # Server-side logic
 │   ├── users/
-│   │   ├── users.ts       # Collection definition
-│   │   ├── methods.ts     # Meteor methods
-│   │   ├── publications.ts # Data publications
+│   │   ├── users.js       # Collection definition
+│   │   ├── methods.js     # Meteor methods
+│   │   ├── publications.js # Data publications
 │   │   └── server/        # Server-only code
 │   └── [collection]/
 ├── ui/                     # Client-side components
@@ -1504,16 +1409,12 @@ imports/
 └── startup/               # Initialization code
     ├── client/
     └── server/
-\`\`\`
+```
 
 **Component Organization**:
-\`\`\`typescript
+```jsx
 // Component file structure
-export interface ComponentProps {
-  // Props interface
-}
-
-export const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+export const Component = ({ prop1, prop2 }) => {
   // Hooks
   const [state, setState] = useState();
   const { data } = useTracker();
@@ -1531,12 +1432,12 @@ export const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
     </div>
   );
 };
-\`\`\`
+```
 
 ### 2. Performance Optimization
 
 **Database Optimization**:
-\`\`\`typescript
+```jsx
 // Use indexes for frequently queried fields
 if (Meteor.isServer) {
   Events.createIndex({ date: 1, type: 1 });
@@ -1559,10 +1460,10 @@ Meteor.publish('events.recent', function() {
     }
   });
 });
-\`\`\`
+```
 
 **React Optimization**:
-\`\`\`typescript
+```jsx
 // Memoize expensive computations
 const expensiveValue = useMemo(() => {
   return computeExpensiveValue(data);
@@ -1575,12 +1476,12 @@ const MemoizedComponent = React.memo(Component);
 const handleClick = useCallback(() => {
   // Handler logic
 }, [dependency]);
-\`\`\`
+```
 
 ### 3. Security Best Practices
 
 **Method Security**:
-\`\`\`typescript
+```jsx
 Meteor.methods({
   'events.create'(eventData) {
     // Always check authentication
@@ -1609,10 +1510,10 @@ Meteor.methods({
     return Events.insert(sanitizedData);
   }
 });
-\`\`\`
+```
 
 **Publication Security**:
-\`\`\`typescript
+```jsx
 Meteor.publish('messages.private', function(otherUserId) {
   // Check authentication
   if (!this.userId) {
@@ -1630,12 +1531,12 @@ Meteor.publish('messages.private', function(otherUserId) {
     ]
   });
 });
-\`\`\`
+```
 
 ### 4. Testing Strategy
 
 **Unit Testing**:
-\`\`\`typescript
+```jsx
 // Test Meteor methods
 import { expect } from 'chai';
 import { Meteor } from 'meteor/meteor';
@@ -1662,10 +1563,10 @@ if (Meteor.isServer) {
     });
   });
 }
-\`\`\`
+```
 
 **Integration Testing**:
-\`\`\`typescript
+```jsx
 // Test React components
 import { render, screen } from '@testing-library/react';
 import { EventCard } from '/imports/ui/components/EventCard';
@@ -1684,12 +1585,12 @@ describe('EventCard Component', () => {
     expect(screen.getByText('Test Location')).toBeInTheDocument();
   });
 });
-\`\`\`
+```
 
 ### 5. Deployment & Monitoring
 
 **Production Deployment**:
-\`\`\`bash
+```bash
 # Build for production
 meteor build ../build --architecture os.linux.x86_64
 
@@ -1706,10 +1607,10 @@ export MONGO_URL=mongodb://localhost:27017/myapp
 export ROOT_URL=http://myapp.com
 export PORT=3000
 node main.js
-\`\`\`
+```
 
 **Monitoring Setup**:
-\`\`\`typescript
+```jsx
 // Server monitoring
 import { Meteor } from 'meteor/meteor';
 
@@ -1737,7 +1638,7 @@ if (Meteor.isServer) {
     // Send to error tracking service
   });
 }
-\`\`\`
+```
 
 ### 6. Scalability Considerations
 
@@ -1754,7 +1655,7 @@ if (Meteor.isServer) {
 - Implement caching strategies
 
 **Code Splitting**:
-\`\`\`typescript
+```jsx
 // Lazy load components
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 const EventManager = lazy(() => import('./EventManager'));
@@ -1770,7 +1671,7 @@ const App = () => (
     </Suspense>
   </Router>
 );
-\`\`\`
+```
 
 This comprehensive guide provides everything needed to understand, build, and scale the CommunityHub Meteor application. Each section builds upon the previous ones, creating a complete roadmap for development.
 
@@ -1798,18 +1699,4 @@ This comprehensive guide provides everything needed to understand, build, and sc
 **Happy Coding! 🚀**
 
 This guide should give you everything you need to build a comprehensive community platform with Meteor.js. Remember to start with the basics and gradually add more complex features as you become comfortable with the framework.
-\`\`\`
-
-You can now download this complete markdown file which contains all the detailed documentation for building the CommunityHub Meteor Community Web App. The file includes:
-
-1. **Complete project overview** with tech stack and features
-2. **Detailed UI component breakdown** for every page and component
-3. **Architecture and design principles** with atomic design approach
-4. **Step-by-step implementation plan** with code examples
-5. **Phased project roadmap** with clear milestones
-6. **Flow diagrams and architecture** explanations
-7. **Best practices and scalability** considerations
-8. **Additional resources** and community links
-
-This comprehensive guide will help you understand and recreate the entire CommunityHub project from scratch!
 ```
