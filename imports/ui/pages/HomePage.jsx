@@ -1,7 +1,7 @@
 // Home page component
 import React from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { Header } from '../components/common/Header';
+import { Header } from '../components/common/Navigation';
 import { Footer } from '../components/common/Footer';
 
 export const HomePage = () => (
