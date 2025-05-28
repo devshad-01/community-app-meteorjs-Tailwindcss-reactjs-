@@ -7,21 +7,22 @@
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
-"dependencies": {
-  "@babel/runtime": "^7.20.7",
-  "@fortawesome/free-solid-svg-icons": "^6.4.2",
-  "@fortawesome/react-fontawesome": "^0.2.0",
-  "autoprefixer": "^10.4.14",
-  "date-fns": "^2.30.0",
-  "emoji-picker-react": "^4.12.2",
-  "lucide-react": "^0.511.0",
-  "postcss": "^8.5.3",
-  "postcss-load-config": "^6.0.1",
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "react-router-dom": "^6.16.0",
-  "tailwindcss": "^4.1.7"
-},
+  "dependencies": {
+    "@babel/runtime": "^7.20.7",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@tailwindcss/postcss": "^4.1.7",
+    "autoprefixer": "^10.4.14",
+    "date-fns": "^2.30.0",
+    "emoji-picker-react": "^4.12.2",
+    "lucide-react": "^0.511.0",
+    "postcss": "^8.5.3",
+    "postcss-load-config": "^6.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.16.0",
+    "tailwindcss": "^4.1.7"
+  },
   "meteor": {
     "mainModule": {
       "client": "client/main.jsx",
