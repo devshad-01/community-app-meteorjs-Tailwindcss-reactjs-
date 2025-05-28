@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 import { Navigation } from './components/common/Navigation';
 import { HomePage } from './pages/HomePage';
 import { EventsPage } from './pages/EventsPage';
@@ -6,11 +8,26 @@ import { ForumPage } from './pages/ForumPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
+import { LoginPage } from './pages/LoginPage';
 
 export const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
 
+  // Track user authentication state
+  const { user, isLoading } = useTracker(() => {
+    const subscription = Meteor.subscribe('users.current');
+    return {
+      user: Meteor.user(),
+      isLoading: !subscription.ready()
+    };
+  });
+
   const renderPage = () => {
+    // Redirect to login page if trying to access protected pages while not logged in
+    if (!isLoading && !user && ['profile', 'admin'].includes(currentPage)) {
+      return <LoginPage />;
+    }
+
     switch (currentPage) {
       case 'home':
         return <HomePage />;
@@ -24,6 +41,8 @@ export const App = () => {
         return <ProfilePage />;
       case 'admin':
         return <AdminPage />;
+      case 'login':
+        return <LoginPage />;
       default:
         return <HomePage />;
     }

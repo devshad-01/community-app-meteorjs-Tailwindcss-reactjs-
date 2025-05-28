@@ -1,15 +1,31 @@
 // Navigation component for app routing
 import React from 'react';
+import { Meteor } from 'meteor/meteor';
+import { useTracker } from 'meteor/react-meteor-data';
 
 export const Navigation = ({ currentPage, onNavigate }) => {
+  const { user, isLoading } = useTracker(() => {
+    const handler = Meteor.subscribe('users.current');
+    return {
+      user: Meteor.user(),
+      isLoading: !handler.ready()
+    };
+  });
+
   const pages = [
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'events', label: 'Events', icon: '📅' },
     { id: 'forum', label: 'Forum', icon: '💬' },
     { id: 'chat', label: 'Chat', icon: '💭' },
-    { id: 'profile', label: 'Profile', icon: '👤' },
-    { id: 'admin', label: 'Admin', icon: '⚙️' }
+    // Only show profile page if logged in
+    ...(user ? [{ id: 'profile', label: 'Profile', icon: '👤' }] : []),
+    // Only show admin page for users with admin role (you can add a check here later)
+    ...(user ? [{ id: 'admin', label: 'Admin', icon: '⚙️' }] : [])
   ];
+
+  const handleLogout = () => {
+    Meteor.logout();
+  };
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700">
@@ -38,6 +54,29 @@ export const Navigation = ({ currentPage, onNavigate }) => {
                 <span className="hidden md:inline">{page.label}</span>
               </button>
             ))}
+            
+            {/* Login/Logout Button */}
+            {!isLoading && (
+              user ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200
+                    bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800"
+                >
+                  <span>🚪</span>
+                  <span className="hidden md:inline">Logout</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => onNavigate('login')}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200
+                    bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800"
+                >
+                  <span>🔑</span>
+                  <span className="hidden md:inline">Login</span>
+                </button>
+              )
+            )}
           </div>
         </div>
       </div>
