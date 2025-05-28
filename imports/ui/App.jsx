@@ -23,8 +23,15 @@ export const App = () => {
   });
 
   const renderPage = () => {
+    // If user is logged in and on login page, redirect to home
+    if (!isLoading && user && currentPage === 'login') {
+      setCurrentPage('home');
+      return <HomePage />;
+    }
+
     // Redirect to login page if trying to access protected pages while not logged in
-    if (!isLoading && !user && ['profile', 'admin'].includes(currentPage)) {
+    if (!isLoading && !user && ['profile', 'admin', 'chat'].includes(currentPage)) {
+      setCurrentPage('login');
       return <LoginPage />;
     }
 

@@ -24,17 +24,25 @@ export const Navigation = ({ currentPage, onNavigate }) => {
   ];
 
   const handleLogout = () => {
-    Meteor.logout();
+    Meteor.logout(() => {
+      // Redirect to home page after logout
+      onNavigate('home');
+    });
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700">
+    <nav className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-1">
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">
-              Community App
-            </span>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">CA</span>
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                Community App
+              </span>
+            </div>
           </div>
           
           <div className="flex space-x-1">
@@ -43,14 +51,14 @@ export const Navigation = ({ currentPage, onNavigate }) => {
                 key={page.id}
                 onClick={() => onNavigate(page.id)}
                 className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200
+                  flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 group
                   ${currentPage === page.id
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-lg'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:text-blue-600 dark:hover:text-blue-400'
                   }
                 `}
               >
-                <span>{page.icon}</span>
+                <span className="group-hover:scale-110 transition-transform duration-200">{page.icon}</span>
                 <span className="hidden md:inline">{page.label}</span>
               </button>
             ))}
@@ -60,19 +68,19 @@ export const Navigation = ({ currentPage, onNavigate }) => {
               user ? (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200
-                    bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 group
+                    bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 shadow-sm"
                 >
-                  <span>🚪</span>
+                  <span className="group-hover:scale-110 transition-transform duration-200">🚪</span>
                   <span className="hidden md:inline">Logout</span>
                 </button>
               ) : (
                 <button
                   onClick={() => onNavigate('login')}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200
-                    bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 group
+                    bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl"
                 >
-                  <span>🔑</span>
+                  <span className="group-hover:scale-110 transition-transform duration-200">🔑</span>
                   <span className="hidden md:inline">Login</span>
                 </button>
               )
