@@ -124,7 +124,7 @@ const EventCard = ({ event, onRsvp }) => {
   return (
     <div className={`relative rounded-lg overflow-hidden shadow-md ${event.featured ? 'border-2 border-orange-500' : 'border border-slate-700'}`}>
       {event.featured && (
-        <div className="absolute top-2 right-2 bg-orange-500 text-slate-900 px-2 py-1 rounded-full text-xs font-bold flex items-center">
+        <div className="absolute top-0 right-2 bg-orange-400 text-slate-900 px-2 py-1 rounded-full text-xs font-bold flex items-center">
           <FiStar className="w-3 h-3 mr-1" /> Featured
         </div>
       )}

@@ -344,11 +344,11 @@ export const HomePage = () => {
                       {/* Animated CTA Button */}
                       <Link
                         to="/forum"
-                        className="inline-flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-semibold group/btn transition-all duration-300 transform hover:translate-x-2"
+                        className="inline-flex items-center text-orange-400 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-semibold group/btn transition-all duration-300 transform hover:translate-x-2"
                       >
                         <span className="relative">
                           Explore
-                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover/btn:w-full"></span>
+                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover/btn:w-full"></span>
                         </span>
                         <ArrowRight className="w-4 h-4 ml-2 transform transition-all duration-300 group-hover/btn:translate-x-1 group-hover/btn:scale-110" />
                       </Link>
