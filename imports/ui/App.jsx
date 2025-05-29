@@ -11,6 +11,7 @@ import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Footer } from './components/common/Footer';
 
@@ -38,6 +39,7 @@ export const App = () => {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<HomePage />} />
           
           {/* Protected routes - require authentication */}
