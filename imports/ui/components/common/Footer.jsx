@@ -1,5 +1,5 @@
 import React from "react";
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart, CircleDot } from "lucide-react";
 
 export const Footer = ({ onNav }) => {
   const currentYear = new Date().getFullYear();
@@ -68,11 +68,16 @@ export const Footer = ({ onNav }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CH</span>
-              </div>
-              <span className="font-bold text-xl">CommunityHub</span>
+            <div className="flex items-center space-x-2 mb-4 group">
+              <span className="flex items-center">
+                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 dark:from-blue-400 dark:to-green-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 dark:group-hover:from-blue-300 dark:group-hover:to-green-400 transition-all duration-300">
+                  Community
+                </span>
+                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 dark:group-hover:text-blue-400 transition-colors duration-300">
+                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 dark:text-blue-400 group-hover:text-orange-500 dark:group-hover:text-blue-500 transition-colors duration-300" />
+                  Hub
+                </span>
+              </span>
             </div>
             <p className="text-slate-300 mb-6 max-w-md">
               Connect, collaborate, and build amazing communities with our modern platform featuring real-time chat,
@@ -146,7 +151,14 @@ export const Footer = ({ onNav }) => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-sm text-slate-300">
-              <span>© {currentYear} CommunityHub. All rights reserved.</span>
+              <span className="flex items-center space-x-1">
+                <span>© {currentYear}</span>
+                <span className="font-bold bg-gradient-to-r from-orange-500 to-amber-600 dark:from-blue-400 dark:to-green-500 bg-clip-text text-transparent">
+                  Community
+                </span>
+                <CircleDot className="w-4 h-4 text-orange-400 dark:text-blue-400" />
+                <span className="font-bold">Hub</span>
+              </span>
               <span>•</span>
               <span className="flex items-center space-x-1">
                 <span>Made with</span>
