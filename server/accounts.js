@@ -11,11 +11,10 @@ Meteor.startup(() => {
 
   // Validate new users
   Accounts.validateNewUser((user) => {
-    // Basic validation
-    if (!user.emails || !user.emails[0] || !user.emails[0].address) {
+    if (!user.emails || !user.emails[0]?.address) {
       throw new Meteor.Error(403, 'Email is required');
     }
-    
+
     if (!user.profile || !user.profile.name) {
       throw new Meteor.Error(403, 'Name is required');
     }
@@ -23,23 +22,20 @@ Meteor.startup(() => {
     return true;
   });
 
-  // Set up user creation hooks
+  // Hook for customizing user creation
   Accounts.onCreateUser((options, user) => {
-    // Set default profile
     user.profile = options.profile || {};
-    
-    // Set default role if not specified
+
     if (!user.profile.role) {
       user.profile.role = 'member';
     }
-    
-    // Add creation timestamp
+
     user.createdAt = new Date();
-    
+
     return user;
   });
 
-  // Configure email templates
+  // Email templates
   Accounts.emailTemplates.siteName = 'CommunityHub';
   Accounts.emailTemplates.from = 'CommunityHub <noreply@communityhub.com>';
 
@@ -48,7 +44,7 @@ Meteor.startup(() => {
       return 'Reset your password on CommunityHub';
     },
     text(user, url) {
-      return `Hello ${user.profile?.name || 'User'},\n\nTo reset your password, simply click the link below:\n\n${url}\n\nIf you did not request this reset, please ignore this email.\n\nThanks,\nThe CommunityHub Team`;
+      return `Hello ${user.profile?.name || 'User'},\n\nTo reset your password, click the link below:\n\n${url}\n\nIf you did not request this, ignore this email.\n\nThanks,\nCommunityHub Team`;
     }
   };
 
@@ -57,26 +53,23 @@ Meteor.startup(() => {
       return 'Verify your email address';
     },
     text(user, url) {
-      return `Hello ${user.profile?.name || 'User'},\n\nTo verify your account email, simply click the link below:\n\n${url}\n\nThanks,\nThe CommunityHub Team`;
+      return `Hello ${user.profile?.name || 'User'},\n\nTo verify your email, click the link below:\n\n${url}\n\nThanks,\nCommunityHub Team`;
     }
   };
 
-  // Create default admin user if it doesn't exist
-  Meteor.users.find().countAsync().then((userCount) => {
-    if (userCount === 0) {
-      const adminUserId = Accounts.createUser({
-        email: 'admin@communityhub.com',
-        password: 'admin123',
-        username: 'admin',
-        profile: {
-          name: 'System Administrator',
-          role: 'admin'
-        }
-      });
-      
-      console.log('Created default admin user:', adminUserId);
-    }
-  }).catch((error) => {
-    console.error('Error checking user count:', error);
-  });
+  // Create default admin user only if not present
+  if (Meteor.users.find().count() === 0) {
+    const userId = Accounts.createUser({
+      email: 'admin@communityhub.com',
+      username: 'admin',
+      password: 'admin123',
+      profile: {
+        name: 'System Administrator',
+        role: 'admin'
+      }
+    });
+
+    console.log('✅ Created default admin user with ID:', userId);
+  }
 });
+
