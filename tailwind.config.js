@@ -21,6 +21,7 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+
         
         // Warm color palette
         primary: {
@@ -90,7 +91,7 @@ module.exports = {
           foreground: "#0F172A",
         },
         card: {
-          DEFAULT: "#FFFFFF",
+          DEFAULT: "#0F172A",
           foreground: "#0F172A",
         },
         // Custom warm colors
