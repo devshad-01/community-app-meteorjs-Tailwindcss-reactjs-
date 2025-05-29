@@ -62,7 +62,7 @@ export const Footer = ({ onNav }) => {
     ));
 
   return (
-    <footer className="bg-slate-900 text-white">
+    <footer className="bg-slate-800 text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">

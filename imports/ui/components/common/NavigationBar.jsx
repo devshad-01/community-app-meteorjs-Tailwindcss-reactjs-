@@ -140,12 +140,12 @@ export const NavigationBar = () => {
     return (
       <Link
         to={item.href}
-        className={`group flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${className}`}
+        className={`group flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium hover:text-white transition-all duration-200 ${className}`}
         onClick={onClick}
         title={item.description}
       >
-        <Icon className={`w-5 h-5 transition-transform duration-200 ${
-          isActive(item.href) ? 'scale-110 text-blue-400' : 'group-hover:scale-105'
+        <Icon className={`w-5 h-5 transition-transform duration-300  ${
+          isActive(item.href) ? 'scale-110 text-white-800' : 'group-hover:scale-105'
         }`} />
         <span>{item.name}</span>
       </Link>
@@ -153,7 +153,7 @@ export const NavigationBar = () => {
   };
 
   return (
-    <nav className="bg-slate-900 border-b border-slate-700 shadow-lg sticky top-0 z-50">
+    <nav className="bg-slate-700 border-b border-slate-700 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
