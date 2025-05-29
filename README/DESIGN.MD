@@ -43,11 +43,7 @@
 | Private Messages | Filtered Pub/Sub  | Threads collection      |  
 | Notifications    | DDP + Webhooks    | Notifications collection|  
 
-**Optimization**:  
-* Presence tracking with `konecty:user-presence`  
-* Oplog tailing for scalability  
 
----
 
 #### **4. Event Ecosystem**  
 **Pipeline**:  
