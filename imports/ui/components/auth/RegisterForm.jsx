@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Github } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Github, UserPlus } from 'lucide-react';
 
-export const LoginForm = ({ onSuccess }) => {
+export const RegisterForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,10 +29,29 @@ export const LoginForm = ({ onSuccess }) => {
     setIsLoading(true);
     setError('');
 
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // Login existing user
+      // Create new user account
       await new Promise((resolve, reject) => {
-        Meteor.loginWithPassword(formData.email, formData.password, (err) => {
+        Accounts.createUser({
+          email: formData.email,
+          password: formData.password,
+          profile: {
+            name: formData.name
+          }
+        }, (err) => {
           if (err) reject(err);
           else resolve();
         });
@@ -37,7 +59,7 @@ export const LoginForm = ({ onSuccess }) => {
       
       if (onSuccess) onSuccess();
     } catch (err) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || 'An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +84,7 @@ export const LoginForm = ({ onSuccess }) => {
       loginMethod(loginOptions, (err) => {
         setIsLoading(false);
         if (err) {
-          setError(err.message || `${provider} login failed`);
+          setError(err.message || `${provider} registration failed`);
         } else if (onSuccess) {
           onSuccess();
         }
@@ -74,14 +96,14 @@ export const LoginForm = ({ onSuccess }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-600">
-            <User className="h-6 w-6 text-white" />
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-600">
+            <UserPlus className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to your account
+            Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-300">
-            Welcome back to CommunityHub
+            Join the CommunityHub today
           </p>
         </div>
 
@@ -94,6 +116,24 @@ export const LoginForm = ({ onSuccess }) => {
 
           <div className="space-y-4">
             <div>
+              <label htmlFor="name" className="sr-only">Full name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Full name"
+                />
+              </div>
+            </div>
+
+            <div>
               <label htmlFor="email" className="sr-only">Email address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -105,7 +145,7 @@ export const LoginForm = ({ onSuccess }) => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
               </div>
@@ -119,12 +159,12 @@ export const LoginForm = ({ onSuccess }) => {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Password (min. 6 characters)"
                 />
                 <button
                   type="button"
@@ -135,38 +175,40 @@ export const LoginForm = ({ onSuccess }) => {
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              className="text-blue-400 hover:text-blue-300 text-sm"
-              onClick={() => {
-                // Handle forgot password
-                if (formData.email) {
-                  Accounts.forgotPassword({ email: formData.email }, (err) => {
-                    if (err) {
-                      setError(err.message);
-                    } else {
-                      setError('Password reset email sent!');
-                    }
-                  });
-                } else {
-                  setError('Please enter your email address first');
-                }
-              }}
-            >
-              Forgot your password?
-            </button>
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Confirm password"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Creating account...' : 'Create Account'}
             </button>
           </div>
 
@@ -219,10 +261,10 @@ export const LoginForm = ({ onSuccess }) => {
 
           <div className="text-center">
             <Link
-              to="/register"
+              to="/login"
               className="text-blue-400 hover:text-blue-300 text-sm"
             >
-              Don't have an account? Sign up
+              Already have an account? Sign in
             </Link>
           </div>
         </form>
