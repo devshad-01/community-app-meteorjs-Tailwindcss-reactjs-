@@ -329,7 +329,7 @@ export const NavigationBar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+                  className="px-4 py-2 bg-white hover:bg-slate-300 text-orange-500 font-medium rounded-lg transition-colors duration-200"
                 >
                   Register
                 </Link>

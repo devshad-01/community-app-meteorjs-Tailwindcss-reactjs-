@@ -8,7 +8,8 @@ import {
   Globe,
   Zap,
   Star,
-  ArrowRight, 
+  ArrowRight,
+  CheckCircle,
   UserPlus,
 } from "lucide-react"
 
@@ -79,7 +80,7 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-background dark:bg-slate-900">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 sm:py-16 lg:py-20 xl:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900  p-5">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-10"></div>
 
