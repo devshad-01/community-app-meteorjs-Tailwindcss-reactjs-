@@ -88,14 +88,14 @@ export const HomePage = () => {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Hero Content */}
             <div className="text-center lg:text-left animate-fade-in">
-              <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-warm-100 dark:bg-slate-800 rounded-full text-warm-600 dark:text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+              <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-warm-200 bg-warm-100 dark:bg-slate-800 dark:border-slate-700 rounded-full text-warm-600 dark:text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Welcome to Our Community
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-warm-900 dark:text-white mb-4 sm:mb-6 leading-tight">
                 Growing in
-                <span className="text-warm-500 dark:text-orange-400 block">Faith & Fellowship</span>
+                <span className="text-orange-400 block">Faith & Fellowship</span>
                 Together
               </h1>
 
@@ -107,7 +107,7 @@ export const HomePage = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-warm-500 dark:bg-orange-500 hover:bg-warm-600 dark:hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group text-sm sm:text-base"
+                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group text-sm sm:text-base"
                 >
                   Join Our Community
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -257,11 +257,31 @@ export const HomePage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-background dark:bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-background via-warm-25 to-orange-25 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          {/* Floating particles */}
+          <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-bounce opacity-60" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+          <div className="absolute top-40 right-20 w-3 h-3 bg-warm-500 rounded-full animate-bounce opacity-40" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+          <div className="absolute bottom-32 left-1/4 w-2 h-2 bg-orange-300 rounded-full animate-bounce opacity-50" style={{animationDelay: '2s', animationDuration: '3.5s'}}></div>
+          <div className="absolute top-60 right-1/3 w-4 h-4 bg-warm-400 rounded-full animate-bounce opacity-30" style={{animationDelay: '0.5s', animationDuration: '5s'}}></div>
+          
+          {/* Moving gradient orbs */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-orange-300 to-warm-400 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{animationDuration: '4s'}}></div>
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-l from-warm-300 to-orange-400 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-25 animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium mb-6 animate-pulse">
+              <Zap className="w-4 h-4 mr-2 animate-spin" style={{animationDuration: '3s'}} />
+              Powerful Community Features
+            </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-warm-900 dark:text-white mb-3 sm:mb-4">
-              Everything We Need to Stay Connected
+              Everything We Need to Stay 
+              <span className="text-transparent bg-gradient-to-r from-orange-500 via-warm-500 to-orange-600 bg-clip-text block sm:inline sm:ml-2 animate-pulse">
+                Connected
+              </span>
             </h2>
             <p className="text-base sm:text-lg text-warm-600 dark:text-slate-300 max-w-3xl mx-auto">
               From worship services to fellowship events, our platform provides all the tools our community needs to
@@ -269,41 +289,128 @@ export const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+          {/* Animated Feature Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon
+              const delay = index * 0.2
+              
               return (
-                <div key={index} className="group animate-fade-in">
-                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-warm-200 dark:border-slate-700">
-                    <div className="relative">
+                <div 
+                  key={index} 
+                  className="group relative"
+                  style={{animationDelay: `${delay}s`}}
+                >
+                  {/* Animated Card Container */}
+                  <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-700 overflow-hidden border border-warm-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 transform hover:-translate-y-2 animate-fade-in">
+                    
+                    {/* Animated Image Section */}
+                    <div className="relative h-48 overflow-hidden">
                       <img
                         src={feature.image || "/placeholder.svg"}
                         alt={feature.title}
-                        className="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-125 group-hover:rotate-2"
                       />
-                      <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-warm-500 dark:bg-orange-500 text-white p-2 rounded-lg">
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      
+                      {/* Animated Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Floating Icon with Rotation */}
+                      <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm text-orange-600 dark:text-orange-400 p-3 rounded-full shadow-lg transform transition-all duration-700 group-hover:rotate-12 group-hover:scale-110">
+                        <Icon className="w-5 h-5" />
                       </div>
+                      
+                      {/* Animated Number Badge */}
+                      <div className="absolute bottom-4 left-4 bg-orange-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow-lg transform transition-all duration-500 group-hover:rotate-180 group-hover:scale-125">
+                        {index + 1}
+                      </div>
+                      
+                      {/* Moving Highlight */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                     </div>
-                    <div className="p-4 sm:p-6">
-                      <h3 className="text-lg sm:text-xl font-semibold text-warm-900 dark:text-white mb-2 sm:mb-3">
+                    
+                    {/* Content Section with Sliding Animation */}
+                    <div className="p-6 relative">
+                      {/* Animated Title */}
+                      <h3 className="text-xl font-bold text-warm-900 dark:text-white mb-3 transform transition-all duration-300 group-hover:translate-x-2">
                         {feature.title}
                       </h3>
-                      <p className="text-warm-600 dark:text-slate-300 mb-3 sm:mb-4 text-sm sm:text-base">
+                      
+                      {/* Description with Fade-in */}
+                      <p className="text-warm-600 dark:text-slate-300 mb-4 text-sm leading-relaxed transform transition-all duration-500 opacity-80 group-hover:opacity-100 group-hover:translate-x-1">
                         {feature.description}
                       </p>
+                      
+                      {/* Animated CTA Button */}
                       <Link
                         to="/forum"
-                        className="inline-flex items-center text-warm-500 dark:text-orange-400 hover:text-warm-600 dark:hover:text-orange-300 font-medium group text-sm sm:text-base"
+                        className="inline-flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-semibold group/btn transition-all duration-300 transform hover:translate-x-2"
                       >
-                        Explore
-                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                        <span className="relative">
+                          Explore
+                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover/btn:w-full"></span>
+                        </span>
+                        <ArrowRight className="w-4 h-4 ml-2 transform transition-all duration-300 group-hover/btn:translate-x-1 group-hover/btn:scale-110" />
                       </Link>
+                      
+                      {/* Floating dots animation */}
+                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-orange-400 rounded-full opacity-0 group-hover:opacity-60 transform scale-0 group-hover:scale-100 transition-all duration-700 animate-ping"></div>
+                      <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-warm-500 rounded-full opacity-0 group-hover:opacity-40 transform scale-0 group-hover:scale-100 transition-all duration-500" style={{transitionDelay: '200ms'}}></div>
                     </div>
+                    
+                    {/* Ripple effect on hover */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-500/0 via-orange-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 transform scale-0 group-hover:scale-100 transition-all duration-700 pointer-events-none"></div>
                   </div>
+                  
+                  {/* Orbiting particles around card */}
+                  <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full opacity-0 group-hover:opacity-60 transform rotate-0 group-hover:rotate-180 transition-all duration-1000 origin-[100px_100px]"></div>
+                  <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-warm-500 rounded-full opacity-0 group-hover:opacity-40 transform rotate-0 group-hover:rotate-180 transition-all duration-1200 origin-[-100px_-100px]"></div>
                 </div>
               )
             })}
+          </div>
+          
+          {/* Animated Call to Action */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-8 py-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-warm-200 dark:border-slate-700 hover:shadow-2xl transition-all duration-500 group transform hover:scale-105">
+              
+              {/* Animated Avatar Stack */}
+              <div className="flex -space-x-3 mr-6">
+                {[
+                  { bg: 'from-orange-500 to-warm-600', letter: 'J', delay: '0ms' },
+                  { bg: 'from-blue-500 to-purple-600', letter: 'M', delay: '100ms' },
+                  { bg: 'from-green-500 to-teal-600', letter: 'S', delay: '200ms' },
+                  { bg: 'from-purple-500 to-pink-600', letter: '+50', delay: '300ms' }
+                ].map((avatar, i) => (
+                  <div 
+                    key={i}
+                    className={`w-12 h-12 bg-gradient-to-br ${avatar.bg} rounded-full border-3 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold text-sm transform transition-all duration-700 hover:scale-125 hover:rotate-12 hover:z-10 relative group-hover:animate-bounce`}
+                    style={{animationDelay: avatar.delay, animationDuration: '1s'}}
+                  >
+                    {avatar.letter}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Text with typing effect */}
+              <div className="text-left">
+                <p className="text-warm-900 dark:text-white font-bold text-lg transform transition-all duration-300 group-hover:translate-x-2">
+                  Join 150+ active members
+                </p>
+                <p className="text-warm-600 dark:text-slate-300 transform transition-all duration-500 group-hover:translate-x-1">
+                  Already using these features
+                </p>
+              </div>
+              
+              {/* Pulse ring */}
+              <div className="absolute inset-0 rounded-3xl border-2 border-orange-400 opacity-0 group-hover:opacity-60 transform scale-100 group-hover:scale-110 transition-all duration-700 animate-pulse"></div>
+            </div>
+            
+            {/* Floating connect lines */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="w-96 h-96 border border-orange-300/20 rounded-full animate-spin opacity-30" style={{animationDuration: '20s'}}></div>
+              <div className="absolute inset-8 border border-warm-400/20 rounded-full animate-spin opacity-40" style={{animationDuration: '15s', animationDirection: 'reverse'}}></div>
+            </div>
           </div>
         </div>
       </section>
