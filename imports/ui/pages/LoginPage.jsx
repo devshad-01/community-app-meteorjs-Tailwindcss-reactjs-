@@ -15,7 +15,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <LoginForm onSuccess={handleLoginSuccess} />
     </div>
   );

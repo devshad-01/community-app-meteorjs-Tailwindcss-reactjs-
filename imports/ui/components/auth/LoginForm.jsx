@@ -71,23 +71,23 @@ export const LoginForm = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-600">
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-500 dark:bg-blue-600">
             <User className="h-6 w-6 text-white" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-warm-900 dark:text-white">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-300">
+          <p className="mt-2 text-center text-sm text-warm-700 dark:text-gray-300">
             Welcome back to CommunityHub
           </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-md text-sm">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 px-4 py-3 rounded-md text-sm">
               {error}
             </div>
           )}
@@ -96,7 +96,7 @@ export const LoginForm = ({ onSuccess }) => {
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-orange-500 dark:text-gray-400" />
                 <input
                   id="email"
                   name="email"
@@ -105,7 +105,7 @@ export const LoginForm = ({ onSuccess }) => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-blue-500 focus:border-orange-500 dark:focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
               </div>
@@ -114,7 +114,7 @@ export const LoginForm = ({ onSuccess }) => {
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-orange-500 dark:text-gray-400" />
                 <input
                   id="password"
                   name="password"
@@ -123,12 +123,12 @@ export const LoginForm = ({ onSuccess }) => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-blue-500 focus:border-orange-500 dark:focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Password"
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                  className="absolute right-3 top-3 text-orange-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -140,7 +140,7 @@ export const LoginForm = ({ onSuccess }) => {
           <div className="flex items-center justify-between">
             <button
               type="button"
-              className="text-blue-400 hover:text-blue-300 text-sm"
+              className="text-warm-600 hover:text-warm-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
               onClick={() => {
                 // Handle forgot password
                 if (formData.email) {
@@ -164,7 +164,7 @@ export const LoginForm = ({ onSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
@@ -173,10 +173,10 @@ export const LoginForm = ({ onSuccess }) => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600" />
+                <div className="w-full border-t border-warm-200 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-800 text-gray-400">Or continue with</span>
+                <span className="px-2 bg-white dark:bg-slate-800 text-warm-600 dark:text-gray-400">Or continue with</span>
               </div>
             </div>
 
@@ -185,7 +185,7 @@ export const LoginForm = ({ onSuccess }) => {
                 type="button"
                 onClick={() => handleSocialLogin('google')}
                 disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-warm-200 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-warm-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -199,7 +199,7 @@ export const LoginForm = ({ onSuccess }) => {
                 type="button"
                 onClick={() => handleSocialLogin('facebook')}
                 disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-warm-200 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-warm-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -210,7 +210,7 @@ export const LoginForm = ({ onSuccess }) => {
                 type="button"
                 onClick={() => handleSocialLogin('github')}
                 disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-warm-200 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-warm-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-warm-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 <Github className="w-5 h-5" />
               </button>
@@ -220,7 +220,7 @@ export const LoginForm = ({ onSuccess }) => {
           <div className="text-center">
             <Link
               to="/register"
-              className="text-blue-400 hover:text-blue-300 text-sm"
+              className="text-warm-600 hover:text-warm-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
             >
               Don't have an account? Sign up
             </Link>
