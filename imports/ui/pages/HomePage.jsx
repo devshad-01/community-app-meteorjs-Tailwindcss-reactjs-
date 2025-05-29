@@ -88,14 +88,14 @@ export const HomePage = () => {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Hero Content */}
             <div className="text-center lg:text-left animate-fade-in">
-              <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-warm-100 dark:bg-slate-800 rounded-full text-warm-600 dark:text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+              <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-warm-200 bg-warm-100 dark:bg-slate-800 dark:border-slate-700 rounded-full text-warm-600 dark:text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 Welcome to Our Community
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-warm-900 dark:text-white mb-4 sm:mb-6 leading-tight">
                 Growing in
-                <span className="text-warm-500 dark:text-orange-400 block">Faith & Fellowship</span>
+                <span className="text-orange-400 block">Faith & Fellowship</span>
                 Together
               </h1>
 
@@ -107,7 +107,7 @@ export const HomePage = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-warm-500 dark:bg-orange-500 hover:bg-warm-600 dark:hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group text-sm sm:text-base"
+                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group text-sm sm:text-base"
                 >
                   Join Our Community
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
