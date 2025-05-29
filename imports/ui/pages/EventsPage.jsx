@@ -67,7 +67,7 @@ export const EventsPage = () => {
             </div>
             <input
               type="text"
-              className="w-full bg-slate-600 rounded-lg py-2 pl-10 pr-4 text-white placeholder-white focus:outline-none focus:ring-none focus:ring-orange-500"
+              className="w-full bg-card rounded-lg py-2 pl-10 pr-4 text-slate-900 outline-1 placeholder-slate-900 focus:outline-none focus:ring-none focus:ring-orange-500"
               placeholder="Search events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -77,7 +77,7 @@ export const EventsPage = () => {
           <div className="flex flex-wrap gap-2">
             <FilterTab name="all" count={filterCounts.all} active={activeFilter === 'all'} onClick={() => setActiveFilter('all')} />
             <FilterTab name="workshop" icon={<FiTool className="mr-1 w-4 h-4" />} count={filterCounts.workshop} active={activeFilter === 'workshop'} onClick={() => setActiveFilter('workshop')} />
-            <FilterTab name="meeting" icon={<FiUsers className="mr-1 w-4 h-4" />} count={filterCounts.meeting} active={activeFilter === 'meeting'} onClick={() => setActiveFilter('meeting')} />
+            <FilterTab name="meeting" icon={<FiUsers className="mr-1 w-4 h-4 " />} count={filterCounts.meeting} active={activeFilter === 'meeting'} onClick={() => setActiveFilter('meeting')} />
             <FilterTab name="social" icon={<FiUsers className="mr-1 w-4 h-4" />} count={filterCounts.social} active={activeFilter === 'social'} onClick={() => setActiveFilter('social')} />
             <FilterTab name="featured" icon={<FiStar className="mr-1 w-4 h-4" />} count={filterCounts.featured} active={activeFilter === 'featured'} onClick={() => setActiveFilter('featured')} />
           </div>
@@ -116,9 +116,9 @@ const FilterTab = ({ name, icon, count, active, onClick }) => {
 // Event Card
 const EventCard = ({ event, onRsvp }) => {
   const typeColors = {
-    workshop: 'bg-blue-500',
-    meeting: 'bg-purple-500',
-    social: 'bg-green-500',
+    workshop: 'bg-white text-slate-800',
+    meeting: 'bg-white text-slate-800',
+    social: 'bg-white text-slate-800',
   };
 
   return (
@@ -152,8 +152,8 @@ const EventCard = ({ event, onRsvp }) => {
           onClick={() => onRsvp(event.id, !event.attending)}
           className={`mt-auto px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             event.attending
-              ? 'bg-slate-800 text-orange-400 hover:bg-orange-500 hover:text-white'
-              : 'bg-orange-500 text-slate-900 hover:bg-orange-600'
+              ? 'bg-slate-800 text-orange-400 hover:bg-orange-400 hover:text-white'
+              : 'bg-orange-400 text-slate-900 hover:bg-orange-300'
           }`}
         >
           {event.attending ? 'Cancel RSVP' : 'RSVP Now'}
