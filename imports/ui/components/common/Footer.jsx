@@ -70,11 +70,11 @@ export const Footer = ({ onNav }) => {
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-2 mb-4 group">
               <span className="flex items-center">
-                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 dark:from-blue-400 dark:to-green-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 dark:group-hover:from-blue-300 dark:group-hover:to-green-400 transition-all duration-300">
+                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 transition-all duration-300">
                   Community
                 </span>
-                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 dark:group-hover:text-blue-400 transition-colors duration-300">
-                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 dark:text-blue-400 group-hover:text-orange-500 dark:group-hover:text-blue-500 transition-colors duration-300" />
+                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 transition-colors duration-300">
+                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 group-hover:text-orange-500 transition-colors duration-300" />
                   Hub
                 </span>
               </span>
@@ -153,10 +153,10 @@ export const Footer = ({ onNav }) => {
             <div className="flex items-center space-x-2 text-sm text-slate-300">
               <span className="flex items-center space-x-1">
                 <span>© {currentYear}</span>
-                <span className="font-bold bg-gradient-to-r from-orange-500 to-amber-600 dark:from-blue-400 dark:to-green-500 bg-clip-text text-transparent">
+                <span className="font-bold bg-gradient-to-r from-orange-500 to-amber-600 bg-clip-text text-transparent">
                   Community
                 </span>
-                <CircleDot className="w-4 h-4 text-orange-400 dark:text-blue-400" />
+                <CircleDot className="w-4 h-4 text-orange-400" />
                 <span className="font-bold">Hub</span>
               </span>
               <span>•</span>

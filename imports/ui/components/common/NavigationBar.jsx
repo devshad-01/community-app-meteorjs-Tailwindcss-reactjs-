@@ -165,11 +165,11 @@ export const NavigationBar = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span className="flex items-center">
-                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 dark:from-blue-400 dark:to-green-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 dark:group-hover:from-blue-300 dark:group-hover:to-green-400 transition-all duration-300">
+                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 transition-all duration-300">
                   Community
                 </span>
-                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 dark:group-hover:text-blue-400 transition-colors duration-300">
-                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 dark:text-blue-400 group-hover:text-orange-500 dark:group-hover:text-blue-500 transition-colors duration-300" />
+                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 transition-colors duration-300">
+                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 group-hover:text-orange-500 transition-colors duration-300" />
                   Hub
                 </span>
               </span>
