@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTracker } from 'meteor/react-meteor-data';
+import { useAuth } from '../../hooks/useAuth';
 import { Meteor } from 'meteor/meteor';
 import {
   Bell, Calendar, MessageSquare, Settings, LogOut, Menu, X, Home, 

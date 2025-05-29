@@ -1,4 +1,26 @@
-// Users collection and methods will be defined here
-import { Mongo } from 'meteor/mongo';
+// Users API - Main entry point
+import { Meteor } from 'meteor/meteor';
 
-export const UsersCollection = new Mongo.Collection('users');
+// Import server-side code when on server
+if (Meteor.isServer) {
+  import './server';
+}
+
+// Export the users collection (Meteor.users is the built-in collection)
+export const UsersCollection = Meteor.users;
+
+// Export method names for client use
+export const UserMethods = {
+  updateProfile: 'users.updateProfile',
+  updateRole: 'users.updateRole',
+  deleteUser: 'users.deleteUser',
+  sendVerificationEmail: 'users.sendVerificationEmail',
+  sendPasswordResetEmail: 'users.sendPasswordResetEmail'
+};
+
+// Export publication names for client use
+export const UserPublications = {
+  userData: 'userData',
+  allUsers: 'allUsers',
+  usersBasic: 'usersBasic'
+};
