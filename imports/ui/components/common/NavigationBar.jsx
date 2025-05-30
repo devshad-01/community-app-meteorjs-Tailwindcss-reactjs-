@@ -293,14 +293,7 @@ export const NavigationBar = () => {
                         <span className="text-sm">Profile</span>
                       </Link>
                       
-                      <Link
-                        to="/settings"
-                        className="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-750 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span className="text-sm">Settings</span>
-                      </Link>
+
                       
                       <div className="border-t border-slate-700">
                         <button

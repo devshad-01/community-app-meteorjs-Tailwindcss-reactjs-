@@ -72,9 +72,9 @@ export const LoginForm = ({ onSuccess }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 border shadow-lg rounded-lg p-6 border-grey-300">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-500 dark:bg-blue-600">
+          <div className="mx-auto h-12 w-12 flex   items-center justify-center rounded-full bg-orange-500 dark:bg-blue-600">
             <User className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-warm-900 dark:text-white">
