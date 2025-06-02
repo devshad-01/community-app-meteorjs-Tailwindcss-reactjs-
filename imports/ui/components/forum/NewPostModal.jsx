@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
-import { X, Send, Tag, FileText, Folder } from 'lucide-react';
+import { X, Send, Tag, FileText, Folder, Image, Trash2 } from 'lucide-react';
 
 export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategoryId = null }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +10,7 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
     tags: '',
     pinned: false
   });
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,6 +20,45 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    
+    files.forEach(file => {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select only image files');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+      
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageData = {
+          id: Date.now() + Math.random(),
+          name: file.name,
+          data: event.target.result,
+          size: file.size
+        };
+        
+        setUploadedImages(prev => [...prev, imageData]);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // Reset input
+    e.target.value = '';
+  };
+
+  const removeImage = (imageId) => {
+    setUploadedImages(prev => prev.filter(img => img.id !== imageId));
   };
 
   const handleSubmit = async (e) => {
@@ -45,20 +85,13 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
         .filter(tag => tag.length > 0);
 
       // Create post
-      await new Promise((resolve, reject) => {
-        Meteor.call('forums.posts.create', {
-          title: formData.title.trim(),
-          content: formData.content.trim(),
-          categoryId: formData.categoryId,
-          tags,
-          pinned: formData.pinned
-        }, (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        });
+      await Meteor.callAsync('forums.posts.create', {
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        categoryId: formData.categoryId,
+        tags,
+        images: uploadedImages.map(img => img.data), // Send base64 image data
+        pinned: formData.pinned
       });
 
       // Reset form and close modal
@@ -69,6 +102,7 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
         tags: '',
         pinned: false
       });
+      setUploadedImages([]);
       onClose();
       
     } catch (err) {
@@ -162,6 +196,57 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
               className="w-full px-4 py-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-vertical"
               required
             />
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="flex items-center text-sm font-medium text-warm-700 dark:text-slate-300 mb-2">
+              <Image className="w-4 h-4 mr-1" />
+              Images (optional)
+            </label>
+            
+            {/* Upload Button */}
+            <div className="mb-4">
+              <label className="inline-flex items-center px-4 py-2 border border-warm-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-warm-50 dark:hover:bg-slate-700 transition-colors duration-200">
+                <Image className="w-4 h-4 mr-2" />
+                <span className="text-sm text-warm-600 dark:text-slate-400">Choose Images</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-warm-500 dark:text-slate-400 mt-1">
+                Maximum 5MB per image. Supported formats: JPG, PNG, GIF, WebP
+              </p>
+            </div>
+
+            {/* Image Preview */}
+            {uploadedImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                {uploadedImages.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <img
+                      src={image.data}
+                      alt={image.name}
+                      className="w-full h-24 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(image.id)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded">
+                      {image.name.length > 15 ? image.name.substring(0, 15) + '...' : image.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Tags */}

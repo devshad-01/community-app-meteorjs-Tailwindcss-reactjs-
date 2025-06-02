@@ -4,6 +4,16 @@ import { ForumCategories, ForumPosts, ForumReplies, ForumTags } from './collecti
 import { ForumValidation, ForumPermissions } from './utils';
 import { FORUM_CONSTANTS } from './constants';
 
+// Helper function to generate random tag colors
+function generateTagColor() {
+  const colors = [
+    '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
+    '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
+    '#F97316', '#6366F1', '#14B8A6', '#EAB308'
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
 Meteor.methods({
   // Category Methods
   async 'forums.categories.create'(categoryData) {
@@ -119,7 +129,8 @@ Meteor.methods({
       content: String,
       categoryId: String,
       tags: Match.Optional([String]),
-      pinned: Match.Optional(Boolean)
+      pinned: Match.Optional(Boolean),
+      images: Match.Optional([String]) // Array of image URLs/base64 strings
     });
 
     // Validate category exists
@@ -138,6 +149,7 @@ Meteor.methods({
       categoryId: postData.categoryId,
       authorId: this.userId,
       tags: postData.tags || [],
+      images: postData.images || [], // Store image URLs/base64 strings
       pinned: canPin ? (postData.pinned || false) : false,
       locked: false,
       replyCount: 0,
@@ -168,7 +180,7 @@ Meteor.methods({
             $inc: { usageCount: 1 },
             $setOnInsert: { 
               createdAt: new Date(),
-              color: this._generateTagColor() 
+              color: generateTagColor() 
             },
             $set: { updatedAt: new Date() }
           }
@@ -237,7 +249,7 @@ Meteor.methods({
             $inc: { usageCount: 1 },
             $setOnInsert: { 
               createdAt: new Date(),
-              color: this._generateTagColor() 
+              color: generateTagColor() 
             },
             $set: { updatedAt: new Date() }
           }
@@ -570,15 +582,5 @@ Meteor.methods({
     ).fetchAsync();
 
     return tags;
-  },
-
-  // Helper method to generate random tag colors
-  _generateTagColor() {
-    const colors = [
-      '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
-      '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
-      '#F97316', '#6366F1', '#14B8A6', '#EAB308'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
   }
 });

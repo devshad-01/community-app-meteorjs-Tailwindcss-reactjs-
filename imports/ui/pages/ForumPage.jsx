@@ -349,6 +349,37 @@ export const ForumPage = () => {
                 </p>
               </div>
 
+              {/* Images */}
+              {post.images && post.images.length > 0 && (
+                <div className="mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {post.images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Post image ${index + 1}`}
+                          className="w-full h-48 object-cover rounded-lg border border-warm-200 dark:border-slate-600 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => {
+                            // Create a modal overlay to view full image
+                            const modal = document.createElement('div');
+                            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+                            modal.onclick = () => modal.remove();
+                            
+                            const img = document.createElement('img');
+                            img.src = image;
+                            img.className = 'max-w-full max-h-full object-contain rounded-lg';
+                            img.onclick = (e) => e.stopPropagation();
+                            
+                            modal.appendChild(img);
+                            document.body.appendChild(modal);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Tags */}
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -676,6 +707,28 @@ export const ForumPage = () => {
                                 </span>
                               )}
                             </p>
+                            
+                            {/* Images Preview */}
+                            {post.images && post.images.length > 0 && (
+                              <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {post.images.slice(0, 3).map((image, index) => (
+                                  <div key={index} className="relative">
+                                    <img
+                                      src={image}
+                                      alt={`Post image ${index + 1}`}
+                                      className="w-full h-20 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                    />
+                                    {post.images.length > 3 && index === 2 && (
+                                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                        <span className="text-white text-sm font-medium">
+                                          +{post.images.length - 3} more
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex items-center justify-between">
@@ -773,12 +826,35 @@ export const ForumPage = () => {
                       
                       <div className="mb-4">
                         <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
-                          {truncateContent(post.content, 200)}                            {post.content && post.content.length > 200 && (
-                              <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
-                                Read more
-                              </span>
-                            )}
+                          {truncateContent(post.content, 200)}
+                          {post.content && post.content.length > 200 && (
+                            <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
+                              Read more
+                            </span>
+                          )}
                         </p>
+                        
+                        {/* Images Preview */}
+                        {post.images && post.images.length > 0 && (
+                          <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {post.images.slice(0, 3).map((image, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                  src={image}
+                                  alt={`Post image ${index + 1}`}
+                                  className="w-full h-20 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                />
+                                {post.images.length > 3 && index === 2 && (
+                                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                    <span className="text-white text-sm font-medium">
+                                      +{post.images.length - 3} more
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       {post.tags && post.tags.length > 0 && (
