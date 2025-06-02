@@ -51,6 +51,83 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Custom animations for smooth UI transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+/* Prevent layout shift during transitions */
+.transition-height {
+  transition: height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+/* Smooth button interactions */
+.btn-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, background-color, box-shadow;
+}
+
+.btn-smooth:active {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .animate-slideIn,
+  .animate-scaleIn {
+    animation: none;
+  }
+  
+  .transition-height,
+  .btn-smooth {
+    transition: none;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   background-color: hsl(var(--background));

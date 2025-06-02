@@ -3,7 +3,7 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
-import { MessageSquare, Search, Users, Eye, Heart, MessageCircle, Calendar, Pin, Plus } from 'lucide-react';
+import { MessageSquare, Search, Users, Eye, Heart, MessageCircle, Calendar, Pin, Plus, X } from 'lucide-react';
 import { 
   ForumCategories, 
   ForumPosts, 
@@ -27,6 +27,7 @@ export const ForumPage = () => {
   const [expandedPost, setExpandedPost] = useState(null);
   const [replyContent, setReplyContent] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
+  const [expandingPost, setExpandingPost] = useState(null);
 
   const { user, categories, posts, loading, forumStats, expandedPostData } = useTracker(() => {
     // Subscribe to forum data
@@ -38,6 +39,7 @@ export const ForumPage = () => {
       limit: 50
     });
     const statsHandle = Meteor.subscribe(ForumPublications.stats);
+    const usersHandle = Meteor.subscribe('usersBasic'); // Subscribe to basic user info
     
     // Subscribe to expanded post details if a post is expanded
     let expandedPostHandle = { ready: () => true };
@@ -47,7 +49,7 @@ export const ForumPage = () => {
       repliesHandle = Meteor.subscribe(ForumPublications.repliesByPost, expandedPost);
     }
 
-    const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready();
+    const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready() || !usersHandle.ready();
 
     if (loading) {
       return {
@@ -211,14 +213,24 @@ export const ForumPage = () => {
   };
 
   const handlePostClick = (postId) => {
-    // Toggle expanded state - expand if not expanded, collapse if already expanded
-    if (expandedPost === postId) {
-      setExpandedPost(null);
-    } else {
-      setExpandedPost(postId);
-      // Increment view count
-      Meteor.call(ForumMethods.incrementViews, postId);
-    }
+    // Prevent double-clicks and add smooth transition
+    if (expandingPost === postId) return;
+    
+    setExpandingPost(postId);
+    
+    // Use requestAnimationFrame for smoother transitions
+    requestAnimationFrame(() => {
+      if (expandedPost === postId) {
+        setExpandedPost(null);
+      } else {
+        setExpandedPost(postId);
+        // Increment view count
+        Meteor.call(ForumMethods.incrementViews, postId);
+      }
+      
+      // Reset expanding state after a short delay
+      setTimeout(() => setExpandingPost(null), 100);
+    });
   };
 
   const handleLikePost = async (postId) => {
@@ -295,7 +307,18 @@ export const ForumPage = () => {
     const isLiked = post.likes && post.likes.includes(user?._id);
 
     return (
-      <div className="mt-4 border-t border-warm-200 dark:border-slate-600 pt-4">
+      <div className="relative">
+        {/* Collapse Button */}
+        <div className="flex justify-end items-center mb-4">
+          <button
+            onClick={() => setExpandedPost(null)}
+            className="flex items-center space-x-1 text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300 transition-colors duration-200"
+          >
+            <span className="text-sm">Collapse</span>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        
         {/* Full Post Content */}
         <div className="mb-6">
           <div className="flex items-start space-x-4 mb-4">
@@ -344,7 +367,7 @@ export const ForumPage = () => {
               <div className="flex items-center space-x-6 mt-6 pt-4 border-t border-warm-200 dark:border-slate-700">
                 <button
                   onClick={() => handleLikePost(post._id)}
-                  className={`flex items-center space-x-2 transition-colors duration-200 ${
+                  className={`flex items-center space-x-2 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-95 will-change-transform ${
                     isLiked 
                       ? 'text-red-500 hover:text-red-600' 
                       : 'text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300'
@@ -414,14 +437,14 @@ export const ForumPage = () => {
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder="Write your reply..."
-                    className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none"
+                    className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-300 ease-in-out"
                     rows="3"
                   />
                   <div className="flex justify-end mt-2">
                     <button
                       type="submit"
                       disabled={submittingReply || !replyContent.trim()}
-                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
                     >
                       {submittingReply ? 'Posting...' : 'Post Reply'}
                     </button>
@@ -459,7 +482,7 @@ export const ForumPage = () => {
             {user && (
               <button 
                 onClick={handleNewPost}
-                className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
               >
                 <Plus className="w-4 h-4 mr-2 inline" />
                 New Post
@@ -484,9 +507,9 @@ export const ForumPage = () => {
                     <button
                       key={category._id}
                       onClick={() => setSelectedCategory(category._id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] will-change-transform ${
                         selectedCategory === category._id
-                          ? 'bg-warm-50 dark:bg-orange-900/20 text-warm-700 dark:text-orange-300'
+                          ? 'bg-warm-50 dark:bg-orange-900/20 text-warm-700 dark:text-orange-300 shadow-sm'
                           : 'text-warm-600 dark:text-slate-400 hover:bg-warm-25 dark:hover:bg-slate-700/50'
                       }`}
                     >
@@ -569,7 +592,7 @@ export const ForumPage = () => {
                       placeholder="Search posts, tags, or content..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                      className="w-full pl-10 pr-4 py-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-300 ease-in-out"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Search className="w-4 h-4 text-warm-400 dark:text-slate-400" />
@@ -580,7 +603,7 @@ export const ForumPage = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full py-3 px-4 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                    className="w-full py-3 px-4 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-300 ease-in-out"
                   >
                     <option value="recent">Recent Activity</option>
                     <option value="popular">Most Popular</option>
@@ -608,75 +631,87 @@ export const ForumPage = () => {
                     return (
                     <div
                       key={post._id}
-                      className="bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-6 hover:shadow-warm transition-all duration-200"
+                      className="bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-6 hover:shadow-warm transition-all duration-300 ease-in-out will-change-transform"
                     >
-                      <div 
-                        onClick={() => handlePostClick(post._id)}
-                        className="cursor-pointer"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                              {authorName.charAt(0)}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 transition-colors duration-200">
-                                {post.title}
-                              </h3>
-                              <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
-                                <span>{authorName}</span>
-                                <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                                  {authorRole}
-                                </span>
-                                <span>•</span>
-                                <span>{formatTimeAgo(post.createdAt)}</span>
+                      {/* Show collapsed view when not expanded */}
+                      {expandedPost !== post._id && (
+                        <div 
+                          onClick={() => handlePostClick(post._id)}
+                          className={`cursor-pointer transform transition-all duration-300 ease-in-out ${
+                            expandingPost === post._id 
+                              ? 'scale-[1.01] opacity-75' 
+                              : 'hover:scale-[1.01] active:scale-[0.99]'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                {authorName.charAt(0)}
                               </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 transition-colors duration-200">
+                                  {post.title}
+                                </h3>
+                                <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
+                                  <span>{authorName}</span>
+                                  <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                                    {authorRole}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{formatTimeAgo(post.createdAt)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                              {categoryInfo.icon} {categoryInfo.name}
+                            </span>
+                          </div>
+                          
+                          <div className="mb-4">
+                            <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
+                              {truncateContent(post.content, 200)}
+                              {post.content && post.content.length > 200 && (
+                                <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
+                                  Read more
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
+                              <span className="flex items-center space-x-1">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{post.replyCount || 0} replies</span>
+                              </span>
+                              <span className="flex items-center space-x-1">
+                                <Eye className="w-4 h-4" />
+                                <span>{post.views || 0} views</span>
+                              </span>
+                              <span className="flex items-center space-x-1">
+                                <Heart className="w-4 h-4" />
+                                <span>{(post.likes || []).length} likes</span>
+                              </span>
+                            </div>
+                            <div className="text-xs text-warm-400 dark:text-slate-500">
+                              Last reply {formatTimeAgo(post.lastReplyAt)}
                             </div>
                           </div>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                            {categoryInfo.icon} {categoryInfo.name}
-                          </span>
                         </div>
-                        
-                        {expandedPost !== post._id && (
-                          <>
-                            <div className="mb-4">
-                              <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
-                                {truncateContent(post.content, 200)}
-                                {post.content && post.content.length > 200 && (
-                                  <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline">
-                                    Read more
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                                <span className="flex items-center space-x-1">
-                                  <MessageCircle className="w-4 h-4" />
-                                  <span>{post.replyCount || 0} replies</span>
-                                </span>
-                                <span className="flex items-center space-x-1">
-                                  <Eye className="w-4 h-4" />
-                                  <span>{post.views || 0} views</span>
-                                </span>
-                                <span className="flex items-center space-x-1">
-                                  <Heart className="w-4 h-4" />
-                                  <span>{(post.likes || []).length} likes</span>
-                                </span>
-                              </div>
-                              <div className="text-xs text-warm-400 dark:text-slate-500">
-                                Last reply {formatTimeAgo(post.lastReplyAt)}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                      )}
                       
-                      {/* Expanded Content */}
-                      {expandedPost === post._id && expandedPostData && (
-                        <ExpandedPostView postData={expandedPostData} />
+                      {/* Show expanded view when expanded */}
+                      {expandedPost === post._id && (
+                        <div className="animate-fadeIn">
+                          {expandedPostData ? (
+                            <ExpandedPostView postData={expandedPostData} />
+                          ) : (
+                            <div className="flex items-center justify-center py-8">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warm-500"></div>
+                              <span className="ml-3 text-warm-600 dark:text-slate-400">Loading post details...</span>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                     );
@@ -700,88 +735,99 @@ export const ForumPage = () => {
                 return (
                 <div
                   key={post._id}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-200 group"
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-300 ease-in-out group will-change-transform"
                 >
-                  <div 
-                    onClick={() => handlePostClick(post._id)}
-                    className="cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
-                          {authorName.charAt(0)}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
-                            {post.title}
-                          </h3>
-                          <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
-                            <span>{authorName}</span>
-                            <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                              {authorRole}
-                            </span>
-                            <span>•</span>
-                            <span>{formatTimeAgo(post.createdAt)}</span>
+                  {/* Show collapsed view when not expanded */}
+                  {expandedPost !== post._id && (
+                    <div 
+                      onClick={() => handlePostClick(post._id)}
+                      className={`cursor-pointer transform transition-all duration-300 ease-in-out ${
+                        expandingPost === post._id 
+                          ? 'scale-[1.01] opacity-75' 
+                          : 'hover:scale-[1.01] active:scale-[0.99]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
+                            {authorName.charAt(0)}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
+                              {post.title}
+                            </h3>
+                            <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
+                              <span>{authorName}</span>
+                              <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                                {authorRole}
+                              </span>
+                              <span>•</span>
+                              <span>{formatTimeAgo(post.createdAt)}</span>
+                            </div>
                           </div>
                         </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                          {categoryInfo.icon} {categoryInfo.name}
+                        </span>
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                        {categoryInfo.icon} {categoryInfo.name}
-                      </span>
-                    </div>
-                    
-                    {expandedPost !== post._id && (
-                      <>
-                        <div className="mb-4">
-                          <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
-                            {truncateContent(post.content, 200)}
-                            {post.content && post.content.length > 200 && (
-                              <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline">
+                      
+                      <div className="mb-4">
+                        <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
+                          {truncateContent(post.content, 200)}                            {post.content && post.content.length > 200 && (
+                              <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
                                 Read more
                               </span>
                             )}
-                          </p>
+                        </p>
+                      </div>
+                      
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {post.tags.map(tag => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
                         </div>
-                        
-                        {post.tags && post.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {post.tags.map(tag => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                            <span className="flex items-center space-x-1">
-                              <MessageCircle className="w-4 h-4" />
-                              <span>{post.replyCount || 0} replies</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Eye className="w-4 h-4" />
-                              <span>{post.views || 0} views</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Heart className="w-4 h-4" />
-                              <span>{(post.likes || []).length} likes</span>
-                            </span>
-                          </div>
-                          <div className="text-xs text-warm-400 dark:text-slate-500">
-                            Last reply {formatTimeAgo(post.lastReplyAt)}
-                          </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
+                          <span className="flex items-center space-x-1">
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{post.replyCount || 0} replies</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{post.views || 0} views</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <Heart className="w-4 h-4" />
+                            <span>{(post.likes || []).length} likes</span>
+                          </span>
                         </div>
-                      </>
-                    )}
-                  </div>
+                        <div className="text-xs text-warm-400 dark:text-slate-500">
+                          Last reply {formatTimeAgo(post.lastReplyAt)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
-                  {/* Expanded Content */}
-                  {expandedPost === post._id && expandedPostData && (
-                    <ExpandedPostView postData={expandedPostData} />
+                  {/* Show expanded view when expanded */}
+                  {expandedPost === post._id && (
+                    <div className="animate-fadeIn">
+                      {expandedPostData ? (
+                        <ExpandedPostView postData={expandedPostData} />
+                      ) : (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warm-500"></div>
+                          <span className="ml-3 text-warm-600 dark:text-slate-400">Loading post details...</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
                 );
@@ -799,7 +845,7 @@ export const ForumPage = () => {
                   {user && (
                     <button 
                       onClick={handleNewPost}
-                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
+                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
                     >
                       Start a new discussion
                     </button>
