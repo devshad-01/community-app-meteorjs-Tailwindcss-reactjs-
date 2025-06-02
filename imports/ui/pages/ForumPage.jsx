@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
+import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { MessageSquare, Search, Users, Eye, Heart, MessageCircle, Calendar, Pin, Plus } from 'lucide-react';
 import { 
   ForumCategories, 
   ForumPosts, 
+  ForumReplies,
   ForumPublications, 
   ForumMethods,
   ForumFormatting,
@@ -17,12 +19,16 @@ import { NewPostModal } from '../components/forum/NewPostModal';
 const ForumStats = new Mongo.Collection('forumStats');
 
 export const ForumPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showNewPostModal, setShowNewPostModal] = useState(false);
+  const [expandedPost, setExpandedPost] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
 
-  const { user, categories, posts, loading, forumStats } = useTracker(() => {
+  const { user, categories, posts, loading, forumStats, expandedPostData } = useTracker(() => {
     // Subscribe to forum data
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     const postsHandle = Meteor.subscribe(ForumPublications.postsList, {
@@ -32,6 +38,14 @@ export const ForumPage = () => {
       limit: 50
     });
     const statsHandle = Meteor.subscribe(ForumPublications.stats);
+    
+    // Subscribe to expanded post details if a post is expanded
+    let expandedPostHandle = { ready: () => true };
+    let repliesHandle = { ready: () => true };
+    if (expandedPost) {
+      expandedPostHandle = Meteor.subscribe(ForumPublications.singlePost, expandedPost);
+      repliesHandle = Meteor.subscribe(ForumPublications.repliesByPost, expandedPost);
+    }
 
     const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready();
 
@@ -41,7 +55,8 @@ export const ForumPage = () => {
         categories: [],
         posts: [],
         loading: true,
-        forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 }
+        forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 },
+        expandedPostData: null
       };
     }
 
@@ -114,6 +129,15 @@ export const ForumPage = () => {
       createdAt: { $gte: today } 
     }).count();
 
+    // Get expanded post data if available
+    let expandedPostData = null;
+    if (expandedPost && expandedPostHandle.ready() && repliesHandle.ready()) {
+      const post = ForumPosts.findOne(expandedPost);
+      const replies = ForumReplies.find({ postId: expandedPost }, { sort: { createdAt: 1 } }).fetch();
+      const category = post ? ForumCategories.findOne(post.categoryId) : null;
+      expandedPostData = { post, replies, category };
+    }
+
     return {
       user: Meteor.user(),
       categories: allCategories,
@@ -123,9 +147,10 @@ export const ForumPage = () => {
         totalPosts,
         totalReplies,
         recentPosts
-      }
+      },
+      expandedPostData
     };
-  }, [selectedCategory, searchTerm, sortBy]);
+  }, [selectedCategory, searchTerm, sortBy, expandedPost]);
 
   // Filter and sort posts (done in the database query above)
   const filteredPosts = posts;
@@ -186,8 +211,57 @@ export const ForumPage = () => {
   };
 
   const handlePostClick = (postId) => {
-    // Navigate to post detail page
-    alert(`Navigate to post ${postId}`);
+    // Toggle expanded state - expand if not expanded, collapse if already expanded
+    if (expandedPost === postId) {
+      setExpandedPost(null);
+    } else {
+      setExpandedPost(postId);
+      // Increment view count
+      Meteor.call(ForumMethods.incrementViews, postId);
+    }
+  };
+
+  const handleLikePost = async (postId) => {
+    if (!user) {
+      alert('Please log in to like posts');
+      return;
+    }
+
+    try {
+      await Meteor.callAsync(ForumMethods.votePost, postId, 'like');
+    } catch (error) {
+      console.error('Error liking post:', error);
+      alert('Failed to like post. Please try again.');
+    }
+  };
+
+  const handleSubmitReply = async (e, postId) => {
+    e.preventDefault();
+    if (!user) {
+      alert('Please log in to reply');
+      return;
+    }
+
+    if (!replyContent.trim()) {
+      alert('Please enter a reply');
+      return;
+    }
+
+    setSubmittingReply(true);
+    try {
+      await Meteor.callAsync(ForumMethods.createReply, {
+        postId,
+        content: replyContent,
+        parentReplyId: null
+      });
+      
+      setReplyContent('');
+    } catch (error) {
+      console.error('Error creating reply:', error);
+      alert('Failed to create reply. Please try again.');
+    } finally {
+      setSubmittingReply(false);
+    }
   };
 
   const getRoleColor = (role) => {
@@ -198,6 +272,173 @@ export const ForumPage = () => {
       'Member': 'slate'
     };
     return colors[role] || 'slate';
+  };
+
+  const truncateContent = (content, maxLength = 200) => {
+    if (!content) return '';
+    if (content.length <= maxLength) return content;
+    
+    const truncated = content.substring(0, maxLength);
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    
+    return lastSpaceIndex > 0 
+      ? truncated.substring(0, lastSpaceIndex) + '...'
+      : truncated + '...';
+  };
+
+  // Component for expanded post view
+  const ExpandedPostView = ({ postData }) => {
+    const { post, replies, category } = postData;
+    const authorUser = Meteor.users.findOne(post.authorId);
+    const authorName = authorUser?.profile?.name || authorUser?.username || 'Unknown User';
+    const authorRole = getUserRole(post.authorId);
+    const isLiked = post.likes && post.likes.includes(user?._id);
+
+    return (
+      <div className="mt-4 border-t border-warm-200 dark:border-slate-600 pt-4">
+        {/* Full Post Content */}
+        <div className="mb-6">
+          <div className="flex items-start space-x-4 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold">
+              {authorName.charAt(0)}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-2">
+                <h3 className="text-xl font-bold text-warm-900 dark:text-white">{post.title}</h3>
+                {category && (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                    {category.icon} {category.name}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400 mb-4">
+                <span>{authorName}</span>
+                <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                  {authorRole}
+                </span>
+                <span>•</span>
+                <span>{formatTimeAgo(post.createdAt)}</span>
+              </div>
+              
+              <div className="prose max-w-none">
+                <p className="text-warm-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                  {post.content}
+                </p>
+              </div>
+
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {post.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Post Actions */}
+              <div className="flex items-center space-x-6 mt-6 pt-4 border-t border-warm-200 dark:border-slate-700">
+                <button
+                  onClick={() => handleLikePost(post._id)}
+                  className={`flex items-center space-x-2 transition-colors duration-200 ${
+                    isLiked 
+                      ? 'text-red-500 hover:text-red-600' 
+                      : 'text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span>{(post.likes || []).length}</span>
+                </button>
+
+                <div className="flex items-center space-x-2 text-warm-500 dark:text-slate-400">
+                  <MessageCircle className="w-5 h-5" />
+                  <span>{post.replyCount || 0} replies</span>
+                </div>
+
+                <div className="flex items-center space-x-2 text-warm-400 dark:text-slate-500">
+                  <Eye className="w-5 h-5" />
+                  <span>{post.views || 0} views</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Replies Section */}
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-warm-900 dark:text-white">
+            Replies ({replies.length})
+          </h4>
+          
+          {replies.map(reply => {
+            const replyAuthor = Meteor.users.findOne(reply.authorId);
+            const replyAuthorName = replyAuthor?.profile?.name || replyAuthor?.username || 'Unknown User';
+            const replyAuthorRole = getUserRole(reply.authorId);
+            
+            return (
+              <div key={reply._id} className="bg-warm-50 dark:bg-slate-700/50 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-slate-500 to-slate-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {replyAuthorName.charAt(0)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="font-medium text-warm-900 dark:text-white">{replyAuthorName}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(replyAuthorRole)}-100 dark:bg-${getRoleColor(replyAuthorRole)}-900/20 text-${getRoleColor(replyAuthorRole)}-800 dark:text-${getRoleColor(replyAuthorRole)}-300`}>
+                        {replyAuthorRole}
+                      </span>
+                      <span className="text-xs text-warm-500 dark:text-slate-400">{formatTimeAgo(reply.createdAt)}</span>
+                    </div>
+                    <p className="text-warm-700 dark:text-slate-300 whitespace-pre-wrap">
+                      {reply.content}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Reply Form */}
+          {user && (
+            <form onSubmit={(e) => handleSubmitReply(e, post._id)} className="mt-6">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  {user.profile?.name?.charAt(0) || user.username?.charAt(0) || 'U'}
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="Write your reply..."
+                    className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none"
+                    rows="3"
+                  />
+                  <div className="flex justify-end mt-2">
+                    <button
+                      type="submit"
+                      disabled={submittingReply || !replyContent.trim()}
+                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      {submittingReply ? 'Posting...' : 'Post Reply'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {!user && (
+            <div className="text-center py-4 text-warm-500 dark:text-slate-400">
+              Please log in to reply to this post.
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -367,56 +608,76 @@ export const ForumPage = () => {
                     return (
                     <div
                       key={post._id}
-                      onClick={() => handlePostClick(post._id)}
-                      className="bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-6 hover:shadow-warm transition-all duration-200 cursor-pointer"
+                      className="bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-6 hover:shadow-warm transition-all duration-200"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                            {authorName.charAt(0)}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 cursor-pointer transition-colors duration-200">
-                              {post.title}
-                            </h3>
-                            <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
-                              <span>{authorName}</span>
-                              <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                                {authorRole}
-                              </span>
-                              <span>•</span>
-                              <span>{formatTimeAgo(post.createdAt)}</span>
+                      <div 
+                        onClick={() => handlePostClick(post._id)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                              {authorName.charAt(0)}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 transition-colors duration-200">
+                                {post.title}
+                              </h3>
+                              <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
+                                <span>{authorName}</span>
+                                <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                                  {authorRole}
+                                </span>
+                                <span>•</span>
+                                <span>{formatTimeAgo(post.createdAt)}</span>
+                              </div>
                             </div>
                           </div>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                            {categoryInfo.icon} {categoryInfo.name}
+                          </span>
                         </div>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                          {categoryInfo.icon} {categoryInfo.name}
-                        </span>
+                        
+                        {expandedPost !== post._id && (
+                          <>
+                            <div className="mb-4">
+                              <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
+                                {truncateContent(post.content, 200)}
+                                {post.content && post.content.length > 200 && (
+                                  <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline">
+                                    Read more
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
+                                <span className="flex items-center space-x-1">
+                                  <MessageCircle className="w-4 h-4" />
+                                  <span>{post.replyCount || 0} replies</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Eye className="w-4 h-4" />
+                                  <span>{post.views || 0} views</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Heart className="w-4 h-4" />
+                                  <span>{(post.likes || []).length} likes</span>
+                                </span>
+                              </div>
+                              <div className="text-xs text-warm-400 dark:text-slate-500">
+                                Last reply {formatTimeAgo(post.lastReplyAt)}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                       
-                      <p className="text-warm-700 dark:text-slate-300 mb-4 line-clamp-2">
-                        {post.content}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                          <span className="flex items-center space-x-1">
-                            <MessageCircle className="w-4 h-4" />
-                            <span>{post.replyCount || 0} replies</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.views || 0} views</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Heart className="w-4 h-4" />
-                            <span>{(post.likes || []).length} likes</span>
-                          </span>
-                        </div>
-                        <div className="text-xs text-warm-400 dark:text-slate-500">
-                          Last reply {formatTimeAgo(post.lastReplyAt)}
-                        </div>
-                      </div>
+                      {/* Expanded Content */}
+                      {expandedPost === post._id && expandedPostData && (
+                        <ExpandedPostView postData={expandedPostData} />
+                      )}
                     </div>
                     );
                   })}
@@ -439,69 +700,89 @@ export const ForumPage = () => {
                 return (
                 <div
                   key={post._id}
-                  onClick={() => handlePostClick(post._id)}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-200 group cursor-pointer"
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-200 group"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
-                        {authorName.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
-                          {post.title}
-                        </h3>
-                        <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
-                          <span>{authorName}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                            {authorRole}
-                          </span>
-                          <span>•</span>
-                          <span>{formatTimeAgo(post.createdAt)}</span>
+                  <div 
+                    onClick={() => handlePostClick(post._id)}
+                    className="cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
+                          {authorName.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
+                            {post.title}
+                          </h3>
+                          <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
+                            <span>{authorName}</span>
+                            <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                              {authorRole}
+                            </span>
+                            <span>•</span>
+                            <span>{formatTimeAgo(post.createdAt)}</span>
+                          </div>
                         </div>
                       </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                        {categoryInfo.icon} {categoryInfo.name}
+                      </span>
                     </div>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                      {categoryInfo.icon} {categoryInfo.name}
-                    </span>
+                    
+                    {expandedPost !== post._id && (
+                      <>
+                        <div className="mb-4">
+                          <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
+                            {truncateContent(post.content, 200)}
+                            {post.content && post.content.length > 200 && (
+                              <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline">
+                                Read more
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {post.tags.map(tag => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
+                            <span className="flex items-center space-x-1">
+                              <MessageCircle className="w-4 h-4" />
+                              <span>{post.replyCount || 0} replies</span>
+                            </span>
+                            <span className="flex items-center space-x-1">
+                              <Eye className="w-4 h-4" />
+                              <span>{post.views || 0} views</span>
+                            </span>
+                            <span className="flex items-center space-x-1">
+                              <Heart className="w-4 h-4" />
+                              <span>{(post.likes || []).length} likes</span>
+                            </span>
+                          </div>
+                          <div className="text-xs text-warm-400 dark:text-slate-500">
+                            Last reply {formatTimeAgo(post.lastReplyAt)}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
-                  <p className="text-warm-700 dark:text-slate-300 mb-4 line-clamp-2">
-                    {post.content}
-                  </p>
-                  
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.tags.map(tag => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
+                  {/* Expanded Content */}
+                  {expandedPost === post._id && expandedPostData && (
+                    <ExpandedPostView postData={expandedPostData} />
                   )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                      <span className="flex items-center space-x-1">
-                        <MessageCircle className="w-4 h-4" />
-                        <span>{post.replyCount || 0} replies</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Eye className="w-4 h-4" />
-                        <span>{post.views || 0} views</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Heart className="w-4 h-4" />
-                        <span>{(post.likes || []).length} likes</span>
-                      </span>
-                    </div>
-                    <div className="text-xs text-warm-400 dark:text-slate-500">
-                      Last reply {formatTimeAgo(post.lastReplyAt)}
-                    </div>
-                  </div>
                 </div>
                 );
               })}

@@ -7,6 +7,7 @@ import { NavigationBar } from './components/common/NavigationBar';
 import { HomePage } from './pages/HomePage';
 import { EventsPage } from './pages/EventsPage';
 import { ForumPage } from './pages/ForumPage';
+import { PostDetailPage } from './pages/PostDetailPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
@@ -56,6 +57,14 @@ export const App = () => {
             element={
               <ProtectedRoute>
                 <ForumPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/forum/post/:postId" 
+            element={
+              <ProtectedRoute>
+                <PostDetailPage />
               </ProtectedRoute>
             } 
           />
