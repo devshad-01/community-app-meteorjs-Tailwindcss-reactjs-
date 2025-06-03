@@ -24,12 +24,11 @@ export const ForumPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showNewPostModal, setShowNewPostModal] = useState(false);
-  const [expandedPost, setExpandedPost] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
-  const [submittingReply, setSubmittingReply] = useState(false);
-  const [expandingPost, setExpandingPost] = useState(null);
+  const [replyToggles, setReplyToggles] = useState({}); // Track which posts have reply boxes open
+  const [replyContents, setReplyContents] = useState({}); // Track reply content for each post
+  const [submittingReplies, setSubmittingReplies] = useState({}); // Track which replies are being submitted
 
-  const { user, categories, posts, loading, forumStats, expandedPostData } = useTracker(() => {
+  const { user, categories, posts, loading, forumStats } = useTracker(() => {
     // Subscribe to forum data
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     const postsHandle = Meteor.subscribe(ForumPublications.postsList, {
@@ -40,14 +39,6 @@ export const ForumPage = () => {
     });
     const statsHandle = Meteor.subscribe(ForumPublications.stats);
     const usersHandle = Meteor.subscribe('usersBasic'); // Subscribe to basic user info
-    
-    // Subscribe to expanded post details if a post is expanded
-    let expandedPostHandle = { ready: () => true };
-    let repliesHandle = { ready: () => true };
-    if (expandedPost) {
-      expandedPostHandle = Meteor.subscribe(ForumPublications.singlePost, expandedPost);
-      repliesHandle = Meteor.subscribe(ForumPublications.repliesByPost, expandedPost);
-    }
 
     const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready() || !usersHandle.ready();
 
@@ -57,8 +48,7 @@ export const ForumPage = () => {
         categories: [],
         posts: [],
         loading: true,
-        forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 },
-        expandedPostData: null
+        forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 }
       };
     }
 
@@ -132,13 +122,7 @@ export const ForumPage = () => {
     }).count();
 
     // Get expanded post data if available
-    let expandedPostData = null;
-    if (expandedPost && expandedPostHandle.ready() && repliesHandle.ready()) {
-      const post = ForumPosts.findOne(expandedPost);
-      const replies = ForumReplies.find({ postId: expandedPost }, { sort: { createdAt: 1 } }).fetch();
-      const category = post ? ForumCategories.findOne(post.categoryId) : null;
-      expandedPostData = { post, replies, category };
-    }
+    // REMOVED: We no longer need expanded post functionality
 
     return {
       user: Meteor.user(),
@@ -149,10 +133,9 @@ export const ForumPage = () => {
         totalPosts,
         totalReplies,
         recentPosts
-      },
-      expandedPostData
+      }
     };
-  }, [selectedCategory, searchTerm, sortBy, expandedPost]);
+  }, [selectedCategory, searchTerm, sortBy]);
 
   // Filter and sort posts (done in the database query above)
   const filteredPosts = posts;
@@ -212,25 +195,18 @@ export const ForumPage = () => {
     setShowNewPostModal(true);
   };
 
-  const handlePostClick = (postId) => {
-    // Prevent double-clicks and add smooth transition
-    if (expandingPost === postId) return;
-    
-    setExpandingPost(postId);
-    
-    // Use requestAnimationFrame for smoother transitions
-    requestAnimationFrame(() => {
-      if (expandedPost === postId) {
-        setExpandedPost(null);
-      } else {
-        setExpandedPost(postId);
-        // Increment view count
-        Meteor.call(ForumMethods.incrementViews, postId);
-      }
-      
-      // Reset expanding state after a short delay
-      setTimeout(() => setExpandingPost(null), 100);
-    });
+  const toggleReply = (postId) => {
+    setReplyToggles(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
+  };
+
+  const handleReplyContentChange = (postId, content) => {
+    setReplyContents(prev => ({
+      ...prev,
+      [postId]: content
+    }));
   };
 
   const handleLikePost = async (postId) => {
@@ -254,25 +230,28 @@ export const ForumPage = () => {
       return;
     }
 
-    if (!replyContent.trim()) {
+    const content = replyContents[postId];
+    if (!content || !content.trim()) {
       alert('Please enter a reply');
       return;
     }
 
-    setSubmittingReply(true);
+    setSubmittingReplies(prev => ({ ...prev, [postId]: true }));
     try {
       await Meteor.callAsync(ForumMethods.createReply, {
         postId,
-        content: replyContent,
+        content: content.trim(),
         parentReplyId: null
       });
       
-      setReplyContent('');
+      // Clear reply content and close reply box
+      setReplyContents(prev => ({ ...prev, [postId]: '' }));
+      setReplyToggles(prev => ({ ...prev, [postId]: false }));
     } catch (error) {
       console.error('Error creating reply:', error);
       alert('Failed to create reply. Please try again.');
     } finally {
-      setSubmittingReply(false);
+      setSubmittingReplies(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -286,199 +265,45 @@ export const ForumPage = () => {
     return colors[role] || 'slate';
   };
 
-  // Component for expanded post view
-  const ExpandedPostView = ({ postData }) => {
-    const { post, replies, category } = postData;
-    const authorUser = Meteor.users.findOne(post.authorId);
-    const authorName = authorUser?.profile?.name || authorUser?.username || 'Unknown User';
-    const authorRole = getUserRole(post.authorId);
-    const isLiked = post.likes && post.likes.includes(user?._id);
+  // Component for inline reply box
+  const InlineReplyBox = ({ postId }) => {
+    const isSubmitting = submittingReplies[postId];
+    const replyContent = replyContents[postId] || '';
 
     return (
-      <div className="relative">
-        {/* Collapse Button */}
-        <div className="flex justify-end items-center mb-4">
-          <button
-            onClick={() => setExpandedPost(null)}
-            className="flex items-center space-x-1 text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300 transition-colors duration-200"
-          >
-            <span className="text-sm">Collapse</span>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        
-        {/* Full Post Content */}
-        <div className="mb-6">
-          <div className="flex items-start space-x-4 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {authorName.charAt(0)}
+      <div className="mt-4 p-4 bg-warm-50 dark:bg-slate-700/50 rounded-lg border-l-4 border-warm-500 dark:border-orange-500">
+        <form onSubmit={(e) => handleSubmitReply(e, postId)} className="space-y-3">
+          <div className="flex items-start space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+              {user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
             </div>
             <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <h3 className="text-xl font-bold text-warm-900 dark:text-white">{post.title}</h3>
-                {category && (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                    {category.icon} {category.name}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400 mb-4">
-                <span>{authorName}</span>
-                <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                  {authorRole}
-                </span>
-                <span>•</span>
-                <span>{formatTimeAgo(post.createdAt)}</span>
-              </div>
-              
-              <div className="prose max-w-none">
-                <p className="text-warm-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                  {post.content}
-                </p>
-              </div>
-
-              {/* Images */}
-              {post.images && post.images.length > 0 && (
-                <div className="mt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {post.images.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={image}
-                          alt={`Post image ${index + 1}`}
-                          className="w-full h-48 object-cover rounded-lg border border-warm-200 dark:border-slate-600 cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => {
-                            // Create a modal overlay to view full image
-                            const modal = document.createElement('div');
-                            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-                            modal.onclick = () => modal.remove();
-                            
-                            const img = document.createElement('img');
-                            img.src = image;
-                            img.className = 'max-w-full max-h-full object-contain rounded-lg';
-                            img.onclick = (e) => e.stopPropagation();
-                            
-                            modal.appendChild(img);
-                            document.body.appendChild(modal);
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {post.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Post Actions */}
-              <div className="flex items-center space-x-6 mt-6 pt-4 border-t border-warm-200 dark:border-slate-700">
-                <button
-                  onClick={() => handleLikePost(post._id)}
-                  className={`flex items-center space-x-2 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-95 will-change-transform ${
-                    isLiked 
-                      ? 'text-red-500 hover:text-red-600' 
-                      : 'text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                  <span>{(post.likes || []).length}</span>
-                </button>
-
-                <div className="flex items-center space-x-2 text-warm-500 dark:text-slate-400">
-                  <MessageCircle className="w-5 h-5" />
-                  <span>{post.replyCount || 0} replies</span>
-                </div>
-
-                <div className="flex items-center space-x-2 text-warm-400 dark:text-slate-500">
-                  <Eye className="w-5 h-5" />
-                  <span>{post.views || 0} views</span>
-                </div>
-              </div>
+              <textarea
+                value={replyContent}
+                onChange={(e) => handleReplyContentChange(postId, e.target.value)}
+                placeholder="Write your reply..."
+                className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-300 ease-in-out"
+                rows="3"
+              />
             </div>
           </div>
-        </div>
-
-        {/* Replies Section */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-warm-900 dark:text-white">
-            Replies ({replies.length})
-          </h4>
-          
-          {replies.map(reply => {
-            const replyAuthor = Meteor.users.findOne(reply.authorId);
-            const replyAuthorName = replyAuthor?.profile?.name || replyAuthor?.username || 'Unknown User';
-            const replyAuthorRole = getUserRole(reply.authorId);
-            
-            return (
-              <div key={reply._id} className="bg-warm-50 dark:bg-slate-700/50 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-slate-500 to-slate-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {replyAuthorName.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="font-medium text-warm-900 dark:text-white">{replyAuthorName}</span>
-                      <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(replyAuthorRole)}-100 dark:bg-${getRoleColor(replyAuthorRole)}-900/20 text-${getRoleColor(replyAuthorRole)}-800 dark:text-${getRoleColor(replyAuthorRole)}-300`}>
-                        {replyAuthorRole}
-                      </span>
-                      <span className="text-xs text-warm-500 dark:text-slate-400">{formatTimeAgo(reply.createdAt)}</span>
-                    </div>
-                    <p className="text-warm-700 dark:text-slate-300 whitespace-pre-wrap">
-                      {reply.content}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Reply Form */}
-          {user && (
-            <form onSubmit={(e) => handleSubmitReply(e, post._id)} className="mt-6">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                  {user.profile?.name?.charAt(0) || user.username?.charAt(0) || 'U'}
-                </div>
-                <div className="flex-1">
-                  <textarea
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="Write your reply..."
-                    className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-300 ease-in-out"
-                    rows="3"
-                  />
-                  <div className="flex justify-end mt-2">
-                    <button
-                      type="submit"
-                      disabled={submittingReply || !replyContent.trim()}
-                      className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
-                    >
-                      {submittingReply ? 'Posting...' : 'Post Reply'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          )}
-
-          {!user && (
-            <div className="text-center py-4 text-warm-500 dark:text-slate-400">
-              Please log in to reply to this post.
-            </div>
-          )}
-        </div>
+          <div className="flex justify-between items-center">
+            <button
+              type="button"
+              onClick={() => toggleReply(postId)}
+              className="text-sm text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !replyContent.trim()}
+              className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
+            >
+              {isSubmitting ? 'Posting...' : 'Post Reply'}
+            </button>
+          </div>
+        </form>
       </div>
     );
   };
@@ -652,196 +477,13 @@ export const ForumPage = () => {
                       key={post._id}
                       className="bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-6 hover:shadow-warm transition-all duration-300 ease-in-out will-change-transform"
                     >
-                      {/* Show collapsed view when not expanded */}
-                      {expandedPost !== post._id && (
-                        <div 
-                          onClick={() => handlePostClick(post._id)}
-                          className={`cursor-pointer transform transition-all duration-300 ease-in-out ${
-                            expandingPost === post._id 
-                              ? 'scale-[1.01] opacity-75' 
-                              : 'hover:scale-[1.01] active:scale-[0.99]'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                {authorName.charAt(0)}
-                              </div>
-                              <div>
-                                <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 transition-colors duration-200">
-                                  {post.title}
-                                </h3>
-                                <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
-                                  <span>{authorName}</span>
-                                  <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
-                                    {authorRole}
-                                  </span>
-                                  <span>•</span>
-                                  <span>{formatTimeAgo(post.createdAt)}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
-                              {categoryInfo.icon} {categoryInfo.name}
-                            </span>
-                          </div>
-                          
-                          <div className="mb-4">
-                            <p className="text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                              {post.content}
-                            </p>
-                          </div>
-                          
-                          {/* Images - Always Visible */}
-                          {post.images && post.images.length > 0 && (
-                            <div className="mb-4">
-                              {post.images.length === 1 ? (
-                                // Single image - full width with natural aspect ratio
-                                <div className="relative">
-                                  <img
-                                    src={post.images[0]}
-                                    alt="Post image"
-                                    className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
-                                    style={{ maxHeight: '500px' }}
-                                  />
-                                </div>
-                              ) : post.images.length === 2 ? (
-                                // Two images - side by side with natural height
-                                <div className="grid grid-cols-2 gap-2">
-                                  {post.images.map((image, index) => (
-                                    <div key={index} className="relative">
-                                      <img
-                                        src={image}
-                                        alt={`Post image ${index + 1}`}
-                                        className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
-                                        style={{ height: '250px' }}
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : post.images.length === 3 ? (
-                                // Three images - Instagram style layout
-                                <div className="grid grid-cols-2 gap-2" style={{ height: '300px' }}>
-                                  <div className="row-span-2">
-                                    <img
-                                      src={post.images[0]}
-                                      alt="Post image 1"
-                                      className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                    />
-                                  </div>
-                                  <div className="space-y-2 flex flex-col">
-                                    <img
-                                      src={post.images[1]}
-                                      alt="Post image 2"
-                                      className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                    />
-                                    <img
-                                      src={post.images[2]}
-                                      alt="Post image 3"
-                                      className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                    />
-                                  </div>
-                                </div>
-                              ) : (
-                                // Four or more images - 3-column grid with "+X more" overlay
-                                <div className="grid grid-cols-3 gap-2" style={{ height: '200px' }}>
-                                  {post.images.slice(0, 3).map((image, index) => (
-                                    <div key={index} className="relative">
-                                      <img
-                                        src={image}
-                                        alt={`Post image ${index + 1}`}
-                                        className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                      />
-                                      {index === 2 && post.images.length > 3 && (
-                                        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
-                                          <span className="text-white text-sm font-semibold">
-                                            +{post.images.length - 3} more
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                              <span className="flex items-center space-x-1">
-                                <MessageCircle className="w-4 h-4" />
-                                <span>{post.replyCount || 0} replies</span>
-                              </span>
-                              <span className="flex items-center space-x-1">
-                                <Eye className="w-4 h-4" />
-                                <span>{post.views || 0} views</span>
-                              </span>
-                              <span className="flex items-center space-x-1">
-                                <Heart className="w-4 h-4" />
-                                <span>{(post.likes || []).length} likes</span>
-                              </span>
-                            </div>
-                            <div className="text-xs text-warm-400 dark:text-slate-500">
-                              Last reply {formatTimeAgo(post.lastReplyAt)}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Show expanded view when expanded */}
-                      {expandedPost === post._id && (
-                        <div className="animate-fadeIn">
-                          {expandedPostData ? (
-                            <ExpandedPostView postData={expandedPostData} />
-                          ) : (
-                            <div className="flex items-center justify-center py-8">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warm-500"></div>
-                              <span className="ml-3 text-warm-600 dark:text-slate-400">Loading post details...</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Regular Posts */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-warm-900 dark:text-white flex items-center justify-between">
-                <span>Recent Discussions ({regularPosts.length})</span>
-              </h2>
-              
-              {regularPosts.map(post => {
-                const categoryInfo = getCategoryInfo(post.categoryId);
-                const authorUser = Meteor.users.findOne(post.authorId);
-                const authorName = authorUser?.profile?.name || authorUser?.username || 'Unknown User';
-                const authorRole = getUserRole(post.authorId);
-                
-                return (
-                <div
-                  key={post._id}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-300 ease-in-out group will-change-transform"
-                >
-                  {/* Show collapsed view when not expanded */}
-                  {expandedPost !== post._id && (
-                    <div 
-                      onClick={() => handlePostClick(post._id)}
-                      className={`cursor-pointer transform transition-all duration-300 ease-in-out ${
-                        expandingPost === post._id 
-                          ? 'scale-[1.01] opacity-75' 
-                          : 'hover:scale-[1.01] active:scale-[0.99]'
-                      }`}
-                    >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
+                          <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {authorName.charAt(0)}
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
+                            <h3 className="text-lg font-semibold text-warm-900 dark:text-white hover:text-warm-600 dark:hover:text-orange-400 transition-colors duration-200">
                               {post.title}
                             </h3>
                             <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
@@ -864,7 +506,7 @@ export const ForumPage = () => {
                           {post.content}
                         </p>
                       </div>
-                        
+                      
                       {/* Images - Always Visible */}
                       {post.images && post.images.length > 0 && (
                         <div className="mb-4">
@@ -939,52 +581,234 @@ export const ForumPage = () => {
                         </div>
                       )}
                       
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {post.tags.map(tag => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
-                          <span className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-6 text-sm">
+                          <button
+                            onClick={() => toggleReply(post._id)}
+                            className="flex items-center space-x-1 text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200"
+                          >
                             <MessageCircle className="w-4 h-4" />
                             <span>{post.replyCount || 0} replies</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
+                          </button>
+                          <span className="flex items-center space-x-1 text-warm-400 dark:text-slate-500">
                             <Eye className="w-4 h-4" />
                             <span>{post.views || 0} views</span>
                           </span>
-                          <span className="flex items-center space-x-1">
-                            <Heart className="w-4 h-4" />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLikePost(post._id);
+                            }}
+                            className={`flex items-center space-x-1 transition-colors duration-200 ${
+                              (post.likes && post.likes.includes(user?._id))
+                                ? 'text-red-500 hover:text-red-600' 
+                                : 'text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300'
+                            }`}
+                          >
+                            <Heart className={`w-4 h-4 ${(post.likes && post.likes.includes(user?._id)) ? 'fill-current' : ''}`} />
                             <span>{(post.likes || []).length} likes</span>
-                          </span>
+                          </button>
                         </div>
                         <div className="text-xs text-warm-400 dark:text-slate-500">
                           Last reply {formatTimeAgo(post.lastReplyAt)}
                         </div>
                       </div>
+
+                      {/* Inline Reply Box */}
+                      {user && replyToggles[post._id] && (
+                        <InlineReplyBox postId={post._id} />
+                      )}
+
+                      {!user && replyToggles[post._id] && (
+                        <div className="mt-4 p-4 bg-warm-50 dark:bg-slate-700/50 rounded-lg border-l-4 border-warm-500 dark:border-orange-500 text-center">
+                          <p className="text-warm-600 dark:text-slate-400">
+                            Please log in to reply to this post.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Regular Posts */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-warm-900 dark:text-white flex items-center justify-between">
+                <span>Recent Discussions ({regularPosts.length})</span>
+              </h2>
+              
+              {regularPosts.map(post => {
+                const categoryInfo = getCategoryInfo(post.categoryId);
+                const authorUser = Meteor.users.findOne(post.authorId);
+                const authorName = authorUser?.profile?.name || authorUser?.username || 'Unknown User';
+                const authorRole = getUserRole(post.authorId);
+                
+                return (
+                <div
+                  key={post._id}
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-6 transition-all duration-300 ease-in-out group will-change-transform"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 bg-gradient-to-br from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600 rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
+                        {authorName.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-warm-900 dark:text-white group-hover:text-warm-600 dark:group-hover:text-orange-400 transition-colors duration-200">
+                          {post.title}
+                        </h3>
+                        <div className="flex items-center space-x-2 text-sm text-warm-600 dark:text-slate-400">
+                          <span>{authorName}</span>
+                          <span className={`px-2 py-1 rounded-full text-xs bg-${getRoleColor(authorRole)}-100 dark:bg-${getRoleColor(authorRole)}-900/20 text-${getRoleColor(authorRole)}-800 dark:text-${getRoleColor(authorRole)}-300`}>
+                            {authorRole}
+                          </span>
+                          <span>•</span>
+                          <span>{formatTimeAgo(post.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(post.categoryId)}-100 dark:bg-${getCategoryColor(post.categoryId)}-900/20 text-${getCategoryColor(post.categoryId)}-800 dark:text-${getCategoryColor(post.categoryId)}-300`}>
+                      {categoryInfo.icon} {categoryInfo.name}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                  </div>
+                    
+                  {/* Images - Always Visible */}
+                  {post.images && post.images.length > 0 && (
+                    <div className="mb-4">
+                      {post.images.length === 1 ? (
+                        // Single image - full width with natural aspect ratio
+                        <div className="relative">
+                          <img
+                            src={post.images[0]}
+                            alt="Post image"
+                            className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                            style={{ maxHeight: '500px' }}
+                          />
+                        </div>
+                      ) : post.images.length === 2 ? (
+                        // Two images - side by side with natural height
+                        <div className="grid grid-cols-2 gap-2">
+                          {post.images.map((image, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={image}
+                                alt={`Post image ${index + 1}`}
+                                className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                                style={{ height: '250px' }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : post.images.length === 3 ? (
+                        // Three images - Instagram style layout
+                        <div className="grid grid-cols-2 gap-2" style={{ height: '300px' }}>
+                          <div className="row-span-2">
+                            <img
+                              src={post.images[0]}
+                              alt="Post image 1"
+                              className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                            />
+                          </div>
+                          <div className="space-y-2 flex flex-col">
+                            <img
+                              src={post.images[1]}
+                              alt="Post image 2"
+                              className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                            />
+                            <img
+                              src={post.images[2]}
+                              alt="Post image 3"
+                              className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        // Four or more images - 3-column grid with "+X more" overlay
+                        <div className="grid grid-cols-3 gap-2" style={{ height: '200px' }}>
+                          {post.images.slice(0, 3).map((image, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={image}
+                                alt={`Post image ${index + 1}`}
+                                className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                              />
+                              {index === 2 && post.images.length > 3 && (
+                                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
+                                  <span className="text-white text-sm font-semibold">
+                                    +{post.images.length - 3} more
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                   
-                  {/* Show expanded view when expanded */}
-                  {expandedPost === post._id && (
-                    <div className="animate-fadeIn">
-                      {expandedPostData ? (
-                        <ExpandedPostView postData={expandedPostData} />
-                      ) : (
-                        <div className="flex items-center justify-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-warm-500"></div>
-                          <span className="ml-3 text-warm-600 dark:text-slate-400">Loading post details...</span>
-                        </div>
-                      )}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {post.tags.map(tag => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-6 text-sm">
+                      <button
+                        onClick={() => toggleReply(post._id)}
+                        className="flex items-center space-x-1 text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>{post.replyCount || 0} replies</span>
+                      </button>                        <span className="flex items-center space-x-1 text-warm-400 dark:text-slate-500">
+                          <Eye className="w-4 h-4" />
+                          <span>{post.views || 0} views</span>
+                        </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLikePost(post._id);
+                        }}
+                        className={`flex items-center space-x-1 transition-colors duration-200 ${
+                          (post.likes && post.likes.includes(user?._id))
+                            ? 'text-red-500 hover:text-red-600' 
+                            : 'text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${(post.likes && post.likes.includes(user?._id)) ? 'fill-current' : ''}`} />
+                        <span>{(post.likes || []).length} likes</span>
+                      </button>
+                    </div>
+                    <div className="text-xs text-warm-400 dark:text-slate-500">
+                      Last reply {formatTimeAgo(post.lastReplyAt)}
+                    </div>
+                  </div>
+
+                  {/* Inline Reply Box */}
+                  {user && replyToggles[post._id] && (
+                    <InlineReplyBox postId={post._id} />
+                  )}
+
+                  {!user && replyToggles[post._id] && (
+                    <div className="mt-4 p-4 bg-warm-50 dark:bg-slate-700/50 rounded-lg border-l-4 border-warm-500 dark:border-orange-500 text-center">
+                      <p className="text-warm-600 dark:text-slate-400">
+                        Please log in to reply to this post.
+                      </p>
                     </div>
                   )}
                 </div>
