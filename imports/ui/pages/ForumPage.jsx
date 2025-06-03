@@ -286,18 +286,6 @@ export const ForumPage = () => {
     return colors[role] || 'slate';
   };
 
-  const truncateContent = (content, maxLength = 200) => {
-    if (!content) return '';
-    if (content.length <= maxLength) return content;
-    
-    const truncated = content.substring(0, maxLength);
-    const lastSpaceIndex = truncated.lastIndexOf(' ');
-    
-    return lastSpaceIndex > 0 
-      ? truncated.substring(0, lastSpaceIndex) + '...'
-      : truncated + '...';
-  };
-
   // Component for expanded post view
   const ExpandedPostView = ({ postData }) => {
     const { post, replies, category } = postData;
@@ -699,37 +687,84 @@ export const ForumPage = () => {
                           </div>
                           
                           <div className="mb-4">
-                            <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
-                              {truncateContent(post.content, 200)}
-                              {post.content && post.content.length > 200 && (
-                                <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
-                                  Read more
-                                </span>
-                              )}
+                            <p className="text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                              {post.content}
                             </p>
-                            
-                            {/* Images Preview */}
-                            {post.images && post.images.length > 0 && (
-                              <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                                {post.images.slice(0, 3).map((image, index) => (
-                                  <div key={index} className="relative">
-                                    <img
-                                      src={image}
-                                      alt={`Post image ${index + 1}`}
-                                      className="w-full h-20 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                    />
-                                    {post.images.length > 3 && index === 2 && (
-                                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                        <span className="text-white text-sm font-medium">
-                                          +{post.images.length - 3} more
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
+                          
+                          {/* Images - Always Visible */}
+                          {post.images && post.images.length > 0 && (
+                            <div className="mb-4">
+                              {post.images.length === 1 ? (
+                                // Single image - full width with natural aspect ratio
+                                <div className="relative">
+                                  <img
+                                    src={post.images[0]}
+                                    alt="Post image"
+                                    className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                                    style={{ maxHeight: '500px' }}
+                                  />
+                                </div>
+                              ) : post.images.length === 2 ? (
+                                // Two images - side by side with natural height
+                                <div className="grid grid-cols-2 gap-2">
+                                  {post.images.map((image, index) => (
+                                    <div key={index} className="relative">
+                                      <img
+                                        src={image}
+                                        alt={`Post image ${index + 1}`}
+                                        className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                                        style={{ height: '250px' }}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : post.images.length === 3 ? (
+                                // Three images - Instagram style layout
+                                <div className="grid grid-cols-2 gap-2" style={{ height: '300px' }}>
+                                  <div className="row-span-2">
+                                    <img
+                                      src={post.images[0]}
+                                      alt="Post image 1"
+                                      className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                    />
+                                  </div>
+                                  <div className="space-y-2 flex flex-col">
+                                    <img
+                                      src={post.images[1]}
+                                      alt="Post image 2"
+                                      className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                    />
+                                    <img
+                                      src={post.images[2]}
+                                      alt="Post image 3"
+                                      className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                    />
+                                  </div>
+                                </div>
+                              ) : (
+                                // Four or more images - 3-column grid with "+X more" overlay
+                                <div className="grid grid-cols-3 gap-2" style={{ height: '200px' }}>
+                                  {post.images.slice(0, 3).map((image, index) => (
+                                    <div key={index} className="relative">
+                                      <img
+                                        src={image}
+                                        alt={`Post image ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                      />
+                                      {index === 2 && post.images.length > 3 && (
+                                        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
+                                          <span className="text-white text-sm font-semibold">
+                                            +{post.images.length - 3} more
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-6 text-sm text-warm-500 dark:text-slate-400">
@@ -825,37 +860,84 @@ export const ForumPage = () => {
                       </div>
                       
                       <div className="mb-4">
-                        <p className="text-warm-700 dark:text-slate-300 leading-relaxed">
-                          {truncateContent(post.content, 200)}
-                          {post.content && post.content.length > 200 && (
-                            <span className="text-warm-500 dark:text-orange-400 font-medium ml-1 cursor-pointer hover:underline transition-all duration-200 hover:text-warm-600 dark:hover:text-orange-300">
-                              Read more
-                            </span>
-                          )}
+                        <p className="text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                          {post.content}
                         </p>
-                        
-                        {/* Images Preview */}
-                        {post.images && post.images.length > 0 && (
-                          <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {post.images.slice(0, 3).map((image, index) => (
-                              <div key={index} className="relative">
-                                <img
-                                  src={image}
-                                  alt={`Post image ${index + 1}`}
-                                  className="w-full h-20 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
-                                />
-                                {post.images.length > 3 && index === 2 && (
-                                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                    <span className="text-white text-sm font-medium">
-                                      +{post.images.length - 3} more
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
                       </div>
+                        
+                      {/* Images - Always Visible */}
+                      {post.images && post.images.length > 0 && (
+                        <div className="mb-4">
+                          {post.images.length === 1 ? (
+                            // Single image - full width with natural aspect ratio
+                            <div className="relative">
+                              <img
+                                src={post.images[0]}
+                                alt="Post image"
+                                className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                                style={{ maxHeight: '500px' }}
+                              />
+                            </div>
+                          ) : post.images.length === 2 ? (
+                            // Two images - side by side with natural height
+                            <div className="grid grid-cols-2 gap-2">
+                              {post.images.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img
+                                    src={image}
+                                    alt={`Post image ${index + 1}`}
+                                    className="w-full rounded-lg border border-warm-200 dark:border-slate-600 object-cover"
+                                    style={{ height: '250px' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : post.images.length === 3 ? (
+                            // Three images - Instagram style layout
+                            <div className="grid grid-cols-2 gap-2" style={{ height: '300px' }}>
+                              <div className="row-span-2">
+                                <img
+                                  src={post.images[0]}
+                                  alt="Post image 1"
+                                  className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                />
+                              </div>
+                              <div className="space-y-2 flex flex-col">
+                                <img
+                                  src={post.images[1]}
+                                  alt="Post image 2"
+                                  className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                />
+                                <img
+                                  src={post.images[2]}
+                                  alt="Post image 3"
+                                  className="w-full flex-1 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            // Four or more images - 3-column grid with "+X more" overlay
+                            <div className="grid grid-cols-3 gap-2" style={{ height: '200px' }}>
+                              {post.images.slice(0, 3).map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img
+                                    src={image}
+                                    alt={`Post image ${index + 1}`}
+                                    className="w-full h-full object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                                  />
+                                  {index === 2 && post.images.length > 3 && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
+                                      <span className="text-white text-sm font-semibold">
+                                        +{post.images.length - 3} more
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">

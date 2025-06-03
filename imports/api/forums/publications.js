@@ -82,6 +82,7 @@ Meteor.publish('forums.posts.list', function(options = {}) {
       authorId: 1,
       categoryId: 1,
       tags: 1,
+      images: 1,
       pinned: 1,
       locked: 1,
       replyCount: 1,
