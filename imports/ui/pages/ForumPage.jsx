@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
@@ -18,9 +18,53 @@ import { NewPostModal } from '../components/forum/NewPostModal';
 // Client-side collection for forum stats
 const ForumStats = new Mongo.Collection('forumStats');
 
+// Component for inline reply box - moved outside to prevent re-creation
+const InlineReplyBox = ({ postId, user, replyContents, submittingReplies, handleReplyContentChange, handleSubmitReply, toggleReply }) => {
+  const isSubmitting = submittingReplies[postId];
+  const replyContent = replyContents[postId] || '';
+
+  return (
+    <div className="mt-4 p-4 bg-warm-50 dark:bg-slate-700/50 rounded-lg border-l-4 border-warm-500 dark:border-orange-500">
+      <form onSubmit={(e) => handleSubmitReply(e, postId)} className="space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+            {user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+          </div>
+          <div className="flex-1">
+            <textarea
+              value={replyContent}
+              onChange={(e) => handleReplyContentChange(postId, e.target.value)}
+              placeholder="Write your reply..."
+              className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-300 ease-in-out"
+              rows="3"
+            />
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <button
+            type="button"
+            onClick={() => toggleReply(postId)}
+            className="text-sm text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting || !replyContent.trim()}
+            className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
+          >
+            {isSubmitting ? 'Posting...' : 'Post Reply'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 export const ForumPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showNewPostModal, setShowNewPostModal] = useState(false);
@@ -28,12 +72,21 @@ export const ForumPage = () => {
   const [replyContents, setReplyContents] = useState({}); // Track reply content for each post
   const [submittingReplies, setSubmittingReplies] = useState({}); // Track which replies are being submitted
 
+  // Debounce search term to prevent excessive re-renders
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const { user, categories, posts, loading, forumStats } = useTracker(() => {
     // Subscribe to forum data
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     const postsHandle = Meteor.subscribe(ForumPublications.postsList, {
       categoryId: selectedCategory === 'all' ? null : selectedCategory,
-      searchTerm: searchTerm || null,
+      searchTerm: debouncedSearchTerm || null,
       sortBy,
       limit: 50
     });
@@ -55,12 +108,12 @@ export const ForumPage = () => {
     // Get categories from database
     const categoriesFromDB = ForumCategories.find({}, { sort: { order: 1, name: 1 } }).fetch();
     
-    // Add "All Topics" option
+    // Add "All Topics" option - use static count to avoid re-renders
     const allCategories = [
       { 
         _id: 'all', 
         name: 'All Topics', 
-        postCount: ForumPosts.find().count(), 
+        postCount: 0, // Will be updated by stats
         icon: '💬' 
       },
       ...categoriesFromDB.map(cat => ({
@@ -76,11 +129,11 @@ export const ForumPage = () => {
     if (selectedCategory !== 'all') {
       postQuery.categoryId = selectedCategory;
     }
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       postQuery.$or = [
-        { title: { $regex: searchTerm, $options: 'i' } },
-        { content: { $regex: searchTerm, $options: 'i' } },
-        { tags: { $in: [new RegExp(searchTerm, 'i')] } }
+        { title: { $regex: debouncedSearchTerm, $options: 'i' } },
+        { content: { $regex: debouncedSearchTerm, $options: 'i' } },
+        { tags: { $in: [new RegExp(debouncedSearchTerm, 'i')] } }
       ];
     }
 
@@ -107,22 +160,8 @@ export const ForumPage = () => {
       limit: 50
     }).fetch();
 
-    // Get forum statistics from the client collection or calculate simple ones
+    // Get forum statistics from the client collection only
     const statsData = ForumStats.findOne('global');
-    
-    // Fallback to simple client-side calculations
-    const totalPosts = ForumPosts.find().count();
-    const totalReplies = ForumPosts.find().fetch().reduce((sum, post) => sum + (post.replyCount || 0), 0);
-    
-    // Get today's posts
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const recentPosts = ForumPosts.find({ 
-      createdAt: { $gte: today } 
-    }).count();
-
-    // Get expanded post data if available
-    // REMOVED: We no longer need expanded post functionality
 
     return {
       user: Meteor.user(),
@@ -130,12 +169,12 @@ export const ForumPage = () => {
       posts: postsFromDB,
       loading: false,
       forumStats: statsData || {
-        totalPosts,
-        totalReplies,
-        recentPosts
+        totalPosts: 0,
+        totalReplies: 0,
+        recentPosts: 0
       }
     };
-  }, [selectedCategory, searchTerm, sortBy]);
+  }, [selectedCategory, debouncedSearchTerm, sortBy]); // Only depend on these specific values
 
   // Filter and sort posts (done in the database query above)
   const filteredPosts = posts;
@@ -263,49 +302,6 @@ export const ForumPage = () => {
       'Member': 'slate'
     };
     return colors[role] || 'slate';
-  };
-
-  // Component for inline reply box
-  const InlineReplyBox = ({ postId }) => {
-    const isSubmitting = submittingReplies[postId];
-    const replyContent = replyContents[postId] || '';
-
-    return (
-      <div className="mt-4 p-4 bg-warm-50 dark:bg-slate-700/50 rounded-lg border-l-4 border-warm-500 dark:border-orange-500">
-        <form onSubmit={(e) => handleSubmitReply(e, postId)} className="space-y-3">
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-warm-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1">
-              <textarea
-                value={replyContent}
-                onChange={(e) => handleReplyContentChange(postId, e.target.value)}
-                placeholder="Write your reply..."
-                className="w-full p-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-300 ease-in-out"
-                rows="3"
-              />
-            </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <button
-              type="button"
-              onClick={() => toggleReply(postId)}
-              className="text-sm text-warm-500 hover:text-warm-600 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !replyContent.trim()}
-              className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
-            >
-              {isSubmitting ? 'Posting...' : 'Post Reply'}
-            </button>
-          </div>
-        </form>
-      </div>
-    );
   };
 
   return (
@@ -616,7 +612,15 @@ export const ForumPage = () => {
 
                       {/* Inline Reply Box */}
                       {user && replyToggles[post._id] && (
-                        <InlineReplyBox postId={post._id} />
+                        <InlineReplyBox 
+                          postId={post._id}
+                          user={user}
+                          replyContents={replyContents}
+                          submittingReplies={submittingReplies}
+                          handleReplyContentChange={handleReplyContentChange}
+                          handleSubmitReply={handleSubmitReply}
+                          toggleReply={toggleReply}
+                        />
                       )}
 
                       {!user && replyToggles[post._id] && (
@@ -801,7 +805,15 @@ export const ForumPage = () => {
 
                   {/* Inline Reply Box */}
                   {user && replyToggles[post._id] && (
-                    <InlineReplyBox postId={post._id} />
+                    <InlineReplyBox 
+                      postId={post._id}
+                      user={user}
+                      replyContents={replyContents}
+                      submittingReplies={submittingReplies}
+                      handleReplyContentChange={handleReplyContentChange}
+                      handleSubmitReply={handleSubmitReply}
+                      toggleReply={toggleReply}
+                    />
                   )}
 
                   {!user && replyToggles[post._id] && (
