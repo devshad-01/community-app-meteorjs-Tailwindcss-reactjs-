@@ -12,15 +12,14 @@ import {
 export const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-
-  const events = [
+  const [events, setEvents] = useState([
     { id: 1, title: 'React Workshop', type: 'workshop', date: '2023-06-15', time: '14:00', location: 'Virtual', description: 'Learn React hooks and context API', featured: true, attending: false, capacity: 30, registered: 18 },
     { id: 2, title: 'Team Standup', type: 'meeting', date: '2023-06-10', time: '09:30', location: 'Conference Room A', description: 'Daily team sync', featured: false, attending: true, capacity: 15, registered: 12 },
     { id: 3, title: 'Summer Social', type: 'social', date: '2023-06-20', time: '18:00', location: 'Rooftop Terrace', description: 'Quarterly team social event', featured: true, attending: false, capacity: 50, registered: 32 },
     { id: 4, title: 'Project Retrospective', type: 'meeting', date: '2023-06-12', time: '11:00', location: 'Zoom', description: 'Review of Q2 initiatives', featured: false, attending: false, capacity: 25, registered: 8 },
     { id: 5, title: 'CSS Masterclass', type: 'workshop', date: '2023-06-18', time: '16:00', location: 'Training Room 2', description: 'Advanced CSS techniques', featured: false, attending: false, capacity: 20, registered: 14 },
     { id: 6, title: 'Hackathon Kickoff', type: 'social', date: '2023-06-25', time: '10:00', location: 'Main Hall', description: 'Annual coding competition', featured: true, attending: true, capacity: 100, registered: 78 },
-  ];
+  ]);
 
   const filterCounts = {
     all: events.length,
@@ -37,17 +36,17 @@ export const EventsPage = () => {
   });
 
   const handleRsvp = (eventId, attending) => {
-    const index = events.findIndex(e => e.id === eventId);
-    if (index !== -1) {
-      events[index].attending = attending;
-      if (attending) {
-        events[index].registered += 1;
-      } else {
-        events[index].registered -= 1;
-      }
-    }
-    setSearchTerm(searchTerm + ' ');
-    setSearchTerm(searchTerm);
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.id === eventId 
+          ? { 
+              ...event, 
+              attending, 
+              registered: attending ? event.registered + 1 : event.registered - 1 
+            } 
+          : event
+      )
+    );
   };
 
   return (

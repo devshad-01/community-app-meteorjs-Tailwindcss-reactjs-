@@ -6,7 +6,7 @@ ForumCategories.deny({
   insert() { return true; },
   update() { return true; },
   remove() { return true; }
-});
+}); 
 
 ForumPosts.deny({
   insert() { return true; },
