@@ -71,6 +71,7 @@ export const ForumPage = () => {
   const [replyToggles, setReplyToggles] = useState({}); // Track which posts have reply boxes open
   const [replyContents, setReplyContents] = useState({}); // Track reply content for each post
   const [submittingReplies, setSubmittingReplies] = useState({}); // Track which replies are being submitted
+  const [showMoreReplies, setShowMoreReplies] = useState({}); // Track which posts show all replies
 
   // Debounce search term to prevent excessive re-renders
   useEffect(() => {
@@ -81,7 +82,7 @@ export const ForumPage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { user, categories, posts, loading, forumStats } = useTracker(() => {
+  const { user, categories, posts, loading, forumStats, allReplies } = useTracker(() => {
     // Subscribe to forum data
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     const postsHandle = Meteor.subscribe(ForumPublications.postsList, {
@@ -93,7 +94,19 @@ export const ForumPage = () => {
     const statsHandle = Meteor.subscribe(ForumPublications.stats);
     const usersHandle = Meteor.subscribe('usersBasic'); // Subscribe to basic user info
 
-    const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready() || !usersHandle.ready();
+    // Subscribe to replies for all posts that are visible
+    const repliesHandles = [];
+    const visiblePosts = ForumPosts.find({}, { limit: 50 }).fetch();
+    const postsIds = visiblePosts.map(post => post._id);
+    
+    postsIds.forEach(postId => {
+      repliesHandles.push(Meteor.subscribe(ForumPublications.repliesByPost, postId, {
+        limit: 10, // Load up to 10 replies per post initially
+        sortBy: 'oldest'
+      }));
+    });
+
+    const loading = !categoriesHandle.ready() || !postsHandle.ready() || !statsHandle.ready() || !usersHandle.ready() || repliesHandles.some(handle => !handle.ready());
 
     if (loading) {
       return {
@@ -163,6 +176,11 @@ export const ForumPage = () => {
     // Get forum statistics from the client collection only
     const statsData = ForumStats.findOne('global');
 
+    // Get all replies for the visible posts
+    const repliesData = ForumReplies.find({
+      postId: { $in: postsIds }
+    }, { sort: { createdAt: 1 } }).fetch();
+
     return {
       user: Meteor.user(),
       categories: allCategories,
@@ -172,7 +190,8 @@ export const ForumPage = () => {
         totalPosts: 0,
         totalReplies: 0,
         recentPosts: 0
-      }
+      },
+      allReplies: repliesData
     };
   }, [selectedCategory, debouncedSearchTerm, sortBy]); // Only depend on these specific values
 
@@ -201,6 +220,13 @@ export const ForumPage = () => {
     // Try to match by name or slug
     const categoryName = category.name?.toLowerCase().replace(/\s+/g, '-');
     return colorMap[categoryName] || colorMap[category.slug] || 'slate';
+  };
+
+  const toggleShowMoreReplies = (postId) => {
+    setShowMoreReplies(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
   };
 
   const formatTimeAgo = (date) => {
@@ -279,8 +305,8 @@ export const ForumPage = () => {
     try {
       await Meteor.callAsync(ForumMethods.createReply, {
         postId,
-        content: content.trim(),
-        parentReplyId: null
+        content: content.trim()
+        // omit parentReplyId for top-level replies since it's optional
       });
       
       // Clear reply content and close reply box
@@ -302,6 +328,89 @@ export const ForumPage = () => {
       'Member': 'slate'
     };
     return colors[role] || 'slate';
+  };
+
+  // Helper function to get replies for a specific post
+  const getRepliesForPost = (postId) => {
+    return allReplies ? allReplies.filter(reply => reply.postId === postId) : [];
+  };
+
+  // Helper function to render limited replies with "show more"
+  const renderReplies = (postId) => {
+    const replies = getRepliesForPost(postId);
+    if (!replies || replies.length === 0) return null;
+
+    const INITIAL_REPLIES_LIMIT = 3;
+    const showingAll = showMoreReplies[postId];
+    const visibleReplies = showingAll ? replies : replies.slice(0, INITIAL_REPLIES_LIMIT);
+    const hasMoreReplies = replies.length > INITIAL_REPLIES_LIMIT;
+
+    return (
+      <div className="mt-4 space-y-3">
+        {/* Replies Display */}
+        {visibleReplies.map(reply => {
+          const replyAuthor = Meteor.users.findOne(reply.authorId);
+          const replyAuthorName = replyAuthor?.profile?.name || replyAuthor?.username || 'Unknown User';
+          const replyAuthorRole = getUserRole(reply.authorId);
+          
+          return (
+            <div key={reply._id} className="flex items-start space-x-3 p-3 bg-warm-25 dark:bg-slate-700/30 rounded-lg border border-warm-100 dark:border-slate-600">
+              <div className="w-8 h-8 bg-gradient-to-br from-warm-400 to-warm-500 dark:from-orange-400 dark:to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                {replyAuthorName.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="font-medium text-sm text-warm-900 dark:text-white">
+                    {replyAuthorName}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs bg-${getRoleColor(replyAuthorRole)}-100 dark:bg-${getRoleColor(replyAuthorRole)}-900/20 text-${getRoleColor(replyAuthorRole)}-700 dark:text-${getRoleColor(replyAuthorRole)}-300`}>
+                    {replyAuthorRole}
+                  </span>
+                  <span className="text-xs text-warm-500 dark:text-slate-400">
+                    {formatTimeAgo(reply.createdAt)}
+                  </span>
+                </div>
+                <p className="text-sm text-warm-700 dark:text-slate-300 whitespace-pre-wrap">
+                  {reply.content}
+                </p>
+                <div className="flex items-center space-x-4 mt-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // handleLikeReply(reply._id); // TODO: Implement reply liking
+                    }}
+                    className={`flex items-center space-x-1 text-xs transition-colors duration-200 ${
+                      (reply.likes && reply.likes.includes(user?._id))
+                        ? 'text-red-500 hover:text-red-600' 
+                        : 'text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    <Heart className={`w-3 h-3 ${(reply.likes && reply.likes.includes(user?._id)) ? 'fill-current' : ''}`} />
+                    <span>{(reply.likes || []).length}</span>
+                  </button>
+                  <button className="text-xs text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200">
+                    Reply
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Show More Replies Button */}
+        {hasMoreReplies && (
+          <button
+            onClick={() => toggleShowMoreReplies(postId)}
+            className="w-full text-left text-sm text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 transition-colors duration-200 py-2"
+          >
+            {showingAll 
+              ? `Show fewer replies` 
+              : `Show ${replies.length - INITIAL_REPLIES_LIMIT} more replies`
+            }
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -610,6 +719,9 @@ export const ForumPage = () => {
                         </div>
                       </div>
 
+                      {/* Replies Display */}
+                      {renderReplies(post._id)}
+
                       {/* Inline Reply Box */}
                       {user && replyToggles[post._id] && (
                         <InlineReplyBox 
@@ -802,6 +914,9 @@ export const ForumPage = () => {
                       Last reply {formatTimeAgo(post.lastReplyAt)}
                     </div>
                   </div>
+
+                  {/* Replies Display */}
+                  {renderReplies(post._id)}
 
                   {/* Inline Reply Box */}
                   {user && replyToggles[post._id] && (

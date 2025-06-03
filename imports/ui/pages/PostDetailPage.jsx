@@ -88,8 +88,8 @@ export const PostDetailPage = () => {
     try {
       await Meteor.callAsync(ForumMethods.createReply, {
         postId,
-        content: replyContent,
-        parentReplyId: null // For now, no nested replies
+        content: replyContent
+        // omit parentReplyId for top-level replies since it's optional
       });
       
       setReplyContent('');
