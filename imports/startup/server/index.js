@@ -4,6 +4,7 @@ import { Meteor } from 'meteor/meteor';
 // Import API modules
 import '../../api/users/server';
 import '../../api/forums';
+import '../../api/messages/server';
 
 // Initialize server-specific code here
 Meteor.startup(() => {

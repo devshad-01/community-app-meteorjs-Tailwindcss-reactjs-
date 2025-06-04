@@ -19,6 +19,7 @@ import {
   PostsList,
   NewPostModal
 } from '../components/forum';
+import { GeneralChat } from '../components/chat';
 
 // Client-side collection for forum stats
 const ForumStats = new Mongo.Collection('forumStats');
@@ -30,6 +31,7 @@ export const ForumPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [showNewPostModal, setShowNewPostModal] = useState(false);
+  const [showGeneralChat, setShowGeneralChat] = useState(false);
   const [replyToggles, setReplyToggles] = useState({}); // Track which posts have reply boxes open
   const [replyContents, setReplyContents] = useState({}); // Track reply content for each post
   const [submittingReplies, setSubmittingReplies] = useState({}); // Track which replies are being submitted
@@ -251,6 +253,14 @@ export const ForumPage = () => {
     setShowNewPostModal(true);
   };
 
+  const handleToggleChat = () => {
+    if (!user) {
+      alert('Please log in to access chat');
+      return;
+    }
+    setShowGeneralChat(!showGeneralChat);
+  };
+
   const toggleReply = (postId) => {
     setReplyToggles(prev => ({
       ...prev,
@@ -321,7 +331,12 @@ export const ForumPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <ForumHeader user={user} onNewPost={handleNewPost} />
+      <ForumHeader 
+        user={user} 
+        onNewPost={handleNewPost} 
+        onToggleChat={handleToggleChat}
+        isChatOpen={showGeneralChat}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
@@ -338,7 +353,13 @@ export const ForumPage = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {loading ? (
+            {showGeneralChat ? (
+              <GeneralChat 
+                isOpen={showGeneralChat}
+                onClose={() => setShowGeneralChat(false)}
+                user={user}
+              />
+            ) : loading ? (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 p-8">
                 <div className="animate-pulse space-y-4">
                   <div className="h-4 bg-warm-200 dark:bg-slate-600 rounded w-3/4"></div>
