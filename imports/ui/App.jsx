@@ -4,6 +4,7 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
 import { NavigationBar } from './components/common/NavigationBar';
+import { ToastProvider } from './components/common/ToastProvider';
 import { HomePage } from './pages/HomePage';
 import { EventsPage } from './pages/EventsPage';
 import { ForumPage } from './pages/ForumPage';
@@ -33,74 +34,76 @@ export const App = () => {
   }
 
   return (
-    <div className="app min-h-screen bg-slate-50 dark:bg-slate-900">
-      <NavigationBar />
-      
-      <main className="flex-1">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={<HomePage />} />
-          
-          {/* Protected routes - require authentication */}
-          <Route 
-            path="/events" 
-            element={
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/forum" 
-            element={
-              <ProtectedRoute>
-                <ForumPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/forum/post/:postId" 
-            element={
-              <ProtectedRoute>
-                <PostDetailPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/chat" 
-            element={
-              <ProtectedRoute>
-                <ChatPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Admin-only routes */}
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminPage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Redirect unknown routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      
-      <Footer />
-    </div>
+    <ToastProvider>
+      <div className="app min-h-screen bg-slate-50 dark:bg-slate-900">
+        <NavigationBar />
+        
+        <main className="flex-1">
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/" element={<HomePage />} />
+            
+            {/* Protected routes - require authentication */}
+            <Route 
+              path="/events" 
+              element={
+                <ProtectedRoute>
+                  <EventsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/forum" 
+              element={
+                <ProtectedRoute>
+                  <ForumPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/forum/post/:postId" 
+              element={
+                <ProtectedRoute>
+                  <PostDetailPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/chat" 
+              element={
+                <ProtectedRoute>
+                  <ChatPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin-only routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Redirect unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+      </div>
+    </ToastProvider>
   );
 };

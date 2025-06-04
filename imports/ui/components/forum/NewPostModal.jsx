@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { X, Send, Tag, FileText, Folder, Image, Trash2 } from 'lucide-react';
+import { useToastContext } from '../common/ToastProvider';
 
 export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategoryId = null }) => {
+  const { success, error: showError } = useToastContext();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -94,6 +96,13 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
         pinned: formData.pinned
       });
 
+      // Show success notification
+      success(
+        'Post Created!',
+        `Your post "${formData.title.trim()}" has been published successfully.`,
+        { duration: 3000 }
+      );
+
       // Reset form and close modal
       setFormData({
         title: '',
@@ -106,7 +115,15 @@ export const NewPostModal = ({ isOpen, onClose, categories = [], selectedCategor
       onClose();
       
     } catch (err) {
-      setError(err.message || 'Failed to create post');
+      const errorMessage = err.message || 'Failed to create post';
+      setError(errorMessage);
+      
+      // Show error toast
+      showError(
+        'Failed to Create Post',
+        errorMessage,
+        { duration: 6000 }
+      );
     } finally {
       setIsSubmitting(false);
     }

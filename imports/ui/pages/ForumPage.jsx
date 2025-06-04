@@ -12,6 +12,7 @@ import {
   ForumFormatting,
   FORUM_CONSTANTS 
 } from '../../api/forums';
+import { useToastContext } from '../components/common/ToastProvider';
 import { 
   ForumHeader,
   ForumSidebar,
@@ -25,6 +26,7 @@ import { GeneralChat } from '../components/chat';
 const ForumStats = new Mongo.Collection('forumStats');
 
 export const ForumPage = () => {
+  const { success, error: showError } = useToastContext();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -299,13 +301,13 @@ export const ForumPage = () => {
   const handleSubmitReply = async (e, postId) => {
     e.preventDefault();
     if (!user) {
-      alert('Please log in to reply');
+      showError('Authentication Required', 'Please log in to reply');
       return;
     }
 
     const content = replyContents[postId];
     if (!content || !content.trim()) {
-      alert('Please enter a reply');
+      showError('Empty Reply', 'Please enter a reply before submitting');
       return;
     }
 
@@ -317,12 +319,23 @@ export const ForumPage = () => {
         // omit parentReplyId for top-level replies since it's optional
       });
       
+      // Show success notification
+      success(
+        'Reply Posted!',
+        'Your reply has been posted successfully.',
+        { duration: 3000 }
+      );
+      
       // Clear reply content and close reply box
       setReplyContents(prev => ({ ...prev, [postId]: '' }));
       setReplyToggles(prev => ({ ...prev, [postId]: false }));
     } catch (error) {
       console.error('Error creating reply:', error);
-      alert('Failed to create reply. Please try again.');
+      showError(
+        'Failed to Post Reply',
+        error.message || 'Please try again.',
+        { duration: 5000 }
+      );
     } finally {
       setSubmittingReplies(prev => ({ ...prev, [postId]: false }));
     }

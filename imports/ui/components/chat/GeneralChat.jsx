@@ -3,8 +3,10 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 import { Send, X, Users, MessageCircle } from 'lucide-react';
 import { MessagesCollection } from '../../../api/messages';
+import { useToastContext } from '../common/ToastProvider';
 
 export const GeneralChat = ({ isOpen, onClose, user }) => {
+  const { error: showError } = useToastContext();
   const [newMessage, setNewMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const messagesEndRef = useRef(null);
@@ -48,7 +50,11 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      showError(
+        'Failed to Send Message',
+        error.message || 'Please try again.',
+        { duration: 4000 }
+      );
     } finally {
       setIsSubmitting(false);
     }
