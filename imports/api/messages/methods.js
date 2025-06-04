@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { MessagesCollection } from './index';
+import { NotificationHelpers } from '../notifications/helpers';
 
 Meteor.methods({
   async 'messages.sendGeneral'(messageData) {
@@ -50,6 +51,30 @@ Meteor.methods({
       });
 
       console.log('Message inserted with ID:', messageId);
+      
+      // Create notifications for new message
+      if (Meteor.isServer) {
+        await NotificationHelpers.createForNewMessage(messageId, content, this.userId);
+        
+        // Detect and create mention notifications
+        const mentions = NotificationHelpers.detectMentions(content);
+        if (mentions.length > 0) {
+          const mentionedUsers = await NotificationHelpers.findUsersByUsernames(mentions);
+          for (const mentionedUser of mentionedUsers) {
+            if (mentionedUser._id !== this.userId) { // Don't notify self
+              await NotificationHelpers.createForMention(
+                mentionedUser._id,
+                this.userId,
+                'message',
+                messageId,
+                'You were mentioned in chat',
+                content
+              );
+            }
+          }
+        }
+      }
+      
       return messageId;
     } catch (error) {
       console.error('Error in messages.sendGeneral method:', error);

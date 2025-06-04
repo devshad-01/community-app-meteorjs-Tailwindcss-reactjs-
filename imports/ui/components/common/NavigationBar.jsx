@@ -6,6 +6,8 @@ import {
   Bell, Calendar, MessageSquare, Settings, LogOut, Menu, X, Home, 
   ChevronDown, User, Shield, Users, CircleDot
 } from 'lucide-react';
+import { NotificationDropdown } from '../notifications';
+import { NotificationsCollection } from '/imports/api/notifications';
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,11 +19,25 @@ export const NavigationBar = () => {
   const notificationRef = useRef(null);
   const userMenuRef = useRef(null);
 
-  const { user, isLoading } = useTracker(() => {
+  const { user, isLoading, unreadNotificationCount } = useTracker(() => {
     const currentUser = Meteor.user();
+    
+    // Subscribe to notifications if user is logged in
+    let unreadCount = 0;
+    if (currentUser) {
+      const handle = Meteor.subscribe('userNotifications', { onlyUnread: true });
+      if (handle.ready()) {
+        unreadCount = NotificationsCollection.find({
+          userId: currentUser._id,
+          read: false
+        }).count();
+      }
+    }
+    
     return {
       user: currentUser,
       isLoading: Meteor.loggingIn(),
+      unreadNotificationCount: unreadCount,
     };
   }, []);
 
@@ -111,15 +127,6 @@ export const NavigationBar = () => {
 
   const isAdmin = user?.profile?.role === 'admin';
   const isAuthenticated = !!user && !isLoading;
-
-  // Mock notifications - replace with real data
-  const notifications = [
-    { id: 1, title: 'New event: Team Meeting', time: '2 min ago', unread: true },
-    { id: 2, title: 'Forum post in General', time: '5 min ago', unread: true },
-    { id: 3, title: 'Message from John', time: '10 min ago', unread: false },
-  ];
-
-  const unreadCount = notifications.filter(n => n.unread).length;
 
   const getUserInitial = () => {
     if (user?.profile?.name) {
@@ -217,42 +224,17 @@ export const NavigationBar = () => {
                     title="Notifications"
                   >
                     <Bell className="w-5 h-5" />
-                    {unreadCount > 0 && (
+                    {unreadNotificationCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
                       </span>
                     )}
                   </button>
                   
-                  {showNotifications && (
-                    <div className="absolute right-0 mt-2 w-80 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden z-50">
-                      <div className="px-4 py-3 border-b border-slate-700 bg-slate-750">
-                        <h3 className="text-sm font-semibold text-white">Notifications</h3>
-                      </div>
-                      <div className="max-h-64 overflow-y-auto">
-                        {notifications.length > 0 ? (
-                          notifications.map(notification => (
-                            <div
-                              key={notification.id}
-                              className={`px-4 py-3 hover:bg-slate-750 cursor-pointer border-l-4 ${
-                                notification.unread ? 'border-blue-500 bg-slate-750/50' : 'border-transparent'
-                              }`}
-                            >
-                              <p className={`text-sm ${notification.unread ? 'font-medium text-white' : 'text-slate-300'}`}>
-                                {notification.title}
-                              </p>
-                              <p className="text-xs text-slate-400 mt-1">{notification.time}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="px-4 py-6 text-center text-slate-400">
-                            <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No notifications</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  <NotificationDropdown 
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                  />
                 </div>
 
                 {/* User Menu */}

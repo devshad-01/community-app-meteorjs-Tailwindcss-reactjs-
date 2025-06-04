@@ -3,6 +3,7 @@ import { check, Match } from 'meteor/check';
 import { ForumCategories, ForumPosts, ForumReplies, ForumTags } from './collections';
 import { ForumValidation, ForumPermissions } from './utils';
 import { FORUM_CONSTANTS } from './constants';
+import { NotificationHelpers } from '../notifications/helpers';
 
 // Helper function to generate random tag colors
 function generateTagColor() {
@@ -188,6 +189,29 @@ Meteor.methods({
       }
     }
 
+    // Create notifications for new post
+    if (Meteor.isServer) {
+      await NotificationHelpers.createForNewPost(postId, postData.title, this.userId, postData.categoryId);
+      
+      // Detect and create mention notifications
+      const mentions = NotificationHelpers.detectMentions(postData.content);
+      if (mentions.length > 0) {
+        const mentionedUsers = await NotificationHelpers.findUsersByUsernames(mentions);
+        for (const mentionedUser of mentionedUsers) {
+          if (mentionedUser._id !== this.userId) { // Don't notify self
+            await NotificationHelpers.createForMention(
+              mentionedUser._id,
+              this.userId,
+              'post',
+              postId,
+              postData.title,
+              postData.content
+            );
+          }
+        }
+      }
+    }
+
     return postId;
   },
 
@@ -369,6 +393,12 @@ Meteor.methods({
     }
 
     await ForumPosts.updateAsync(postId, updateOperation);
+    
+    // Create notification for post like (only for new likes, not unlikes)
+    if (Meteor.isServer && voteType === 'like' && !hasLiked && this.userId !== post.authorId) {
+      await NotificationHelpers.createForPostLike(postId, post.title, this.userId, post.authorId);
+    }
+    
     return true;
   },
 
@@ -439,6 +469,29 @@ Meteor.methods({
         lastReplyId: replyId
       }
     });
+
+    // Create notifications for new reply
+    if (Meteor.isServer) {
+      await NotificationHelpers.createForNewReply(replyId, replyData.postId, replyData.content, this.userId, post.authorId);
+      
+      // Detect and create mention notifications
+      const mentions = NotificationHelpers.detectMentions(replyData.content);
+      if (mentions.length > 0) {
+        const mentionedUsers = await NotificationHelpers.findUsersByUsernames(mentions);
+        for (const mentionedUser of mentionedUsers) {
+          if (mentionedUser._id !== this.userId) { // Don't notify self
+            await NotificationHelpers.createForMention(
+              mentionedUser._id,
+              this.userId,
+              'reply',
+              replyId,
+              `Reply to: ${post.title}`,
+              replyData.content
+            );
+          }
+        }
+      }
+    }
 
     return replyId;
   },
