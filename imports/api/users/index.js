@@ -12,6 +12,7 @@ export const UsersCollection = Meteor.users;
 // Export method names for client use
 export const UserMethods = {
   updateProfile: 'users.updateProfile',
+  updateUsername: 'users.updateUsername',
   updateRole: 'users.updateRole',
   deleteUser: 'users.deleteUser',
   sendVerificationEmail: 'users.sendVerificationEmail',

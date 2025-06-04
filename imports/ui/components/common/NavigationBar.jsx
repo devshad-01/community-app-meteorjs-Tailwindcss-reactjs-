@@ -132,6 +132,9 @@ export const NavigationBar = () => {
     if (user?.profile?.name) {
       return user.profile.name.charAt(0).toUpperCase();
     }
+    if (user?.username) {
+      return user.username.charAt(0).toUpperCase();
+    }
     if (user?.emails?.[0]?.address) {
       return user.emails[0].address.charAt(0).toUpperCase();
     }
@@ -140,6 +143,10 @@ export const NavigationBar = () => {
 
   const getUserDisplayName = () => {
     return user?.profile?.name || user?.username || 'User';
+  };
+
+  const getUserAvatar = () => {
+    return user?.profile?.avatar || null;
   };
 
   const NavLink = ({ item, className = "", onClick }) => {
@@ -243,11 +250,19 @@ export const NavigationBar = () => {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center space-x-2 p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {getUserInitial()}
-                      </span>
-                    </div>
+                    {getUserAvatar() ? (
+                      <img
+                        src={getUserAvatar()}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full object-cover border-2 border-slate-600"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-orange-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {getUserInitial()}
+                        </span>
+                      </div>
+                    )}
                     <span className="hidden sm:block text-sm font-medium">{getUserDisplayName()}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
                       showUserMenu ? 'rotate-180' : ''
@@ -257,10 +272,28 @@ export const NavigationBar = () => {
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden z-50">
                       <div className="px-4 py-3 border-b border-slate-700 bg-slate-750">
-                        <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
-                        <p className="text-xs text-slate-400">{user?.emails?.[0]?.address}</p>
+                        <div className="flex items-center space-x-3">
+                          {getUserAvatar() ? (
+                            <img
+                              src={getUserAvatar()}
+                              alt="Profile"
+                              className="w-10 h-10 rounded-full object-cover border-2 border-slate-600"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-orange-600 rounded-full flex items-center justify-center">
+                              <span className="text-white text-lg font-medium">
+                                {getUserInitial()}
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
+                            <p className="text-xs text-slate-400">@{user?.username || 'username'}</p>
+                            <p className="text-xs text-slate-400">{user?.emails?.[0]?.address}</p>
+                          </div>
+                        </div>
                         {isAdmin && (
-                          <span className="inline-block mt-1 px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">
+                          <span className="inline-block mt-2 px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">
                             Admin
                           </span>
                         )}
