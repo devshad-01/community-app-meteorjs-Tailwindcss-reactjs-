@@ -9,7 +9,8 @@ export const NOTIFICATION_TYPES = {
   NEW_MESSAGE: 'new_message',
   NEW_REPLY: 'new_reply',
   POST_LIKED: 'post_liked',
-  MENTION: 'mention'
+  MENTION: 'mention',
+  MESSAGE_REACTION: 'message_reaction'
 };
 
 // Import methods to make them available

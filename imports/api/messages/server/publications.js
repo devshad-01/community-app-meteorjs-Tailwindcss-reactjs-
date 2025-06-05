@@ -22,7 +22,9 @@ Meteor.publish('generalChatMessages', function(options = {}) {
         content: 1,
         userId: 1,
         type: 1,
-        createdAt: 1
+        createdAt: 1,
+        reactions: 1,
+        updatedAt: 1
       }
     }
   );

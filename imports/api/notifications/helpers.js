@@ -141,6 +141,34 @@ export const NotificationHelpers = {
     }
   },
 
+  async createForMessageReaction(userId, reactingUserId, messageId, emoji) {
+    if (!Meteor.isServer) return;
+    
+    // Don't notify yourself
+    if (userId === reactingUserId) return;
+    
+    try {
+      const reactingUser = await Meteor.users.findOneAsync(reactingUserId, {
+        fields: { username: 1, 'profile.name': 1 }
+      });
+      
+      const userName = reactingUser?.profile?.name || reactingUser?.username || 'Someone';
+      
+      await Meteor.callAsync('notifications.create', {
+        userId: userId,
+        type: NOTIFICATION_TYPES.MESSAGE_REACTION,
+        title: 'New Reaction',
+        message: `${userName} reacted with ${emoji} to your message`,
+        relatedId: messageId,
+        relatedType: 'message',
+        fromUserId: reactingUserId,
+        data: { emoji }
+      });
+    } catch (error) {
+      console.error('Error creating reaction notification:', error);
+    }
+  },
+  
   // Helper to detect mentions in text
   detectMentions(text) {
     if (!text) return [];
