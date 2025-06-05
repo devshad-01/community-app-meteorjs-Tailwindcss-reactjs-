@@ -43,6 +43,12 @@ Meteor.methods({
       updatedAt: new Date()
     });
 
+    console.log(`Notification created with ID: ${notificationId}`, {
+      type: notificationData.type,
+      userId: notificationData.userId,
+      fromUserId: notificationData.fromUserId
+    });
+
     return notificationId;
   },
 

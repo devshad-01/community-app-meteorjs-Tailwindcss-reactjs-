@@ -18,6 +18,12 @@ Meteor.publish('userNotifications', function(options = {}) {
   if (options.onlyUnread) {
     selector.read = false;
   }
+  
+  console.log(`Publishing notifications for user ${this.userId}`, {
+    selector,
+    limit,
+    hasUser: !!this.userId
+  });
 
   return NotificationsCollection.find(selector, {
     sort: { createdAt: -1 },
@@ -30,6 +36,7 @@ Meteor.publish('userNotifications', function(options = {}) {
       relatedId: 1,
       relatedType: 1,
       fromUserId: 1,
+      data: 1,
       read: 1,
       createdAt: 1,
       readAt: 1
@@ -55,10 +62,12 @@ Meteor.publish('notificationCount', function() {
     added: function() {
       count++;
       self.changed('notificationCounts', self.userId, { count });
+      console.log(`Notification count increased for user ${self.userId}: ${count}`);
     },
     removed: function() {
       count--;
       self.changed('notificationCounts', self.userId, { count });
+      console.log(`Notification count decreased for user ${self.userId}: ${count}`);
     }
   });
 

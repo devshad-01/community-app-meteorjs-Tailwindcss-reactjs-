@@ -10,7 +10,8 @@ export const NotificationHelpers = {
     // In the future, you could add user preferences or category subscriptions
     const users = await Meteor.users.find({
       _id: { $ne: authorId }, // Don't notify the author
-      'status.online': true // Only notify online users
+      // Remove the online-only restriction to ensure notifications are created
+      // 'status.online': true // Only notify online users
     }, {
       fields: { _id: 1 },
       limit: 50 // Limit to prevent spam

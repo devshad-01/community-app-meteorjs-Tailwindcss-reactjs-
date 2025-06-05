@@ -9,9 +9,20 @@ export const NotificationDropdown = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   
   const { notifications, unreadCount, isLoading } = useTracker(() => {
-    const handle = Meteor.subscribe('userNotifications');
+    const userId = Meteor.userId();
+    
+    if (!userId) {
+      return {
+        notifications: [],
+        unreadCount: 0,
+        isLoading: false
+      };
+    }
+    
+    const handle = Meteor.subscribe('userNotifications', { limit: 20 });
+    
     const notificationsList = NotificationsCollection.find(
-      { userId: Meteor.userId() },
+      { userId },
       { 
         sort: { createdAt: -1 },
         limit: 20
@@ -19,9 +30,15 @@ export const NotificationDropdown = ({ isOpen, onClose }) => {
     ).fetch();
 
     const unread = NotificationsCollection.find({
-      userId: Meteor.userId(),
+      userId,
       read: false
     }).count();
+
+    console.log(`Notification dropdown data:`, {
+      count: notificationsList.length,
+      unreadCount: unread,
+      isReady: handle.ready()
+    });
 
     return {
       notifications: notificationsList,

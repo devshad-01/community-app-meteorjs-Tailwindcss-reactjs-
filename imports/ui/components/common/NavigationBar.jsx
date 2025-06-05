@@ -25,12 +25,17 @@ export const NavigationBar = () => {
     // Subscribe to notifications if user is logged in
     let unreadCount = 0;
     if (currentUser) {
+      // Subscribe to notification count - a more efficient way to get just the count
+      Meteor.subscribe('notificationCount');
+      
+      // Also subscribe to the actual notifications
       const handle = Meteor.subscribe('userNotifications', { onlyUnread: true });
       if (handle.ready()) {
         unreadCount = NotificationsCollection.find({
           userId: currentUser._id,
           read: false
         }).count();
+        console.log('Current unread notification count:', unreadCount);
       }
     }
     
