@@ -15,6 +15,7 @@ export const ForumPost = ({
   formatTimeAgo,
   getUserRole,
   handleLikePost,
+  handleLikeReply,
   toggleReply,
   replyToggles,
   replyContents,
@@ -133,6 +134,7 @@ export const ForumPost = ({
         getUserRole={getUserRole}
         getRoleColor={getRoleColor}
         user={user}
+        handleLikeReply={handleLikeReply}
       />
 
       {/* Inline Reply Box */}

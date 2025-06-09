@@ -10,7 +10,8 @@ export const PostReplies = ({
   formatTimeAgo,
   getUserRole,
   getRoleColor,
-  user 
+  user,
+  handleLikeReply
 }) => {
   const replies = allReplies ? allReplies.filter(reply => reply.postId === postId) : [];
   
@@ -53,7 +54,9 @@ export const PostReplies = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // handleLikeReply(reply._id); // TODO: Implement reply liking
+                    if (handleLikeReply) {
+                      handleLikeReply(reply._id);
+                    }
                   }}
                   className={`flex items-center space-x-1 text-xs transition-colors duration-200 ${
                     (reply.likes && reply.likes.includes(user?._id))

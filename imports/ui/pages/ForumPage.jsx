@@ -13,6 +13,7 @@ import {
   FORUM_CONSTANTS 
 } from '../../api/forums';
 import { useToastContext } from '../components/common/ToastProvider';
+import { useForumActions } from '../hooks/useForumActions';
 import { 
   ForumHeader,
   ForumSidebar,
@@ -28,6 +29,7 @@ const ForumStats = new Mongo.Collection('forumStats');
 export const ForumPage = () => {
   const { success, error: showError } = useToastContext();
   const navigate = useNavigate();
+  const { handleLikePost: likePost, handleSubmitReply: submitReply, handleLikeReply: likeReply } = useForumActions();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -48,7 +50,7 @@ export const ForumPage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Separate subscriptions for better performance
+  // Separate subscriptions for better performance and reduced reactivity
   const { user, categories, loading: categoriesLoading } = useTracker(() => {
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     const statsHandle = Meteor.subscribe(ForumPublications.stats);
@@ -84,14 +86,17 @@ export const ForumPage = () => {
     };
   }, []); // No dependencies for stable categories
 
-  // Separate subscription for posts
-  const { posts, loading: postsLoading, forumStats } = useTracker(() => {
-    const postsHandle = Meteor.subscribe(ForumPublications.postsList, {
+  // Single unified subscription for posts and replies to reduce reactive cycles
+  const { posts, allReplies, loading: dataLoading, forumStats } = useTracker(() => {
+    // Prepare subscription parameters
+    const postSubParams = {
       categoryId: selectedCategory === 'all' ? null : selectedCategory,
       searchTerm: debouncedSearchTerm || null,
       sortBy,
       limit: 50
-    });
+    };
+
+    const postsHandle = Meteor.subscribe(ForumPublications.postsList, postSubParams);
     const usersHandle = Meteor.subscribe('usersBasic');
 
     const loading = !postsHandle.ready() || !usersHandle.ready();
@@ -99,6 +104,7 @@ export const ForumPage = () => {
     if (loading) {
       return {
         posts: [],
+        allReplies: [],
         loading: true,
         forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 }
       };
@@ -140,11 +146,34 @@ export const ForumPage = () => {
       limit: 50
     }).fetch();
 
+    // Get replies for the current posts
+    const postsIds = postsFromDB.map(post => post._id);
+    let repliesData = [];
+    
+    if (postsIds.length > 0) {
+      // Subscribe to replies for current posts
+      const repliesHandles = postsIds.map(postId => 
+        Meteor.subscribe(ForumPublications.repliesByPost, postId, {
+          limit: 10,
+          sortBy: 'oldest'
+        })
+      );
+
+      const repliesLoading = repliesHandles.some(handle => !handle.ready());
+      
+      if (!repliesLoading) {
+        repliesData = ForumReplies.find({
+          postId: { $in: postsIds }
+        }, { sort: { createdAt: 1 } }).fetch();
+      }
+    }
+
     // Get forum statistics
     const statsData = ForumStats.findOne('global');
 
     return {
       posts: postsFromDB,
+      allReplies: repliesData,
       loading: false,
       forumStats: statsData || {
         totalPosts: 0,
@@ -154,37 +183,7 @@ export const ForumPage = () => {
     };
   }, [selectedCategory, debouncedSearchTerm, sortBy]);
 
-  // Separate subscription for replies to avoid circular dependencies
-  const { allReplies, loading: repliesLoading } = useTracker(() => {
-    if (posts.length === 0) {
-      return { allReplies: [], loading: false };
-    }
-
-    const postsIds = posts.map(post => post._id);
-    const repliesHandles = postsIds.map(postId => 
-      Meteor.subscribe(ForumPublications.repliesByPost, postId, {
-        limit: 10,
-        sortBy: 'oldest'
-      })
-    );
-
-    const loading = repliesHandles.some(handle => !handle.ready());
-
-    if (loading) {
-      return { allReplies: [], loading: true };
-    }
-
-    const repliesData = ForumReplies.find({
-      postId: { $in: postsIds }
-    }, { sort: { createdAt: 1 } }).fetch();
-
-    return {
-      allReplies: repliesData,
-      loading: false
-    };
-  }, [posts]);
-
-  const loading = categoriesLoading || postsLoading || repliesLoading;
+  const loading = categoriesLoading || dataLoading;
 
   // Memoize filtered and sorted posts to prevent unnecessary re-calculations
   const { pinnedPosts, regularPosts } = useMemo(() => {
@@ -284,21 +283,21 @@ export const ForumPage = () => {
     }));
   };
 
-  const handleLikePost = async (postId) => {
+  const handleLikePost = useCallback(async (postId) => {
     if (!user) {
-      alert('Please log in to like posts');
+      showError('Authentication Required', 'Please log in to like posts');
       return;
     }
 
     try {
-      await Meteor.callAsync(ForumMethods.votePost, postId, 'like');
+      await likePost(postId);
+      // Don't show success message for likes to avoid spam
     } catch (error) {
-      console.error('Error liking post:', error);
-      alert('Failed to like post. Please try again.');
+      showError('Like Failed', error.message);
     }
-  };
+  }, [user, likePost, showError]);
 
-  const handleSubmitReply = async (e, postId) => {
+  const handleSubmitReply = useCallback(async (e, postId) => {
     e.preventDefault();
     if (!user) {
       showError('Authentication Required', 'Please log in to reply');
@@ -313,10 +312,9 @@ export const ForumPage = () => {
 
     setSubmittingReplies(prev => ({ ...prev, [postId]: true }));
     try {
-      await Meteor.callAsync(ForumMethods.createReply, {
+      await submitReply({
         postId,
         content: content.trim()
-        // omit parentReplyId for top-level replies since it's optional
       });
       
       // Show success notification
@@ -330,16 +328,29 @@ export const ForumPage = () => {
       setReplyContents(prev => ({ ...prev, [postId]: '' }));
       setReplyToggles(prev => ({ ...prev, [postId]: false }));
     } catch (error) {
-      console.error('Error creating reply:', error);
       showError(
         'Failed to Post Reply',
-        error.message || 'Please try again.',
+        error.message,
         { duration: 5000 }
       );
     } finally {
       setSubmittingReplies(prev => ({ ...prev, [postId]: false }));
     }
-  };
+  }, [user, replyContents, submitReply, success, showError]);
+
+  const handleLikeReply = useCallback(async (replyId) => {
+    if (!user) {
+      showError('Authentication Required', 'Please log in to like replies');
+      return;
+    }
+
+    try {
+      await likeReply(replyId);
+      // Don't show success message for likes to avoid spam
+    } catch (error) {
+      showError('Like Failed', error.message);
+    }
+  }, [user, likeReply, showError]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
@@ -402,6 +413,7 @@ export const ForumPage = () => {
                   formatTimeAgo={formatTimeAgo}
                   getUserRole={getUserRole}
                   handleLikePost={handleLikePost}
+                  handleLikeReply={handleLikeReply}
                   toggleReply={toggleReply}
                   replyToggles={replyToggles}
                   replyContents={replyContents}
@@ -426,6 +438,7 @@ export const ForumPage = () => {
                   formatTimeAgo={formatTimeAgo}
                   getUserRole={getUserRole}
                   handleLikePost={handleLikePost}
+                  handleLikeReply={handleLikeReply}
                   toggleReply={toggleReply}
                   replyToggles={replyToggles}
                   replyContents={replyContents}

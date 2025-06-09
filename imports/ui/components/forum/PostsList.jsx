@@ -14,6 +14,7 @@ export const PostsList = ({
   formatTimeAgo,
   getUserRole,
   handleLikePost,
+  handleLikeReply,
   toggleReply,
   replyToggles,
   replyContents,
@@ -73,6 +74,7 @@ export const PostsList = ({
             formatTimeAgo={formatTimeAgo}
             getUserRole={getUserRole}
             handleLikePost={handleLikePost}
+            handleLikeReply={handleLikeReply}
             toggleReply={toggleReply}
             replyToggles={replyToggles}
             replyContents={replyContents}
