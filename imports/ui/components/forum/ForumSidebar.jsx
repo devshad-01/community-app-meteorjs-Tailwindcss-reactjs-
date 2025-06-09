@@ -5,7 +5,6 @@ export const ForumSidebar = memo(({
   categories, 
   selectedCategory, 
   onCategoryChange, 
-  forumStats, 
   loading
 }) => {
   return (
@@ -39,33 +38,6 @@ export const ForumSidebar = memo(({
               </span>
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Forum Stats */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-warm-900 dark:text-white mb-4">
-          Forum Stats
-        </h3>
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-warm-600 dark:text-slate-400">Total Posts</span>
-            <span className="font-semibold text-warm-900 dark:text-white">
-              {loading ? '...' : forumStats.totalPosts}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-warm-600 dark:text-slate-400">Total Replies</span>
-            <span className="font-semibold text-warm-900 dark:text-white">
-              {loading ? '...' : forumStats.totalReplies}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-warm-600 dark:text-slate-400">Today's Posts</span>
-            <span className="font-semibold text-warm-900 dark:text-white">
-              {loading ? '...' : forumStats.recentPosts}
-            </span>
-          </div>
         </div>
       </div>
 

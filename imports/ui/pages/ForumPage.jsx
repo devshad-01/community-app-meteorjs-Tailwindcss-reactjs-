@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { 
   ForumCategories, 
   ForumPosts, 
@@ -22,9 +21,6 @@ import {
   NewPostModal
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
-
-// Client-side collection for forum stats
-const ForumStats = new Mongo.Collection('forumStats');
 
 export const ForumPage = () => {
   const { success, error: showError } = useToastContext();
@@ -53,9 +49,8 @@ export const ForumPage = () => {
   // Separate subscriptions for better performance and reduced reactivity
   const { user, categories, loading: categoriesLoading } = useTracker(() => {
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
-    const statsHandle = Meteor.subscribe(ForumPublications.stats);
     
-    const loading = !categoriesHandle.ready() || !statsHandle.ready();
+    const loading = !categoriesHandle.ready();
     
     if (loading) {
       return {
@@ -87,7 +82,7 @@ export const ForumPage = () => {
   }, []); // No dependencies for stable categories
 
   // Single unified subscription for posts and replies to reduce reactive cycles
-  const { posts, allReplies, loading: dataLoading, forumStats } = useTracker(() => {
+  const { posts, allReplies, loading: dataLoading } = useTracker(() => {
     // Prepare subscription parameters
     const postSubParams = {
       categoryId: selectedCategory === 'all' ? null : selectedCategory,
@@ -105,8 +100,7 @@ export const ForumPage = () => {
       return {
         posts: [],
         allReplies: [],
-        loading: true,
-        forumStats: { totalPosts: 0, totalReplies: 0, recentPosts: 0 }
+        loading: true
       };
     }
 
@@ -168,18 +162,10 @@ export const ForumPage = () => {
       }
     }
 
-    // Get forum statistics
-    const statsData = ForumStats.findOne('global');
-
     return {
       posts: postsFromDB,
       allReplies: repliesData,
-      loading: false,
-      forumStats: statsData || {
-        totalPosts: 0,
-        totalReplies: 0,
-        recentPosts: 0
-      }
+      loading: false
     };
   }, [selectedCategory, debouncedSearchTerm, sortBy]);
 
@@ -370,7 +356,6 @@ export const ForumPage = () => {
               categories={categories}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
-              forumStats={forumStats}
               loading={loading}
             />
           </div>

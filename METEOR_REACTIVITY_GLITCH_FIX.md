@@ -3,7 +3,9 @@
 ## Problem Description
 
 ### The Issue
+
 The forum page was experiencing severe UI glitches and re-rendering problems, specifically:
+
 - **Reload/glitch behavior** when liking posts or replies
 - **UI flickering** during reply submissions
 - **Unexpected page refreshes** during forum interactions
@@ -11,6 +13,7 @@ The forum page was experiencing severe UI glitches and re-rendering problems, sp
 - **Broken user experience** with form state being lost
 
 ### Root Cause Analysis
+
 The problem was caused by **improper Meteor reactivity patterns** in the forum components:
 
 1. **Direct `Meteor.callAsync` calls in React components** - These calls were happening within the reactive context, causing the UI to re-render every time a Meteor method was called
@@ -24,6 +27,7 @@ The problem was caused by **improper Meteor reactivity patterns** in the forum c
 ## The Solution
 
 ### Core Principle
+
 **Isolate Meteor method calls from the reactivity system** using `Tracker.nonreactive()` and proper timing controls.
 
 ### Implementation
@@ -52,6 +56,7 @@ const callForumMethod = (methodName, ...args) => {
 ```
 
 **Key Features:**
+
 - **`Tracker.nonreactive()`** - Prevents method calls from triggering reactive computations
 - **Promise-based wrapper** - Provides clean async/await syntax
 - **`setTimeout()`** - Ensures UI updates happen after reactive computations complete
@@ -60,68 +65,76 @@ const callForumMethod = (methodName, ...args) => {
 #### 2. Updated Forum Components
 
 **Before (Problematic):**
+
 ```javascript
 const handleLikePost = async (postId) => {
   try {
     // ❌ This triggers reactive updates during execution
-    await Meteor.callAsync(ForumMethods.votePost, postId, 'like');
+    await Meteor.callAsync(ForumMethods.votePost, postId, "like");
   } catch (error) {
-    alert('Error: ' + error.message);
+    alert("Error: " + error.message);
   }
 };
 ```
 
 **After (Fixed):**
-```javascript
-const { handleLikePost, handleLikeReply, handleSubmitReply } = useForumActions();
 
-const onLikePost = useCallback(async (postId) => {
-  try {
-    // ✅ Properly isolated method call
-    await handleLikePost(postId);
-    success('Post liked!');
-  } catch (error) {
-    showError(error.message);
-  }
-}, [handleLikePost, success, showError]);
+```javascript
+const { handleLikePost, handleLikeReply, handleSubmitReply } =
+  useForumActions();
+
+const onLikePost = useCallback(
+  async (postId) => {
+    try {
+      // ✅ Properly isolated method call
+      await handleLikePost(postId);
+      success("Post liked!");
+    } catch (error) {
+      showError(error.message);
+    }
+  },
+  [handleLikePost, success, showError]
+);
 ```
 
 #### 3. Optimized Reactive Subscriptions
 
 **Before (Inefficient):**
+
 ```javascript
 // Multiple reactive subscriptions causing cascading updates
 const { posts } = useTracker(() => {
-  const handle = Meteor.subscribe('forumPosts', searchOptions);
+  const handle = Meteor.subscribe("forumPosts", searchOptions);
   return {
     posts: ForumPosts.find().fetch(),
-    loading: !handle.ready()
+    loading: !handle.ready(),
   };
 }, [searchTerm, selectedCategory, sortBy]); // ❌ Too many dependencies
 
 // Separate subscription for each post's replies
-posts.forEach(post => {
+posts.forEach((post) => {
   useTracker(() => {
-    Meteor.subscribe('forumReplies', post._id); // ❌ N+1 subscription problem
+    Meteor.subscribe("forumReplies", post._id); // ❌ N+1 subscription problem
   }, [post._id]);
 });
 ```
 
 **After (Optimized):**
+
 ```javascript
 // Single optimized reactive subscription
 const { posts, categories, loading } = useTracker(() => {
   // Consolidated subscriptions
-  const postsHandle = Meteor.subscribe('forumPosts', {
-    category: selectedCategory !== 'all' ? selectedCategory : undefined,
+  const postsHandle = Meteor.subscribe("forumPosts", {
+    category: selectedCategory !== "all" ? selectedCategory : undefined,
     search: debouncedSearchTerm,
     sort: sortBy,
-    limit: 50
+    limit: 50,
   });
-  
-  const categoriesHandle = Meteor.subscribe('forumCategories');
-  const statsHandle = Meteor.subscribe('forumStats');
-  
+
+  const categoriesHandle = Meteor.subscribe("forumCategories");
+  const statsHandle = Meteor.subscribe("forumStats");
+
   if (!postsHandle.ready() || !categoriesHandle.ready()) {
     return { posts: [], categories: [], loading: true };
   }
@@ -129,11 +142,14 @@ const { posts, categories, loading } = useTracker(() => {
   // Efficient data fetching
   const postsQuery = buildPostsQuery(selectedCategory, debouncedSearchTerm);
   const sortOptions = buildSortOptions(sortBy);
-  
+
   return {
-    posts: ForumPosts.find(postsQuery, { sort: sortOptions, limit: 50 }).fetch(),
+    posts: ForumPosts.find(postsQuery, {
+      sort: sortOptions,
+      limit: 50,
+    }).fetch(),
     categories: ForumCategories.find().fetch(),
-    loading: false
+    loading: false,
   };
 }, [selectedCategory, debouncedSearchTerm, sortBy]); // ✅ Minimal dependencies
 ```
@@ -155,14 +171,17 @@ const { posts, categories, loading } = useTracker(() => {
 ### Meteor Reactivity Best Practices Applied
 
 1. **Separate Side Effects from Reactive Data**
+
    - Use `Tracker.nonreactive()` for method calls
    - Keep subscriptions separate from actions
 
 2. **Minimize Reactive Dependencies**
+
    - Use `useMemo` and `useCallback` to prevent unnecessary re-renders
    - Debounce user inputs that trigger reactive updates
 
 3. **Optimize Subscription Patterns**
+
    - Consolidate related subscriptions
    - Avoid N+1 subscription problems
    - Use publication parameters efficiently
@@ -194,12 +213,14 @@ When implementing similar fixes for Meteor reactivity issues:
 ## Performance Impact
 
 **Before Fix:**
+
 - 10-15 re-renders per forum action
 - Visible UI glitches and flickering
 - Lost form state during operations
 - Poor user experience
 
 **After Fix:**
+
 - 1-2 re-renders per forum action
 - Smooth UI interactions
 - Preserved form state

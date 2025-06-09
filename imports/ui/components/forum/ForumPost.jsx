@@ -83,7 +83,7 @@ export const ForumPost = ({
           {post.tags.map(tag => (
             <span
               key={tag}
-              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300"
+              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-warm-100 dark:bg-slate-700 text-warm-700 dark:text-slate-300 hover:bg-warm-200 dark:hover:bg-slate-600 cursor-pointer transition-colors"
             >
               #{tag}
             </span>
