@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { Users, Settings, Shield, Activity, Trash2 } from 'lucide-react';
+import { Users, Settings, Shield, Activity, Trash2, CalendarPlus } from 'lucide-react'; // NEW: Added CalendarPlus icon
 import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
 import { UserPublications, UserMethods } from '/imports/api/users';
+import { AddEventForm } from './AddEventForm.jsx'; // Correct path to your AddEventForm
 
 export const AdminPage = () => {
   const { users, isLoading } = useTracker(() => {
@@ -41,7 +42,7 @@ export const AdminPage = () => {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">
-                Manage users and system settings
+                Manage users, events, and system settings
               </p>
             </div>
 
@@ -62,39 +63,41 @@ export const AdminPage = () => {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Admins</p>
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {users.filter(u => u.profile?.role === 'admin').length}
+                      {/* Assuming roles are directly on the user object, or adapt for alanning:roles if needed */}
+                      {users.filter(u => u.roles?.includes('admin')).length}
                     </p>
+                  </div>
+                </div>
+              </div>
+              {/* You might want to get total number of events here using useTracker */}
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center">
+                  <CalendarPlus className="h-8 w-8 text-purple-500" /> {/* Changed icon to CalendarPlus */}
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Events</p>
+                    {/* Placeholder: You'd fetch actual event count from a publication here */}
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">-</p>
                   </div>
                 </div>
               </div>
               <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center">
-                  <Activity className="h-8 w-8 text-purple-500" />
+                  <Activity className="h-8 w-8 text-orange-500" /> {/* Changed icon to Activity */}
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Members</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {users.filter(u => u.profile?.role === 'member').length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center">
-                  <Settings className="h-8 w-8 text-orange-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Online</p>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Active RSVPs</p>
+                    {/* Placeholder: You'd fetch actual active RSVP count from a publication here */}
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">-</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* User Management */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700">
+            {/* User Management Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-8"> {/* Added mb-8 for spacing */}
               <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-white">User Management</h2>
               </div>
-              
+
               {isLoading ? (
                 <div className="p-6">
                   <p className="text-slate-600 dark:text-slate-400">Loading users...</p>
@@ -138,8 +141,9 @@ export const AdminPage = () => {
                             {user.emails?.[0]?.address || 'No email'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
+                             {/* Assuming roles are an array directly on the user object, or use Roles.getRolesForUser */}
                             <select
-                              value={user.profile?.role || 'member'}
+                              value={user.roles?.includes('admin') ? 'admin' : 'member'} // Adjust based on your role structure
                               onChange={(e) => handleRoleChange(user._id, e.target.value)}
                               className="text-sm border rounded px-2 py-1 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
                             >
@@ -153,7 +157,7 @@ export const AdminPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
                               onClick={() => handleDeleteUser(user._id)}
-                              disabled={user._id === Meteor.userId()}
+                              disabled={user._id === Meteor.userId()} // Prevent deleting self
                               className="text-red-600 hover:text-red-900 disabled:text-slate-400 disabled:cursor-not-allowed"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -166,6 +170,18 @@ export const AdminPage = () => {
                 </div>
               )}
             </div>
+
+            {/* --- NEW: Event Management Section --- */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-8">
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Event Management</h2>
+              </div>
+              <div className="p-6">
+                <AddEventForm /> {/* Your AddEventForm component is rendered here */}
+              </div>
+            </div>
+            {/* --- END NEW: Event Management Section --- */}
+
           </div>
         </div>
       </div>

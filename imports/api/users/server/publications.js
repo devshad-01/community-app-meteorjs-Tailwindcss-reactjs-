@@ -23,7 +23,7 @@ Meteor.publish('userData', function () {
 
 // Publish user list for admins
 Meteor.publish('allUsers', function () {
-  const user = Meteor.users.findOne(this.userId);
+  const user = Meteor.users.findOneAsync(this.userId);
   
   if (user && user.profile && user.profile.role === 'admin') {
     return Meteor.users.find(

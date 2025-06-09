@@ -1,61 +1,130 @@
 import React, { useState } from 'react';
+import { Meteor } from 'meteor/meteor';
+import { useTracker } from 'meteor/react-meteor-data';
+import { Events } from '/imports/api/events/events';
+import { UserRsvps } from '/imports/api/rsvps/rsvps';
+
+// --- Lucide React Icons ---
 import {
   Search as FiSearch,
   Calendar as FiCalendar,
   Users as FiUsers,
   Wrench as FiTool,
-  Star as FiStar,
   MapPin as FiMapPin,
-  Clock as FiClock
+  Clock as FiClock,
+  DollarSign as FiDollarSign
 } from 'lucide-react';
 
+// ====================================================================================
+// EventsPage Component
+// ====================================================================================
 export const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [events, setEvents] = useState([
-    { id: 1, title: 'React Workshop', type: 'workshop', date: '2023-06-15', time: '14:00', location: 'Virtual', description: 'Learn React hooks and context API', featured: true, attending: false, capacity: 30, registered: 18 },
-    { id: 2, title: 'Team Standup', type: 'meeting', date: '2023-06-10', time: '09:30', location: 'Conference Room A', description: 'Daily team sync', featured: false, attending: true, capacity: 15, registered: 12 },
-    { id: 3, title: 'Summer Social', type: 'social', date: '2023-06-20', time: '18:00', location: 'Rooftop Terrace', description: 'Quarterly team social event', featured: true, attending: false, capacity: 50, registered: 32 },
-    { id: 4, title: 'Project Retrospective', type: 'meeting', date: '2023-06-12', time: '11:00', location: 'Zoom', description: 'Review of Q2 initiatives', featured: false, attending: false, capacity: 25, registered: 8 },
-    { id: 5, title: 'CSS Masterclass', type: 'workshop', date: '2023-06-18', time: '16:00', location: 'Training Room 2', description: 'Advanced CSS techniques', featured: false, attending: false, capacity: 20, registered: 14 },
-    { id: 6, title: 'Hackathon Kickoff', type: 'social', date: '2023-06-25', time: '10:00', location: 'Main Hall', description: 'Annual coding competition', featured: true, attending: true, capacity: 100, registered: 78 },
-  ]);
+  const [activeFilter, setActiveFilter] = useState('upcoming');
 
+  // --- MODIFIED: Meteor Data Integration using useTracker ---
+  const { isLoading, allEvents, upcomingEvents, pastEvents, userRsvps } = useTracker(() => {
+    // 1. Subscribe to the SINGLE 'events.all' publication
+    const allEventsHandle = Meteor.subscribe('events.all');
+    const userRsvpsHandle = Meteor.subscribe('rsvps.myEvents');
+
+    // 2. Check if all necessary subscriptions are ready
+    const isLoading = !allEventsHandle.ready() || !userRsvpsHandle.ready();
+
+    // 3. Fetch ALL events from the client-side collection once ready
+    const fetchedAllEvents = Events.find(
+      {},
+      { sort: { date: 1, time: 1 } } // Use consistent sorting from publication
+    ).fetch();
+
+    // Fetch the current user's RSVP records
+    const fetchedUserRsvps = UserRsvps.find({}).fetch();
+
+    // --- NEW CLIENT-SIDE CATEGORIZATION LOGIC ---
+    // This is the main change: We now categorize events here based on the current time
+    const now = new Date();
+    // Get current date and time as YYYY-MM-DD and HH:MM strings for comparison
+    const currentDateStr = now.toISOString().split('T')[0]; // e.g., "2025-06-09"
+    const currentTimeStr = now.toTimeString().slice(0, 5); // e.g., "13:04"
+
+    const upcoming = [];
+    const past = [];
+
+    fetchedAllEvents.forEach(event => {
+      // Concatenate event date and time strings for comparison (e.g., "2025-06-09 14:00")
+      const eventDateTimeStr = `${event.date} ${event.time}`;
+      // Concatenate current date and time
+      const currentDateTimeStr = `${currentDateStr} ${currentTimeStr}`;
+
+      // Compare event's date-time string with current date-time string
+      // This works because YYYY-MM-DD HH:MM strings are lexicographically sortable
+      if (eventDateTimeStr >= currentDateTimeStr) {
+        upcoming.push(event);
+      } else {
+        past.push(event);
+      }
+    });
+    // --- END NEW CLIENT-SIDE CATEGORIZATION LOGIC ---
+
+    return {
+      isLoading,
+      allEvents: fetchedAllEvents, // All events from the publication
+      upcomingEvents: upcoming,    // Categorized client-side
+      pastEvents: past,            // Categorized client-side
+      userRsvps: fetchedUserRsvps,
+    };
+  });
+  // --- END MODIFIED: Meteor Data Integration ---
+
+  // --- No changes needed here, existing UI logic remains intact ---
   const filterCounts = {
-    all: events.length,
-    workshop: events.filter(e => e.type === 'workshop').length,
-    meeting: events.filter(e => e.type === 'meeting').length,
-    social: events.filter(e => e.type === 'social').length,
-    featured: events.filter(e => e.featured).length,
+    all: allEvents.length,
+    upcoming: upcomingEvents.length,
+    past: pastEvents.length,
+    workshop: allEvents.filter(e => e.type === 'workshop').length,
+    meeting: allEvents.filter(e => e.type === 'meeting').length,
+    social: allEvents.filter(e => e.type === 'social').length,
   };
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = activeFilter === 'all' || (activeFilter === 'featured' ? event.featured : event.type === activeFilter);
+  const filteredEvents = allEvents.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    let matchesFilter = false;
+    if (activeFilter === 'all') {
+      matchesFilter = true;
+    } else if (activeFilter === 'upcoming') {
+      // Use the new client-side derived upcomingEvents list
+      matchesFilter = upcomingEvents.some(e => e._id === event._id);
+    } else if (activeFilter === 'past') {
+      // Use the new client-side derived pastEvents list
+      matchesFilter = pastEvents.some(e => e._id === event._id);
+    } else {
+      matchesFilter = event.type === activeFilter;
+    }
+
     return matchesSearch && matchesFilter;
   });
 
-  const handleRsvp = (eventId, attending) => {
-    setEvents(prevEvents => 
-      prevEvents.map(event => 
-        event.id === eventId 
-          ? { 
-              ...event, 
-              attending, 
-              registered: attending ? event.registered + 1 : event.registered - 1 
-            } 
-          : event
-      )
-    );
+  const handleRsvp = (eventId, wantsToAttend) => {
+    console.log(`(EventsPage) Initiating RSVP for event ${eventId} (Wants to attend: ${wantsToAttend})`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-slate-100 p-4 md:p-8 flex justify-center items-center">
+        <p className="text-xl text-orange-400">Loading Events...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen  text-slate-100 p-4 md:p-8">
+    <div className="min-h-screen text-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-orange-400 mb-2">Upcoming Events</h1>
-          <p className="text-slate-400">Browse and join upcoming events in your community</p>
+          <h1 className="text-3xl font-bold text-orange-400 mb-2">Events Hub</h1>
+          <p className="text-slate-400">Browse and join events in your community</p>
         </header>
 
         {/* Search and Filters */}
@@ -66,7 +135,7 @@ export const EventsPage = () => {
             </div>
             <input
               type="text"
-              className="w-full bg-card rounded-lg py-2 pl-10 pr-4 text-slate-900 outline-1 placeholder-slate-900 focus:outline-none focus:ring-none focus:ring-orange-500"
+              className="w-full bg-slate-700 rounded-lg py-2 pl-10 pr-4 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Search events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -75,10 +144,11 @@ export const EventsPage = () => {
 
           <div className="flex flex-wrap gap-2">
             <FilterTab name="all" count={filterCounts.all} active={activeFilter === 'all'} onClick={() => setActiveFilter('all')} />
+            <FilterTab name="upcoming" icon={<FiCalendar className="mr-1 w-4 h-4" />} count={filterCounts.upcoming} active={activeFilter === 'upcoming'} onClick={() => setActiveFilter('upcoming')} />
+            <FilterTab name="past" icon={<FiClock className="mr-1 w-4 h-4" />} count={filterCounts.past} active={activeFilter === 'past'} onClick={() => setActiveFilter('past')} />
             <FilterTab name="workshop" icon={<FiTool className="mr-1 w-4 h-4" />} count={filterCounts.workshop} active={activeFilter === 'workshop'} onClick={() => setActiveFilter('workshop')} />
             <FilterTab name="meeting" icon={<FiUsers className="mr-1 w-4 h-4 " />} count={filterCounts.meeting} active={activeFilter === 'meeting'} onClick={() => setActiveFilter('meeting')} />
             <FilterTab name="social" icon={<FiUsers className="mr-1 w-4 h-4" />} count={filterCounts.social} active={activeFilter === 'social'} onClick={() => setActiveFilter('social')} />
-            <FilterTab name="featured" icon={<FiStar className="mr-1 w-4 h-4" />} count={filterCounts.featured} active={activeFilter === 'featured'} onClick={() => setActiveFilter('featured')} />
           </div>
         </div>
 
@@ -90,7 +160,14 @@ export const EventsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map(event => (
-              <EventCard key={event.id} event={event} onRsvp={handleRsvp} />
+              <EventCard
+                key={event._id}
+                event={event}
+                onRsvp={handleRsvp}
+                // Determine if this event is in the past for dimming
+                isPastEvent={pastEvents.some(e => e._id === event._id)} // Correctly uses client-side categorized pastEvents
+                currentUserRsvps={userRsvps}
+              />
             ))}
           </div>
         )}
@@ -99,7 +176,9 @@ export const EventsPage = () => {
   );
 };
 
-// Filter Tab
+// ====================================================================================
+// Filter Tab Component & EventCard Component (no changes needed)
+// ====================================================================================
 const FilterTab = ({ name, icon, count, active, onClick }) => {
   const base = 'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors';
   const classes = active ? 'bg-orange-400 text-white outline' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white';
@@ -112,23 +191,99 @@ const FilterTab = ({ name, icon, count, active, onClick }) => {
   );
 };
 
-// Event Card
-const EventCard = ({ event, onRsvp }) => {
+const EventCard = ({ event, onRsvp, isPastEvent, currentUserRsvps }) => {
   const typeColors = {
     workshop: 'bg-white text-slate-800',
     meeting: 'bg-white text-slate-800',
     social: 'bg-white text-slate-800',
   };
 
-  return (
-    <div className={`relative rounded-lg overflow-hidden shadow-md ${event.featured ? 'border-2 border-orange-500' : 'border border-slate-700'}`}>
-      {event.featured && (
-        <div className="absolute top-0 right-2 bg-orange-400 text-slate-900 px-2 py-1 rounded-full text-xs font-bold flex items-center">
-          <FiStar className="w-3 h-3 mr-1" /> Featured
-        </div>
-      )}
+  const currentUserRsvp = currentUserRsvps.find(rsvp => rsvp.eventId === event._id && rsvp.userId === Meteor.userId());
+  const isPendingPayment = currentUserRsvp && currentUserRsvp.status === 'pending_payment';
+  const isConfirmed = currentUserRsvp && currentUserRsvp.status === 'confirmed';
+  const [showPaymentInput, setShowPaymentInput] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [paymentMessage, setPaymentMessage] = useState('');
 
-      <div className="bg-card p-6 h-full flex flex-col">
+  const handleRsvpClick = async () => {
+    if (!Meteor.userId()) {
+      alert('You need to be logged in to interact with events. Please log in.');
+      return;
+    }
+
+    if (isPastEvent) {
+      alert('Cannot RSVP for past events.');
+      return;
+    }
+
+    if (isConfirmed) {
+      try {
+        await Meteor.call('events.rsvp', event._id, false);
+        setPaymentMessage('');
+        alert('RSVP cancelled successfully!');
+      } catch (error) {
+        console.error('Error cancelling RSVP:', error);
+        alert(`Failed to cancel RSVP: ${error.error || error.reason}`);
+      }
+    } else if (isPendingPayment) {
+      setShowPaymentInput(true);
+      setPaymentMessage('Please enter your Mpesa phone number to complete registration.');
+    } else {
+      try {
+        const result = await Meteor.call('events.rsvp', event._id, true);
+        alert(result.message);
+        if (result.message && result.message.includes("proceed to payment")) {
+           setShowPaymentInput(true);
+           setPaymentMessage('Please enter your Mpesa phone number to complete registration.');
+        }
+      } catch (error) {
+        console.error('Error initiating RSVP:', error);
+        alert(`Failed to RSVP: ${error.error || error.reason}`);
+      }
+    }
+  };
+
+  const handlePaymentSubmit = async () => {
+    if (!phoneNumber || !/^2547[0-9]{8}$/.test(phoneNumber)) {
+      setPaymentMessage('Please enter a valid Mpesa phone number (e.g., 2547XXXXXXXX).');
+      return;
+    }
+
+    setPaymentMessage('Initiating payment... Please wait for STK Push on your phone.');
+    try {
+      const amount = 100;
+      const result = await Meteor.call('events.processPayment', event._id, amount, phoneNumber);
+
+      alert(result.message);
+      setShowPaymentInput(false);
+      setPaymentMessage('');
+      setPhoneNumber('');
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      setPaymentMessage(`Payment failed: ${error.error || error.reason}`);
+      alert(`Payment failed: ${error.error || error.reason}`);
+    }
+  };
+
+  let buttonText = 'RSVP Now';
+  let buttonDisabled = isPastEvent;
+
+  if (!isPastEvent) {
+    if (isConfirmed) {
+      buttonText = 'Attending (Cancel RSVP)';
+      buttonDisabled = false;
+    } else if (isPendingPayment) {
+      buttonText = 'Complete Payment';
+      buttonDisabled = false;
+    } else if (event.registered >= event.capacity) {
+      buttonText = 'Event Full';
+      buttonDisabled = true;
+    }
+  }
+
+  return (
+    <div className={`relative rounded-lg overflow-hidden shadow-md border ${isPastEvent ? 'border-slate-800 opacity-60' : 'border-slate-700'}`}>
+      <div className="bg-slate-800 p-6 h-full flex flex-col">
         <div className="flex justify-between items-start mb-2">
           <span className={`${typeColors[event.type]} text-xs px-2 py-1 rounded-full font-semibold`}>
             {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
@@ -147,16 +302,46 @@ const EventCard = ({ event, onRsvp }) => {
           <div className="flex items-center"><FiClock className="w-4 h-4 mr-2" /> {event.time}</div>
         </div>
 
-        <button
-          onClick={() => onRsvp(event.id, !event.attending)}
-          className={`mt-auto px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            event.attending
-              ? 'bg-slate-800 text-orange-400 hover:bg-orange-400 hover:text-white'
-              : 'bg-orange-400 text-slate-900 hover:bg-orange-300'
-          }`}
-        >
-          {event.attending ? 'Cancel RSVP' : 'RSVP Now'}
-        </button>
+        {showPaymentInput ? (
+          <div className="mt-auto">
+            <p className="text-sm text-slate-300 mb-2">{paymentMessage}</p>
+            <input
+              type="tel"
+              placeholder="Enter Mpesa Phone (e.g., 2547XXXXXXXX)"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="w-full bg-slate-700 rounded-md py-2 px-3 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 mb-2"
+            />
+            <button
+              onClick={handlePaymentSubmit}
+              className="w-full bg-green-500 text-white py-2 rounded-md text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center"
+            >
+              <FiDollarSign className="w-4 h-4 mr-2" /> Pay Now
+            </button>
+            <button
+              onClick={() => {
+                setShowPaymentInput(false);
+                setPaymentMessage('');
+                setPhoneNumber('');
+              }}
+              className="w-full mt-2 bg-slate-700 text-slate-300 py-2 rounded-md text-sm font-medium hover:bg-slate-600 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleRsvpClick}
+            className={`mt-auto px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              isConfirmed
+                ? 'bg-slate-700 text-orange-400 hover:bg-orange-400 hover:text-white'
+                : 'bg-orange-400 text-slate-900 hover:bg-orange-300'
+            } ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={buttonDisabled}
+          >
+            {buttonText}
+          </button>
+        )}
       </div>
     </div>
   );

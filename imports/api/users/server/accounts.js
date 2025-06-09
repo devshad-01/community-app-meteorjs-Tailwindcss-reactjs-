@@ -1,5 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
+import { Roles } from 'meteor/alanning:roles'; // <--- Also import Roles here if you use it in startup code
+
 
 Meteor.startup(() => {
   // Configure accounts
