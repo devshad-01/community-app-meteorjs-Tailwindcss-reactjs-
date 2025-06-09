@@ -1,26 +1,30 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Users } from 'lucide-react';
 
-export const ForumSidebar = ({ 
+export const ForumSidebar = memo(({ 
   categories, 
   selectedCategory, 
   onCategoryChange, 
   forumStats, 
-  loading 
+  loading
 }) => {
   return (
     <div className="space-y-6">
       {/* Categories */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-warm-200 dark:border-slate-700 p-6">
         <h3 className="text-lg font-semibold text-warm-900 dark:text-white mb-4">
-          Categories
+          Posts Categories
         </h3>
         <div className="space-y-2">
           {categories.map(category => (
             <button
               key={category._id}
-              onClick={() => onCategoryChange(category._id)}
-              className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] will-change-transform ${
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onCategoryChange(category._id);
+              }}
+              className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors duration-200 ${
                 selectedCategory === category._id
                   ? 'bg-warm-50 dark:bg-orange-900/20 text-warm-700 dark:text-orange-300 shadow-sm'
                   : 'text-warm-600 dark:text-slate-400 hover:bg-warm-25 dark:hover:bg-slate-700/50'
@@ -82,4 +86,4 @@ export const ForumSidebar = ({
       </div>
     </div>
   );
-};
+});

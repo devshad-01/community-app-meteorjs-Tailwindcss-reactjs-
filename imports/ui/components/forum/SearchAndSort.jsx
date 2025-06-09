@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Search } from 'lucide-react';
 
-export const SearchAndSort = ({ 
+export const SearchAndSort = memo(({ 
   searchTerm, 
   onSearchChange, 
   sortBy, 
@@ -39,4 +39,4 @@ export const SearchAndSort = ({
       </div>
     </div>
   );
-};
+});
