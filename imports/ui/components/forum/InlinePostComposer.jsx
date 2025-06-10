@@ -176,58 +176,70 @@ export const InlinePostComposer = ({
   const shouldShowExpandedForm = isExpanded || isContentFocused || formData.content.length > 0;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-warm-200 dark:border-slate-700 mb-6 transition-all duration-300">
-      <form onSubmit={handleSubmit} className="p-4">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md border border-warm-200 dark:border-slate-700 mb-4 transition-all duration-300">
+      <form onSubmit={handleSubmit} className="p-3">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
-            <p className="text-red-800 dark:text-red-300 text-sm">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-2 mb-3">
+            <p className="text-red-800 dark:text-red-300 text-xs">{error}</p>
           </div>
         )}
 
         {/* Main Content Area */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Content Input - Always Visible */}
-          <div>
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleInputChange}
-              onFocus={handleContentFocus}
-              placeholder="What's on your mind? Share your thoughts with the community..."
-              rows={shouldShowExpandedForm ? 4 : 2}
-              className="w-full px-4 py-3 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white resize-none transition-all duration-200"
-              required
-            />
+          <div className="flex space-x-3">
+            {/* User Avatar */}
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-warm-500 dark:bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-semibold">
+                  {Meteor.user()?.profile?.firstName?.charAt(0) || Meteor.user()?.username?.charAt(0) || 'U'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Input Area */}
+            <div className="flex-1">
+              <textarea
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleInputChange}
+                onFocus={handleContentFocus}
+                placeholder="What's on your mind?"
+                rows={shouldShowExpandedForm ? 3 : 1}
+                className="w-full px-3 py-2 border border-warm-200 dark:border-slate-600 bg-warm-50 dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 dark:text-white resize-none transition-all duration-300 text-sm placeholder-warm-400 dark:placeholder-slate-500"
+                required
+              />
+            </div>
           </div>
 
           {/* Expanded Form - Show when focused or has content */}
           {shouldShowExpandedForm && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-3 animate-fadeIn">
               {/* Title - Optional */}
-              <div>
+              <div className="ml-11">
                 <input
                   type="text"
                   id="title"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="Title (optional - will be auto-generated if empty)"
-                  className="w-full px-4 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  placeholder="Title (optional)"
+                  className="w-full px-3 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white text-sm"
                 />
               </div>
 
-              {/* Category */}
-              <div>
+              {/* Category & Tags Row */}
+              <div className="ml-11 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <select
                   id="categoryId"
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  className="px-3 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white text-sm"
                   required
                 >
-                  <option value="">Select a category...</option>
+                  <option value="">Select category...</option>
                   {categories
                     .filter(cat => cat._id !== 'all')
                     .map(category => (
@@ -236,58 +248,45 @@ export const InlinePostComposer = ({
                     </option>
                   ))}
                 </select>
-              </div>
 
-              {/* Tags */}
-              <div>
                 <input
                   type="text"
                   id="tags"
                   name="tags"
                   value={formData.tags}
                   onChange={handleInputChange}
-                  placeholder="Tags (optional - separate with commas)"
-                  className="w-full px-4 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  placeholder="Tags (comma separated)"
+                  className="px-3 py-2 border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white text-sm"
                 />
               </div>
 
-              {/* Image Upload */}
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                
-                {/* Image Preview */}
-                {uploadedImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+              {/* Image Preview */}
+              {uploadedImages.length > 0 && (
+                <div className="ml-11">
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                     {uploadedImages.map((image) => (
                       <div key={image.id} className="relative group">
                         <img
                           src={image.data}
                           alt={image.name}
-                          className="w-full h-20 object-cover rounded-lg border border-warm-200 dark:border-slate-600"
+                          className="w-full h-16 object-cover rounded-md border border-warm-200 dark:border-slate-600"
                         />
                         <button
                           type="button"
                           onClick={() => removeImage(image.id)}
-                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                          className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <X className="w-3 h-3" />
                         </button>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Pin Post Option (for admins/moderators) */}
               {(Meteor.user()?.profile?.role === 'admin' || Meteor.user()?.profile?.role === 'moderator') && (
-                <div className="flex items-center">
+                <div className="ml-11 flex items-center">
                   <input
                     type="checkbox"
                     id="pinned"
@@ -296,37 +295,47 @@ export const InlinePostComposer = ({
                     onChange={handleInputChange}
                     className="w-4 h-4 text-warm-600 bg-warm-100 border-warm-300 rounded focus:ring-warm-500 dark:focus:ring-orange-500 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
                   />
-                  <label htmlFor="pinned" className="ml-2 text-sm font-medium text-warm-700 dark:text-slate-300">
+                  <label htmlFor="pinned" className="ml-2 text-sm text-warm-700 dark:text-slate-300">
                     Pin this post
                   </label>
                 </div>
               )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
             </div>
           )}
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-warm-200 dark:border-slate-700">
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-warm-200 dark:border-slate-700">
           {/* Left side - Action buttons */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center px-3 py-2 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200"
+              className="flex items-center px-2 py-1.5 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
               title="Add images"
             >
               <Image className="w-4 h-4 mr-1" />
-              <span className="text-sm">Photo</span>
+              <span className="text-xs">Photo</span>
             </button>
             
             {shouldShowExpandedForm && (
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex items-center px-3 py-2 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200"
+                className="flex items-center px-2 py-1.5 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
               >
                 <X className="w-4 h-4 mr-1" />
-                <span className="text-sm">Cancel</span>
+                <span className="text-xs">Cancel</span>
               </button>
             )}
           </div>
@@ -335,16 +344,16 @@ export const InlinePostComposer = ({
           <button
             type="submit"
             disabled={isSubmitting || !formData.content.trim() || !formData.categoryId}
-            className="px-6 py-2 bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white rounded-lg font-semibold shadow hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-1.5 bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white rounded-full font-medium shadow hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm"
           >
             {isSubmitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5"></div>
                 Posting...
               </>
             ) : (
               <>
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-3 h-3 mr-1.5" />
                 Post
               </>
             )}
