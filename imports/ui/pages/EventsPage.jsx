@@ -180,7 +180,7 @@ export const EventsPage = () => {
 // Filter Tab Component & EventCard Component (no changes needed)
 // ====================================================================================
 const FilterTab = ({ name, icon, count, active, onClick }) => {
-  const base = 'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors';
+  const base = 'flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer';
   const classes = active ? 'bg-orange-400 text-white outline' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white';
   return (
     <button className={`${base} ${classes}`} onClick={onClick}>

@@ -43,7 +43,7 @@ export const NotFoundPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               to="/"
-              className="inline-flex items-center px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group"
+              className="inline-flex items-center px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-warm hover:shadow-warm-lg group cursor-pointer"
             >
               <Home className="w-5 h-5 mr-2" />
               Go Home
@@ -51,7 +51,7 @@ export const NotFoundPage = () => {
             
             <button
               onClick={() => navigate(-1)}
-              className="inline-flex items-center px-8 py-4 border-2 border-warm-500 dark:border-orange-500 text-warm-500 dark:text-orange-400 hover:bg-warm-50 dark:hover:bg-slate-800 font-semibold rounded-lg transition-all duration-200 group"
+              className="inline-flex items-center px-8 py-4 border-2 border-warm-500 dark:border-orange-500 text-warm-500 dark:text-orange-400 hover:bg-warm-50 dark:hover:bg-slate-800 font-semibold rounded-lg transition-all duration-200 group cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
               Go Back

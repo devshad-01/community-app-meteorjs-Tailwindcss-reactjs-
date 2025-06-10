@@ -31,7 +31,7 @@ export const ForumSidebar = memo(({
                   e.stopPropagation();
                   onCategoryChange(category._id);
                 }}
-                className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] ${
+                className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer ${
                   selectedCategory === category._id
                     ? 'bg-warm-50 dark:bg-orange-900/20 text-warm-700 dark:text-orange-300 shadow-sm'
                     : 'text-warm-600 dark:text-slate-400 hover:bg-warm-25 dark:hover:bg-slate-700/50'

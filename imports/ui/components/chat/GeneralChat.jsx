@@ -192,7 +192,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
             <button
               key={`${reaction.emoji}-${idx}`}
               onClick={() => handleReaction(message._id, reaction.emoji)}
-              className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-0.5 border ${
+              className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-0.5 border cursor-pointer ${
                 isReacted 
                   ? 'bg-blue-100 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700' 
                   : 'bg-warm-100 border-warm-200 dark:bg-slate-700 dark:border-slate-600'
@@ -218,7 +218,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
               <button
                 key={category}
                 onClick={() => setActiveEmojiCategory(category)}
-                className={`px-2 py-1 text-xs rounded-md ${
+                className={`px-2 py-1 text-xs rounded-md cursor-pointer ${
                   activeEmojiCategory === category 
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
                     : 'hover:bg-warm-100 dark:hover:bg-slate-700'
@@ -234,7 +234,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
             <button
               key={emoji}
               onClick={() => handleReaction(messageId, emoji)}
-              className="h-8 w-8 flex items-center justify-center hover:bg-warm-100 dark:hover:bg-slate-700 rounded text-xl"
+              className="h-8 w-8 flex items-center justify-center hover:bg-warm-100 dark:hover:bg-slate-700 rounded text-xl cursor-pointer"
             >
               {emoji}
             </button>
@@ -254,14 +254,14 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
         <div className="w-36">
           <button 
             onClick={() => copyMessageText(message)}
-            className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-warm-100 dark:hover:bg-slate-700 rounded"
+            className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-warm-100 dark:hover:bg-slate-700 rounded cursor-pointer"
           >
             <Copy className="h-4 w-4 mr-2" />
             <span>Copy text</span>
           </button>
           
           <button 
-            className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-warm-100 dark:hover:bg-slate-700 rounded"
+            className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-warm-100 dark:hover:bg-slate-700 rounded cursor-pointer"
           >
             <Reply className="h-4 w-4 mr-2" />
             <span>Reply</span>
@@ -269,7 +269,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
           
           {isOwn && (
             <button 
-              className="flex items-center w-full px-2 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+              className="flex items-center w-full px-2 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded cursor-pointer"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               <span>Delete</span>
@@ -299,7 +299,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
         </div>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          className="p-2 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
         >
           <X className="h-5 w-5 text-warm-600 dark:text-slate-400" />
         </button>
@@ -393,7 +393,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
                               e.stopPropagation();
                               setShowMessageMenu(showMessageMenu === message._id ? null : message._id);
                             }}
-                            className={`p-1 rounded-full ${own ? 'hover:bg-blue-600' : 'hover:bg-warm-300 dark:hover:bg-slate-600'}`}
+                            className={`p-1 rounded-full cursor-pointer ${own ? 'hover:bg-blue-600' : 'hover:bg-warm-300 dark:hover:bg-slate-600'}`}
                           >
                             <MoreHorizontal className={`h-4 w-4 ${own ? 'text-white' : 'text-warm-600 dark:text-slate-400'}`} />
                           </button>
@@ -414,7 +414,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
                   } bottom-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2`}>
                     <button 
                       onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)}
-                      className="p-2 bg-warm-100 dark:bg-slate-700 rounded-full hover:bg-warm-200 dark:hover:bg-slate-600 transition-colors shadow-sm"
+                      className="p-2 bg-warm-100 dark:bg-slate-700 rounded-full hover:bg-warm-200 dark:hover:bg-slate-600 transition-colors shadow-sm cursor-pointer"
                     >
                       <Smile className="h-4 w-4 text-warm-600 dark:text-slate-300" />
                     </button>

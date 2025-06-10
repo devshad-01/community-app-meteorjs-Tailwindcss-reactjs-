@@ -238,7 +238,7 @@ export const ProfilePage = () => {
                   </h2>
                   <button
                     onClick={() => isEditing ? handleCancel() : setIsEditing(true)}
-                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
                       isEditing 
                         ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
                         : 'bg-warm-500 text-white hover:bg-warm-600 shadow-md hover:shadow-lg'
@@ -277,7 +277,7 @@ export const ProfilePage = () => {
                       )}
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 bg-warm-500 text-white p-2 rounded-full hover:bg-warm-600 transition-colors duration-200 shadow-lg"
+                        className="absolute bottom-0 right-0 bg-warm-500 text-white p-2 rounded-full hover:bg-warm-600 transition-colors duration-200 shadow-lg cursor-pointer"
                       >
                         <Camera className="w-4 h-4" />
                       </button>
@@ -434,7 +434,7 @@ export const ProfilePage = () => {
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="flex items-center px-6 py-3 bg-warm-500 text-white rounded-lg hover:bg-warm-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                      className="flex items-center px-6 py-3 bg-warm-500 text-white rounded-lg hover:bg-warm-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
                     >
                       {isSaving ? (
                         <>
@@ -451,7 +451,7 @@ export const ProfilePage = () => {
                     <button
                       onClick={handleCancel}
                       disabled={isSaving}
-                      className="px-6 py-3 border border-warm-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-warm-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
+                      className="px-6 py-3 border border-warm-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-warm-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -469,7 +469,7 @@ export const ProfilePage = () => {
                   </h3>
                   <button
                     onClick={() => isEditingUsername ? handleCancel() : setIsEditingUsername(true)}
-                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
                       isEditingUsername 
                         ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
                         : 'bg-warm-500 text-white hover:bg-warm-600 shadow-md hover:shadow-lg'
@@ -507,7 +507,7 @@ export const ProfilePage = () => {
                       <button
                         onClick={handleUsernameUpdate}
                         disabled={isSaving}
-                        className="flex items-center px-6 py-3 bg-warm-500 text-white rounded-lg hover:bg-warm-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
+                        className="flex items-center px-6 py-3 bg-warm-500 text-white rounded-lg hover:bg-warm-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 cursor-pointer"
                       >
                         {isSaving ? (
                           <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
@@ -546,7 +546,7 @@ export const ProfilePage = () => {
                   </h3>
                   <button
                     onClick={() => setShowEmailActions(!showEmailActions)}
-                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200 cursor-pointer"
                   >
                     {showEmailActions ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -580,7 +580,7 @@ export const ProfilePage = () => {
                     {!user?.emails?.[0]?.verified && (
                       <button
                         onClick={handleSendVerificationEmail}
-                        className="w-full flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-all duration-200"
+                        className="w-full flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-all duration-200 cursor-pointer"
                       >
                         <Mail className="h-4 w-4 mr-2" />
                         Send Verification Email
@@ -589,7 +589,7 @@ export const ProfilePage = () => {
                     
                     <button
                       onClick={() => showError('Not Implemented', 'Password reset functionality will be implemented soon')}
-                      className="w-full px-4 py-3 border border-warm-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-warm-50 dark:hover:bg-slate-700 font-medium transition-all duration-200"
+                      className="w-full px-4 py-3 border border-warm-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-warm-50 dark:hover:bg-slate-700 font-medium transition-all duration-200 cursor-pointer"
                     >
                       Change Password
                     </button>
