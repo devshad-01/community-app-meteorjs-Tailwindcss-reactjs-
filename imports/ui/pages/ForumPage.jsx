@@ -4,21 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { 
   ForumCategories, 
-  ForumPosts, 
-  ForumReplies,
   ForumPublications, 
   ForumMethods,
   ForumFormatting,
   FORUM_CONSTANTS 
 } from '../../api/forums';
 import { useToastContext } from '../components/common/ToastProvider';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { useForumActions } from '../hooks/useForumActions';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { useForumPosts } from '../hooks/useForumPosts';
 import { 
   ForumHeader,
   ForumSidebar,
   SearchAndSort,
   PostsList,
   PostsSkeleton,
+  ProgressivePostsSkeleton,
   NewPostModal
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
@@ -47,7 +49,7 @@ export const ForumPage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Separate subscriptions for better performance and reduced reactivity
+  // Separate subscription for categories (stable)
   const { user, categories, loading: categoriesLoading } = useTracker(() => {
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
     
@@ -82,102 +84,33 @@ export const ForumPage = () => {
     };
   }, []); // No dependencies for stable categories
 
-  // Single unified subscription for posts and replies to reduce reactive cycles
-  const { posts, allReplies, loading: dataLoading } = useTracker(() => {
-    // Prepare subscription parameters
-    const postSubParams = {
-      categoryId: selectedCategory === 'all' ? null : selectedCategory,
-      searchTerm: debouncedSearchTerm || null,
-      sortBy,
-      limit: 50
-    };
+  // Use the new infinite scroll posts hook
+  const {
+    pinnedPosts,
+    regularPosts,
+    allReplies,
+    loading: dataLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    totalLoaded
+  } = useForumPosts({
+    selectedCategory,
+    searchTerm: debouncedSearchTerm,
+    sortBy,
+    initialLimit: 8 // Start with 8 posts, load 8 more each time
+  });
 
-    const postsHandle = Meteor.subscribe(ForumPublications.postsList, postSubParams);
-    const usersHandle = Meteor.subscribe('usersBasic');
-
-    const loading = !postsHandle.ready() || !usersHandle.ready();
-
-    if (loading) {
-      return {
-        posts: [],
-        allReplies: [],
-        loading: true
-      };
-    }
-
-    // Build query for posts
-    let postQuery = {};
-    if (selectedCategory !== 'all') {
-      postQuery.categoryId = selectedCategory;
-    }
-    if (debouncedSearchTerm) {
-      postQuery.$or = [
-        { title: { $regex: debouncedSearchTerm, $options: 'i' } },
-        { content: { $regex: debouncedSearchTerm, $options: 'i' } },
-        { tags: { $in: [new RegExp(debouncedSearchTerm, 'i')] } }
-      ];
-    }
-
-    // Build sort options
-    let sortOptions = { createdAt: -1 };
-    switch (sortBy) {
-      case 'recent':
-        sortOptions = { lastReplyAt: -1, createdAt: -1 };
-        break;
-      case 'popular':
-        sortOptions = { likeCount: -1, createdAt: -1 };
-        break;
-      case 'replies':
-        sortOptions = { replyCount: -1, createdAt: -1 };
-        break;
-      case 'views':
-        sortOptions = { viewCount: -1, createdAt: -1 };
-        break;
-    }
-
-    // Get posts from database
-    const postsFromDB = ForumPosts.find(postQuery, { 
-      sort: sortOptions,
-      limit: 50
-    }).fetch();
-
-    // Get replies for the current posts
-    const postsIds = postsFromDB.map(post => post._id);
-    let repliesData = [];
-    
-    if (postsIds.length > 0) {
-      // Subscribe to replies for current posts
-      const repliesHandles = postsIds.map(postId => 
-        Meteor.subscribe(ForumPublications.repliesByPost, postId, {
-          limit: 10,
-          sortBy: 'oldest'
-        })
-      );
-
-      const repliesLoading = repliesHandles.some(handle => !handle.ready());
-      
-      if (!repliesLoading) {
-        repliesData = ForumReplies.find({
-          postId: { $in: postsIds }
-        }, { sort: { createdAt: 1 } }).fetch();
-      }
-    }
-
-    return {
-      posts: postsFromDB,
-      allReplies: repliesData,
-      loading: false
-    };
-  }, [selectedCategory, debouncedSearchTerm, sortBy]);
+  // Set up infinite scroll
+  const { triggerRef } = useInfiniteScroll({
+    threshold: 300,
+    enabled: !dataLoading && hasMore,
+    onLoadMore: loadMore,
+    loading: isLoadingMore,
+    hasMore
+  });
 
   const loading = categoriesLoading || dataLoading;
-
-  // Memoize filtered and sorted posts to prevent unnecessary re-calculations
-  const { pinnedPosts, regularPosts } = useMemo(() => {
-    const pinned = posts.filter(post => post.pinned);
-    const regular = posts.filter(post => !post.pinned);
-    return { pinnedPosts: pinned, regularPosts: regular };
-  }, [posts]);
 
   // Memoize helper functions to prevent unnecessary re-renders
   const getCategoryColor = useCallback((categoryId) => {
@@ -303,7 +236,7 @@ export const ForumPage = () => {
     if (!user) {
       showError('Authentication Required', 'Please log in to reply');
       return;
-    }c
+    }
 
     const content = replyContents[postId];
     if (!content || !content.trim()) {
@@ -386,11 +319,11 @@ export const ForumPage = () => {
             />
 
             {/* Loading indicator for data refresh */}
-            {dataLoading && posts.length > 0 && (
+            {isLoadingMore && regularPosts.length > 0 && (
               <div className="flex items-center justify-center py-2 mb-4">
                 <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 rounded-full px-4 py-2 shadow-warm border border-warm-200 dark:border-slate-700">
                   <div className="w-4 h-4 border-2 border-warm-500 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-warm-600 dark:text-slate-400">Updating posts...</span>
+                  <span className="text-sm text-warm-600 dark:text-slate-400">Loading more posts...</span>
                 </div>
               </div>
             )}
@@ -402,46 +335,62 @@ export const ForumPage = () => {
                 user={user}
               />
             ) : dataLoading ? (
-              <div className="space-y-6 animate-fadeIn">
-                {/* Pinned Posts Skeleton */}
-                <PostsSkeleton count={1} isPinned={true} />
-                
-                {/* Regular Posts Skeleton */}
-                <PostsSkeleton count={3} isPinned={false} />
+              <div className="space-y-8 animate-fadeIn">
+                {/* Main Loading Spinner */}
+                <div className="text-center py-12">
+                  <LoadingSpinner size="lg" text="Loading forum posts..." />
+                </div>
+
+                {/* Skeleton placeholders for better UX */}
+                <div className="space-y-6">
+                  {/* Pinned Posts Skeleton */}
+                  <div className="mb-6">
+                    <div className="h-6 bg-warm-200 dark:bg-slate-700 rounded w-40 mb-4 animate-pulse"></div>
+                    <PostsSkeleton count={1} isPinned={true} />
+                  </div>
+                  
+                  {/* Regular Posts Progressive Skeleton */}
+                  <div>
+                    <div className="h-6 bg-warm-200 dark:bg-slate-700 rounded w-48 mb-4 animate-pulse"></div>
+                    <ProgressivePostsSkeleton count={3} startDelay={200} />
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="animate-fadeIn" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
+              <div className="animate-fadeIn" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>
                 {/* Pinned Posts */}
-                <PostsList
-                  posts={pinnedPosts}
-                  user={user}
-                  isPinned={true}
-                  title="Pinned Posts"
-                  categoryInfo={getCategoryInfo}
-                  getCategoryColor={getCategoryColor}
-                  getRoleColor={getRoleColor}
-                  formatTimeAgo={formatTimeAgo}
-                  getUserRole={getUserRole}
-                  handleLikePost={handleLikePost}
-                  handleLikeReply={handleLikeReply}
-                  toggleReply={toggleReply}
-                  replyToggles={replyToggles}
-                  replyContents={replyContents}
-                  submittingReplies={submittingReplies}
-                  handleReplyContentChange={handleReplyContentChange}
-                  handleSubmitReply={handleSubmitReply}
-                  allReplies={allReplies}
-                  showMoreReplies={showMoreReplies}
-                  toggleShowMoreReplies={toggleShowMoreReplies}
-                  onNewPost={handleNewPost}
-                />
+                {pinnedPosts.length > 0 && (
+                  <PostsList
+                    posts={pinnedPosts}
+                    user={user}
+                    isPinned={true}
+                    title="📌 Pinned Posts"
+                    categoryInfo={getCategoryInfo}
+                    getCategoryColor={getCategoryColor}
+                    getRoleColor={getRoleColor}
+                    formatTimeAgo={formatTimeAgo}
+                    getUserRole={getUserRole}
+                    handleLikePost={handleLikePost}
+                    handleLikeReply={handleLikeReply}
+                    toggleReply={toggleReply}
+                    replyToggles={replyToggles}
+                    replyContents={replyContents}
+                    submittingReplies={submittingReplies}
+                    handleReplyContentChange={handleReplyContentChange}
+                    handleSubmitReply={handleSubmitReply}
+                    allReplies={allReplies}
+                    showMoreReplies={showMoreReplies}
+                    toggleShowMoreReplies={toggleShowMoreReplies}
+                    onNewPost={handleNewPost}
+                  />
+                )}
 
-                {/* Regular Posts */}
+                {/* Regular Posts with Infinite Scroll */}
                 <PostsList
                   posts={regularPosts}
                   user={user}
                   isPinned={false}
-                  title={`Recent Discussions (${regularPosts.length})`}
+                  title={`💬 Recent Discussions ${totalLoaded > 0 ? `(${totalLoaded} loaded)` : ''}`}
                   categoryInfo={getCategoryInfo}
                   getCategoryColor={getCategoryColor}
                   getRoleColor={getRoleColor}
@@ -459,6 +408,12 @@ export const ForumPage = () => {
                   showMoreReplies={showMoreReplies}
                   toggleShowMoreReplies={toggleShowMoreReplies}
                   onNewPost={handleNewPost}
+                  // Infinite scroll props
+                  isLoadingMore={isLoadingMore}
+                  hasMore={hasMore}
+                  onLoadMore={loadMore}
+                  triggerRef={triggerRef}
+                  totalLoaded={totalLoaded}
                 />
               </div>
             )}

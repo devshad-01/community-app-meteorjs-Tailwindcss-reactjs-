@@ -8,3 +8,4 @@ export { PostImages } from './PostImages';
 export { PostReplies } from './PostReplies';
 export { InlineReplyBox } from './InlineReplyBox';
 export { NewPostModal } from './NewPostModal';
+export { InfiniteScrollLoader, ProgressivePostsSkeleton } from './InfiniteScrollLoader';
