@@ -21,6 +21,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
   const [activeEmojiCategory, setActiveEmojiCategory] = useState('common');
   const [showMessageMenu, setShowMessageMenu] = useState(null); // Stores message ID when menu is open
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const messageInputRef = useRef(null);
 
   // Subscribe to messages and online users
@@ -64,7 +65,10 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
   }, [showEmojiPicker, showMessageMenu]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      // Directly scroll the container to bottom without affecting page scroll
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -275,7 +279,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 h-[600px] flex flex-col overflow-hidden">
       {/* Chat Header */}
       <div className="flex items-center justify-between p-4 border-b border-warm-200 dark:border-slate-700">
         <div className="flex items-center space-x-3">
@@ -321,7 +325,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
