@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Send, Image, Tag, Folder, X, Trash2 } from 'lucide-react';
 import { useToastContext } from '../common/ToastProvider';
+import { UserAvatar } from '../common/UserAvatar';
 
 export const InlinePostComposer = ({ 
   categories = [], 
@@ -173,6 +174,20 @@ export const InlinePostComposer = ({
     }
   };
 
+  // Helper functions for UserAvatar component
+  const getUserRole = (userId) => {
+    const userData = userId ? Meteor.users.findOne(userId) : Meteor.user();
+    return userData?.profile?.role || 'member';
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      'admin': 'red',
+      'member': 'purple'
+    };
+    return colors[role] || 'purple';
+  };
+
   const shouldShowExpandedForm = isExpanded || isContentFocused || formData.content.length > 0;
 
   return (
@@ -190,11 +205,14 @@ export const InlinePostComposer = ({
           <div className="flex space-x-3">
             {/* User Avatar */}
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-warm-500 dark:bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">
-                  {Meteor.user()?.profile?.firstName?.charAt(0) || Meteor.user()?.username?.charAt(0) || 'U'}
-                </span>
-              </div>
+              <UserAvatar 
+                user={Meteor.user()}
+                size="sm"
+                showTooltip={false}
+                getRoleColor={getRoleColor}
+                getUserRole={getUserRole}
+                className="w-8 h-8"
+              />
             </div>
             
             {/* Input Area */}
