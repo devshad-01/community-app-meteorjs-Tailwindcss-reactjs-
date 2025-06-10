@@ -14,6 +14,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Footer } from './components/common/Footer';
 
@@ -97,8 +98,8 @@ export const App = () => {
               } 
             />
             
-            {/* Redirect unknown routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* 404 Page for unknown routes */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
         
