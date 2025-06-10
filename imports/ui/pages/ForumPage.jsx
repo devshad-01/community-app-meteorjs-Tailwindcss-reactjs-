@@ -18,6 +18,7 @@ import {
   ForumSidebar,
   SearchAndSort,
   PostsList,
+  PostsSkeleton,
   NewPostModal
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
@@ -302,7 +303,7 @@ export const ForumPage = () => {
     if (!user) {
       showError('Authentication Required', 'Please log in to reply');
       return;
-    }
+    }c
 
     const content = replyContents[postId];
     if (!content || !content.trim()) {
@@ -353,7 +354,7 @@ export const ForumPage = () => {
   }, [user, likeReply, showError]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-warm-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-warm-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-smooth">
       {/* Header */}
       <ForumHeader 
         user={user} 
@@ -384,6 +385,16 @@ export const ForumPage = () => {
               onSortChange={handleSortChange}
             />
 
+            {/* Loading indicator for data refresh */}
+            {dataLoading && posts.length > 0 && (
+              <div className="flex items-center justify-center py-2 mb-4">
+                <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 rounded-full px-4 py-2 shadow-warm border border-warm-200 dark:border-slate-700">
+                  <div className="w-4 h-4 border-2 border-warm-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-warm-600 dark:text-slate-400">Updating posts...</span>
+                </div>
+              </div>
+            )}
+
             {showGeneralChat ? (
               <GeneralChat 
                 isOpen={showGeneralChat}
@@ -391,15 +402,15 @@ export const ForumPage = () => {
                 user={user}
               />
             ) : dataLoading ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 p-8">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-warm-200 dark:bg-slate-600 rounded w-3/4"></div>
-                  <div className="h-4 bg-warm-200 dark:bg-slate-600 rounded w-1/2"></div>
-                  <div className="h-4 bg-warm-200 dark:bg-slate-600 rounded w-5/6"></div>
-                </div>
+              <div className="space-y-6 animate-fadeIn">
+                {/* Pinned Posts Skeleton */}
+                <PostsSkeleton count={1} isPinned={true} />
+                
+                {/* Regular Posts Skeleton */}
+                <PostsSkeleton count={3} isPinned={false} />
               </div>
             ) : (
-              <>
+              <div className="animate-fadeIn" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                 {/* Pinned Posts */}
                 <PostsList
                   posts={pinnedPosts}
@@ -449,7 +460,7 @@ export const ForumPage = () => {
                   toggleShowMoreReplies={toggleShowMoreReplies}
                   onNewPost={handleNewPost}
                 />
-              </>
+              </div>
             )}
           </div>
         </div> 
