@@ -232,6 +232,20 @@ export const ForumPage = () => {
     return colors[role] || 'slate';
   }, []);
 
+  // Memoize search and sort handlers to prevent SearchAndSort re-renders
+  const handleSearchChange = useCallback((value) => {
+    setSearchTerm(value);
+  }, []);
+
+  const handleSortChange = useCallback((value) => {
+    setSortBy(value);
+  }, []);
+
+  // Memoize category change handler to prevent ForumSidebar re-renders
+  const handleCategoryChange = useCallback((categoryId) => {
+    setSelectedCategory(categoryId);
+  }, []);
+
   const handleNewPost = () => {
     if (!user) {
       alert('Please log in to create a new post');
@@ -350,25 +364,33 @@ export const ForumPage = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Sidebar - Stable, outside reactive context */}
           <div className="lg:col-span-1">
             <ForumSidebar
               categories={categories}
               selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-              loading={loading}
+              onCategoryChange={handleCategoryChange}
+              loading={categoriesLoading}
             />
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-3">
+            {/* Search and Sort - Stable, outside reactive posts context */}
+            <SearchAndSort
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              sortBy={sortBy}
+              onSortChange={handleSortChange}
+            />
+
             {showGeneralChat ? (
               <GeneralChat 
                 isOpen={showGeneralChat}
                 onClose={() => setShowGeneralChat(false)}
                 user={user}
               />
-            ) : loading ? (
+            ) : dataLoading ? (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 p-8">
                 <div className="animate-pulse space-y-4">
                   <div className="h-4 bg-warm-200 dark:bg-slate-600 rounded w-3/4"></div>
@@ -378,14 +400,6 @@ export const ForumPage = () => {
               </div>
             ) : (
               <>
-                {/* Search and Sort */}
-                <SearchAndSort
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                />
-
                 {/* Pinned Posts */}
                 <PostsList
                   posts={pinnedPosts}
