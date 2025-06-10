@@ -63,7 +63,7 @@ export const PostReplies = ({
                       handleLikeReply(reply._id);
                     }
                   }}
-                  className={`flex items-center space-x-1 text-xs transition-colors duration-200 ${
+                  className={`flex items-center space-x-1 text-xs transition-colors duration-200 cursor-pointer ${
                     (reply.likes && reply.likes.includes(user?._id))
                       ? 'text-red-500 hover:text-red-600' 
                       : 'text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300'
@@ -72,7 +72,7 @@ export const PostReplies = ({
                   <Heart className={`w-3 h-3 ${(reply.likes && reply.likes.includes(user?._id)) ? 'fill-current' : ''}`} />
                   <span>{(reply.likes || []).length}</span>
                 </button>
-                <button className="text-xs text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200">
+                <button className="text-xs text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200 cursor-pointer">
                   Reply
                 </button>
               </div>
@@ -85,7 +85,7 @@ export const PostReplies = ({
       {hasMoreReplies && (
         <button
           onClick={() => toggleShowMoreReplies(postId)}
-          className="w-full text-left text-sm text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 transition-colors duration-200 py-2"
+          className="w-full text-left text-sm text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 transition-colors duration-200 py-2 cursor-pointer"
         >
           {showingAll 
             ? `Show fewer replies` 

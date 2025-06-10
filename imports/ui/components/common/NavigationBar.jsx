@@ -242,7 +242,7 @@ export const NavigationBar = () => {
                 <div className="relative" ref={notificationRef}>
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200"
+                    className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200 cursor-pointer"
                     title="Notifications"
                   >
                     <Bell className="w-5 h-5" />
@@ -263,7 +263,7 @@ export const NavigationBar = () => {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200"
+                    className="flex items-center space-x-2 p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200 cursor-pointer"
                   >
                     <UserAvatar 
                       user={user}
@@ -316,7 +316,7 @@ export const NavigationBar = () => {
                       <div className="border-t border-slate-700">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-slate-750 transition-colors"
+                          className="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-slate-750 transition-colors cursor-pointer"
                         >
                           <LogOut className="w-4 h-4" />
                           <span className="text-sm">Logout</span>

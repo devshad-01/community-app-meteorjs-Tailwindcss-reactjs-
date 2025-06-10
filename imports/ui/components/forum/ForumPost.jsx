@@ -97,7 +97,7 @@ export const ForumPost = ({
         <div className="flex items-center space-x-6 text-sm">
           <button
             onClick={() => toggleReply(post._id)}
-            className="flex items-center space-x-1 text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200"
+            className="flex items-center space-x-1 text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300 transition-colors duration-200 cursor-pointer"
           >
             <MessageCircle className="w-4 h-4" />
             <span>{post.replyCount || 0} replies</span>
@@ -111,7 +111,7 @@ export const ForumPost = ({
               e.stopPropagation();
               handleLikePost(post._id);
             }}
-            className={`flex items-center space-x-1 transition-colors duration-200 ${
+            className={`flex items-center space-x-1 transition-colors duration-200 cursor-pointer ${
               (post.likes && post.likes.includes(user?._id))
                 ? 'text-red-500 hover:text-red-600' 
                 : 'text-warm-500 dark:text-slate-400 hover:text-warm-600 dark:hover:text-slate-300'
