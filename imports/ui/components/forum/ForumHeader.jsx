@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, MessageCircle, Search } from 'lucide-react';
+import { MessageSquare, MessageCircle, Search, TrendingUp, Clock, MessageCircleMore, Eye } from 'lucide-react';
 
 export const ForumHeader = ({ 
   user, 
@@ -52,7 +52,7 @@ export const ForumHeader = ({
                   placeholder="Search posts..."
                   value={searchTerm}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-sm border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-warm-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 bg-warm-50 dark:bg-slate-700/50"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="w-4 h-4 text-warm-400 dark:text-slate-400" />
@@ -60,18 +60,27 @@ export const ForumHeader = ({
               </div>
             </div>
 
-            {/* Sort */}
-            <div className="sm:w-40">
-              <select
-                value={sortBy}
-                onChange={(e) => onSortChange(e.target.value)}
-                className="w-full py-2 px-3 text-sm border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-              >
-                <option value="recent">Recent</option>
-                <option value="popular">Popular</option>
-                <option value="replies">Most Replies</option>
-                <option value="views">Most Views</option>
-              </select>
+            {/* Sort Filters - Tab Style */}
+            <div className="flex bg-warm-100 dark:bg-slate-700 rounded-xl p-1">
+              {[
+                { value: 'recent', label: 'Recent', icon: Clock },
+                { value: 'popular', label: 'Popular', icon: TrendingUp },
+                { value: 'replies', label: 'Replies', icon: MessageCircleMore },
+                { value: 'views', label: 'Views', icon: Eye }
+              ].map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => onSortChange(value)}
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                    sortBy === value
+                      ? 'bg-white dark:bg-slate-600 text-warm-700 dark:text-white shadow-sm'
+                      : 'text-warm-600 dark:text-slate-300 hover:text-warm-700 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-600/50'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
