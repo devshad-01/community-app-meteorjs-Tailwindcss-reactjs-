@@ -25,7 +25,6 @@ export const PostsList = ({
   allReplies,
   showMoreReplies,
   toggleShowMoreReplies,
-  onNewPost,
   // New infinite scroll props
   isLoadingMore = false,
   hasMore = true,
@@ -81,16 +80,8 @@ export const PostsList = ({
             No posts found
           </h3>
           <p className="text-warm-600 dark:text-slate-400 mb-4">
-            Try adjusting your search or filter criteria
+            Try adjusting your search or filter criteria, or scroll up to create a new post
           </p>
-          {user && (
-            <button 
-              onClick={onNewPost}
-              className="bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 will-change-transform"
-            >
-              Start a new discussion
-            </button>
-          )}
         </div>
       </div>
     );

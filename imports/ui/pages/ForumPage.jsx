@@ -17,11 +17,10 @@ import { useForumPosts } from '../hooks/useForumPosts';
 import { 
   ForumHeader,
   ForumSidebar,
-  SearchAndSort,
   PostsList,
   PostsSkeleton,
   ProgressivePostsSkeleton,
-  NewPostModal
+  InlinePostComposer
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
 
@@ -33,12 +32,12 @@ export const ForumPage = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
-  const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [showGeneralChat, setShowGeneralChat] = useState(false);
   const [replyToggles, setReplyToggles] = useState({}); // Track which posts have reply boxes open
   const [replyContents, setReplyContents] = useState({}); // Track reply content for each post
   const [submittingReplies, setSubmittingReplies] = useState({}); // Track which replies are being submitted
   const [showMoreReplies, setShowMoreReplies] = useState({}); // Track which posts show all replies
+  const [composerExpanded, setComposerExpanded] = useState(false); // Track composer state
 
   // Debounce search term to prevent excessive re-renders
   useEffect(() => {
@@ -190,17 +189,13 @@ export const ForumPage = () => {
     }
   }, [showGeneralChat]);
 
-  const handleNewPost = () => {
-    if (!user) {
-      alert('Please log in to create a new post');
-      return;
-    }
-    setShowNewPostModal(true);
-    // Close chat when creating new post
+  const handlePostCreated = useCallback(() => {
+    // Close chat when a new post is created
     if (showGeneralChat) {
       setShowGeneralChat(false);
     }
-  };
+    // Optionally refresh the posts or the page will auto-update due to reactivity
+  }, [showGeneralChat]);
 
   const handleToggleChat = () => {
     if (!user) {
@@ -326,9 +321,12 @@ export const ForumPage = () => {
       {/* Header */}
       <ForumHeader 
         user={user} 
-        onNewPost={handleNewPost} 
         onToggleChat={handleToggleChat}
         isChatOpen={showGeneralChat}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -345,13 +343,16 @@ export const ForumPage = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Search and Sort - Stable, outside reactive posts context */}
-            <SearchAndSort
-              searchTerm={searchTerm}
-              onSearchChange={handleSearchChange}
-              sortBy={sortBy}
-              onSortChange={handleSortChange}
-            />
+            {/* Inline Post Composer - Only show if user is logged in */}
+            {user && !showGeneralChat && (
+              <InlinePostComposer
+                categories={categories}
+                selectedCategoryId={selectedCategory !== 'all' ? selectedCategory : null}
+                onPostCreated={handlePostCreated}
+                isExpanded={composerExpanded}
+                onToggleExpanded={setComposerExpanded}
+              />
+            )}
 
             {/* Loading indicator for data refresh */}
             {isLoadingMore && regularPosts.length > 0 && (
@@ -416,7 +417,6 @@ export const ForumPage = () => {
                     allReplies={allReplies}
                     showMoreReplies={showMoreReplies}
                     toggleShowMoreReplies={toggleShowMoreReplies}
-                    onNewPost={handleNewPost}
                   />
                 )}
 
@@ -442,7 +442,6 @@ export const ForumPage = () => {
                   allReplies={allReplies}
                   showMoreReplies={showMoreReplies}
                   toggleShowMoreReplies={toggleShowMoreReplies}
-                  onNewPost={handleNewPost}
                   // Infinite scroll props
                   isLoadingMore={isLoadingMore}
                   hasMore={hasMore}
@@ -455,14 +454,6 @@ export const ForumPage = () => {
           </div>
         </div> 
       </div>
-
-      {/* New Post Modal */}
-      <NewPostModal 
-        isOpen={showNewPostModal}
-        onClose={() => setShowNewPostModal(false)}
-        categories={categories}
-        selectedCategoryId={selectedCategory !== 'all' ? selectedCategory : null}
-      />
     </div>
   );
 };
