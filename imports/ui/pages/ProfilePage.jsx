@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { UserMethods } from '/imports/api/users';
 import { useToastContext } from '../components/common/ToastProvider';
+import { UserAvatar } from '../components/common/UserAvatar';
 
 export const ProfilePage = () => {
   const { user } = useAuth();
@@ -170,6 +171,20 @@ export const ProfilePage = () => {
     return null;
   };
 
+  // Helper functions for user roles and colors
+  const getUserRole = (userId) => {
+    const userData = userId ? Meteor.users.findOne(userId) : user;
+    return userData?.profile?.role || 'member';
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      'admin': 'red',
+      'member': 'slate'
+    };
+    return colors[role] || 'slate';
+  };
+
   const getUserInitial = () => {
     if (user?.profile?.name) {
       return user.profile.name.charAt(0).toUpperCase();
@@ -189,19 +204,13 @@ export const ProfilePage = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              {getUserAvatar() ? (
-                <img
-                  src={getUserAvatar()}
-                  alt="Profile"
-                  className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-slate-700 shadow-lg"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-warm-500 to-orange-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-white dark:border-slate-700 shadow-lg">
-                  {getUserInitial()}
-                </div>
-              )}
-            </div>
+            <UserAvatar 
+              user={user}
+              size="2xl"
+              showTooltip={true}
+              getRoleColor={getRoleColor}
+              getUserRole={getUserRole}
+            />
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
                 {user?.profile?.name || user?.username || 'User Profile'}

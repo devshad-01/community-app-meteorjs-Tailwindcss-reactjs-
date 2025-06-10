@@ -54,7 +54,8 @@ Meteor.publish('usersBasic', function () {
         fields: {
           username: 1,
           'profile.name': 1,
-          'profile.role': 1
+          'profile.role': 1,
+          'profile.avatar': 1  // Added avatar field for UserAvatar component
         }
       }
     );

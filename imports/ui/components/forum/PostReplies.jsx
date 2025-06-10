@@ -1,6 +1,7 @@
 import React from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Heart } from 'lucide-react';
+import { UserAvatar } from '../common/UserAvatar';
 
 export const PostReplies = ({ 
   postId, 
@@ -32,9 +33,13 @@ export const PostReplies = ({
         
         return (
           <div key={reply._id} className="flex items-start space-x-3 p-3 bg-warm-25 dark:bg-slate-700/30 rounded-lg border border-warm-100 dark:border-slate-600">
-            <div className="w-8 h-8 bg-gradient-to-br from-warm-400 to-warm-500 dark:from-orange-400 dark:to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-              {replyAuthorName.charAt(0)}
-            </div>
+            <UserAvatar 
+              user={replyAuthor}
+              size="sm"
+              showTooltip={true}
+              getRoleColor={getRoleColor}
+              getUserRole={getUserRole}
+            />
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <span className="font-medium text-sm text-warm-900 dark:text-white">

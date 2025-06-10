@@ -4,6 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { Send, X, Users, MessageCircle, Smile, Image, Reply, MoreHorizontal, Copy, Trash2 } from 'lucide-react';
 import { MessagesCollection } from '../../../api/messages';
 import { useToastContext } from '../common/ToastProvider';
+import { UserAvatar } from '../common/UserAvatar';
 
 // Extended emoji reactions with categories
 const EMOJI_CATEGORIES = {
@@ -152,28 +153,31 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
     return message.userId === Meteor.userId();
   };
 
+  // Helper functions for user roles and colors (similar to forum)
+  const getUserRole = (userId) => {
+    const user = Meteor.users.findOne(userId);
+    return user?.profile?.role || 'member';
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      'admin': 'red',
+      'member': 'slate'
+    };
+    return colors[role] || 'slate';
+  };
+
   const renderAvatar = (userId) => {
-    const avatar = getUserAvatar(userId);
-    
-    if (avatar) {
-      return (
-        <img
-          src={avatar}
-          alt={getUserDisplayName(userId)}
-          className="h-8 w-8 rounded-full object-cover border border-warm-200 dark:border-slate-700"
-        />
-      );
-    }
+    const user = Meteor.users.findOne(userId);
     
     return (
-      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium 
-        ${userId === Meteor.userId() 
-          ? 'bg-gradient-to-br from-blue-600 to-indigo-600' 
-          : 'bg-gradient-to-br from-blue-400 to-blue-600'
-        }`}
-      >
-        {getUserInitial(userId)}
-      </div>
+      <UserAvatar 
+        user={user}
+        size="sm"
+        showTooltip={true}
+        getRoleColor={getRoleColor}
+        getUserRole={getUserRole}
+      />
     );
   };
 

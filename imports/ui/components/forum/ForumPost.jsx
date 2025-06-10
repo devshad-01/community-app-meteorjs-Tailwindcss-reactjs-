@@ -4,6 +4,7 @@ import { MessageCircle, Eye, Heart } from 'lucide-react';
 import { PostImages } from './PostImages';
 import { PostReplies } from './PostReplies';
 import { InlineReplyBox } from './InlineReplyBox';
+import { UserAvatar } from '../common/UserAvatar';
 
 export const ForumPost = ({ 
   post,
@@ -39,12 +40,13 @@ export const ForumPost = ({
     <div className={baseClasses}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 bg-gradient-to-br ${isPinned 
-            ? 'from-warm-500 to-warm-600 dark:from-orange-500 dark:to-orange-600'
-            : `from-${getCategoryColor(post.categoryId)}-500 to-${getCategoryColor(post.categoryId)}-600`
-          } rounded-full flex items-center justify-center text-white font-semibold text-sm`}>
-            {authorName.charAt(0)}
-          </div>
+          <UserAvatar 
+            user={authorUser}
+            size="md"
+            showTooltip={true}
+            getRoleColor={getRoleColor}
+            getUserRole={getUserRole}
+          />
           <div>
             <h3 className={`text-lg font-semibold text-warm-900 dark:text-white transition-colors duration-200 ${
               isPinned 

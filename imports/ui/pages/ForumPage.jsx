@@ -52,8 +52,9 @@ export const ForumPage = () => {
   // Separate subscription for categories (stable)
   const { user, categories, loading: categoriesLoading } = useTracker(() => {
     const categoriesHandle = Meteor.subscribe(ForumPublications.categories);
+    const usersHandle = Meteor.subscribe('usersBasic'); // Subscribe to user data for avatars
     
-    const loading = !categoriesHandle.ready();
+    const loading = !categoriesHandle.ready() || !usersHandle.ready();
     
     if (loading) {
       return {
@@ -151,17 +152,14 @@ export const ForumPage = () => {
   }, []);
 
   const getUserRole = useCallback((userId) => {
-    // For now, return a default role - this can be enhanced with actual user roles
     const user = Meteor.users.findOne(userId);
-    return user?.profile?.role || 'Member';
+    return user?.profile?.role || 'member';
   }, []);
 
   const getRoleColor = useCallback((role) => {
     const colors = {
-      'Pastor': 'warm',
-      'Volunteer Coordinator': 'orange',
-      'Small Group Leader': 'blue',
-      'Member': 'slate'
+      'admin': 'red',
+      'member': 'slate'
     };
     return colors[role] || 'slate';
   }, []);

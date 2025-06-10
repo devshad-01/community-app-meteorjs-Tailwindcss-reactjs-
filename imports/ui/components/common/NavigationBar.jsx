@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { NotificationDropdown } from '../notifications';
 import { NotificationsCollection } from '/imports/api/notifications';
+import { UserAvatar } from './UserAvatar';
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -127,6 +128,20 @@ export const NavigationBar = () => {
 
   const isAdmin = user?.profile?.role === 'admin';
   const isAuthenticated = !!user && !isLoading;
+
+  // Helper functions for user roles and colors
+  const getUserRole = (userId) => {
+    const userData = userId ? Meteor.users.findOne(userId) : user;
+    return userData?.profile?.role || 'member';
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      'admin': 'red',
+      'member': 'slate'
+    };
+    return colors[role] || 'slate';
+  };
 
   const getUserInitial = () => {
     if (user?.profile?.name) {
@@ -250,19 +265,13 @@ export const NavigationBar = () => {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center space-x-2 p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200"
                   >
-                    {getUserAvatar() ? (
-                      <img
-                        src={getUserAvatar()}
-                        alt="Profile"
-                        className="w-8 h-8 rounded-full object-cover border-2 border-slate-600"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gradient-to-br from-warm-500 to-orange-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {getUserInitial()}
-                        </span>
-                      </div>
-                    )}
+                    <UserAvatar 
+                      user={user}
+                      size="sm"
+                      showTooltip={false}
+                      getRoleColor={getRoleColor}
+                      getUserRole={getUserRole}
+                    />
                     <span className="hidden sm:block text-sm font-medium">{getUserDisplayName()}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
                       showUserMenu ? 'rotate-180' : ''
@@ -273,19 +282,13 @@ export const NavigationBar = () => {
                     <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden z-50">
                       <div className="px-4 py-3 border-b border-slate-700 bg-slate-750">
                         <div className="flex items-center space-x-3">
-                          {getUserAvatar() ? (
-                            <img
-                              src={getUserAvatar()}
-                              alt="Profile"
-                              className="w-10 h-10 rounded-full object-cover border-2 border-slate-600"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-warm-500 to-orange-600 rounded-full flex items-center justify-center">
-                              <span className="text-white text-lg font-medium">
-                                {getUserInitial()}
-                              </span>
-                            </div>
-                          )}
+                          <UserAvatar 
+                            user={user}
+                            size="lg"
+                            showTooltip={false}
+                            getRoleColor={getRoleColor}
+                            getUserRole={getUserRole}
+                          />
                           <div>
                             <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
                             <p className="text-xs text-slate-400">@{user?.username || 'username'}</p>
