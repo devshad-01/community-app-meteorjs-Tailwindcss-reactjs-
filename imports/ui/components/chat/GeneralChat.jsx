@@ -162,9 +162,9 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
   const getRoleColor = (role) => {
     const colors = {
       'admin': 'red',
-      'member': 'slate'
+      'member': 'purple'
     };
-    return colors[role] || 'slate';
+    return colors[role] || 'purple';
   };
 
   const renderAvatar = (userId) => {

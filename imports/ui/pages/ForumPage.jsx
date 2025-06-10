@@ -159,9 +159,9 @@ export const ForumPage = () => {
   const getRoleColor = useCallback((role) => {
     const colors = {
       'admin': 'red',
-      'member': 'slate'
+      'member': 'purple'
     };
-    return colors[role] || 'slate';
+    return colors[role] || 'purple';
   }, []);
 
   // Memoize search and sort handlers to prevent SearchAndSort re-renders

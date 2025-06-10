@@ -22,8 +22,8 @@ export const UserAvatar = ({
   // Get user details
   const userName = userData?.profile?.name || userData?.username || 'Unknown User';
   const userAvatar = userData?.profile?.avatar;
-  const userRole = getUserRole ? getUserRole(userData?._id || userId) : (userData?.profile?.role || 'Member');
-  const roleColor = getRoleColor ? getRoleColor(userRole) : 'slate';
+  const userRole = getUserRole ? getUserRole(userData?._id || userId) : (userData?.profile?.role || 'member');
+  const roleColor = getRoleColor ? getRoleColor(userRole) : 'purple';
   
   // Get user initial
   const getUserInitial = () => {
@@ -80,6 +80,11 @@ export const UserAvatar = ({
         bg: 'from-red-500 to-red-600 dark:from-red-400 dark:to-red-500',
         ring: 'ring-red-200 dark:ring-red-800'
       },
+      purple: {
+        border: 'border-purple-400 dark:border-purple-500',
+        bg: 'from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500',
+        ring: 'ring-purple-200 dark:ring-purple-800'
+      },
       slate: {
         border: 'border-slate-400 dark:border-slate-500',
         bg: 'from-slate-500 to-slate-600 dark:from-slate-400 dark:to-slate-500',
@@ -87,7 +92,7 @@ export const UserAvatar = ({
       }
     };
     
-    return colorMap[color] || colorMap.slate;
+    return colorMap[color] || colorMap.purple;
   };
 
   const colorClasses = getRoleColorClasses(roleColor);
