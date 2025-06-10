@@ -169,16 +169,28 @@ export const ForumPage = () => {
   // Memoize search and sort handlers to prevent SearchAndSort re-renders
   const handleSearchChange = useCallback((value) => {
     setSearchTerm(value);
-  }, []);
+    // Close chat when searching
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
+  }, [showGeneralChat]);
 
   const handleSortChange = useCallback((value) => {
     setSortBy(value);
-  }, []);
+    // Close chat when changing sort
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
+  }, [showGeneralChat]);
 
   // Memoize category change handler to prevent ForumSidebar re-renders
   const handleCategoryChange = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
-  }, []);
+    // Close chat when switching categories
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
+  }, [showGeneralChat]);
 
   const handleNewPost = () => {
     if (!user) {
@@ -186,6 +198,10 @@ export const ForumPage = () => {
       return;
     }
     setShowNewPostModal(true);
+    // Close chat when creating new post
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
   };
 
   const handleToggleChat = () => {
@@ -201,6 +217,10 @@ export const ForumPage = () => {
       ...prev,
       [postId]: !prev[postId]
     }));
+    // Close chat when interacting with posts
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
   };
 
   const toggleShowMoreReplies = useCallback((postId) => {
@@ -208,7 +228,11 @@ export const ForumPage = () => {
       ...prev,
       [postId]: !prev[postId]
     }));
-  }, []);
+    // Close chat when interacting with posts
+    if (showGeneralChat) {
+      setShowGeneralChat(false);
+    }
+  }, [showGeneralChat]);
 
   const handleReplyContentChange = (postId, content) => {
     setReplyContents(prev => ({
@@ -226,10 +250,14 @@ export const ForumPage = () => {
     try {
       await likePost(postId);
       // Don't show success message for likes to avoid spam
+      // Close chat when interacting with posts
+      if (showGeneralChat) {
+        setShowGeneralChat(false);
+      }
     } catch (error) {
       showError('Like Failed', error.message);
     }
-  }, [user, likePost, showError]);
+  }, [user, likePost, showError, showGeneralChat]);
 
   const handleSubmitReply = useCallback(async (e, postId) => {
     e.preventDefault();
@@ -261,6 +289,11 @@ export const ForumPage = () => {
       // Clear reply content and close reply box
       setReplyContents(prev => ({ ...prev, [postId]: '' }));
       setReplyToggles(prev => ({ ...prev, [postId]: false }));
+      
+      // Close chat when submitting reply
+      if (showGeneralChat) {
+        setShowGeneralChat(false);
+      }
     } catch (error) {
       showError(
         'Failed to Post Reply',
@@ -270,7 +303,7 @@ export const ForumPage = () => {
     } finally {
       setSubmittingReplies(prev => ({ ...prev, [postId]: false }));
     }
-  }, [user, replyContents, submitReply, success, showError]);
+  }, [user, replyContents, submitReply, success, showError, showGeneralChat]);
 
   const handleLikeReply = useCallback(async (replyId) => {
     if (!user) {
@@ -281,10 +314,14 @@ export const ForumPage = () => {
     try {
       await likeReply(replyId);
       // Don't show success message for likes to avoid spam
+      // Close chat when interacting with posts
+      if (showGeneralChat) {
+        setShowGeneralChat(false);
+      }
     } catch (error) {
       showError('Like Failed', error.message);
     }
-  }, [user, likeReply, showError]);
+  }, [user, likeReply, showError, showGeneralChat]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-smooth">
