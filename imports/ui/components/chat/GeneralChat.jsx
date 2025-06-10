@@ -283,16 +283,16 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 h-[600px] flex flex-col overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-warm border border-warm-200 dark:border-slate-700 h-[500px] md:h-[600px] flex flex-col overflow-hidden">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-warm-200 dark:border-slate-700">
+      <div className="flex items-center justify-between p-3 md:p-4 border-b border-warm-200 dark:border-slate-700">
         <div className="flex items-center space-x-3">
-          <MessageCircle className="h-6 w-6 text-blue-500" />
+          <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-blue-500" />
           <div>
-            <h3 className="text-lg font-semibold text-warm-900 dark:text-white">
+            <h3 className="text-base md:text-lg font-semibold text-warm-900 dark:text-white">
               General Chat
             </h3>
-            <p className="text-sm text-warm-600 dark:text-slate-400">
+            <p className="text-xs md:text-sm text-warm-600 dark:text-slate-400 hidden md:block">
               {onlineUsers.length} online
             </p>
           </div>
@@ -301,11 +301,12 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
           onClick={onClose}
           className="p-2 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
         >
-          <X className="h-5 w-5 text-warm-600 dark:text-slate-400" />
+          <X className="h-4 w-4 md:h-5 md:w-5 text-warm-600 dark:text-slate-400" />
         </button>
       </div>
 
-      {/* Online Users Bar */}
+      {/* Online Users Bar - Hidden as requested */}
+      {/* 
       <div className="p-3 bg-warm-50 dark:bg-slate-700/50 border-b border-warm-200 dark:border-slate-700">
         <div className="flex items-center space-x-2 text-sm">
           <Users className="h-4 w-4 text-warm-600 dark:text-slate-400" />
@@ -327,6 +328,7 @@ export const GeneralChat = ({ isOpen, onClose, user }) => {
           </div>
         </div>
       </div>
+      */}
 
       {/* Messages Area */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">

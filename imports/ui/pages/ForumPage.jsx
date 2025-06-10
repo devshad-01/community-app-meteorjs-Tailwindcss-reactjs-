@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
+import { X, MessageCircle } from 'lucide-react';
 import { 
   ForumCategories, 
   ForumPublications, 
@@ -329,20 +330,23 @@ export const ForumPage = () => {
         onSortChange={handleSortChange}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar - Stable, outside reactive context */}
-          <div className="lg:col-span-1">
-            <ForumSidebar
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-              loading={categoriesLoading}
-            />
+      <div className="max-w-7xl mx-auto px-2 md:px-4 py-2 md:py-4 lg:py-8">
+        {/* Mobile-First Layout */}
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-2 md:gap-4 lg:gap-8">
+          {/* Sidebar - Mobile: Horizontal at top, Desktop: Vertical left */}
+          <div className="lg:col-span-1 order-1 lg:order-none">
+            <div className="lg:sticky lg:top-4">
+              <ForumSidebar
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+                loading={categoriesLoading}
+              />
+            </div>
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-2 lg:order-none min-w-0">
             {/* Inline Post Composer - Only show if user is logged in */}
             {user && !showGeneralChat && (
               <InlinePostComposer
@@ -454,6 +458,25 @@ export const ForumPage = () => {
           </div>
         </div> 
       </div>
+
+      {/* Floating Chat Button - Mobile Only */}
+      {user && (
+        <button
+          onClick={handleToggleChat}
+          className={`lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl transition-all duration-300 transform active:scale-95 ${
+            showGeneralChat
+              ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 rotate-45'
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 hover:scale-110'
+          } text-white flex items-center justify-center`}
+          title={showGeneralChat ? 'Close Chat' : 'Open General Chat'}
+        >
+          {showGeneralChat ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <MessageCircle className="w-6 h-6" />
+          )}
+        </button>
+      )}
     </div>
   );
 };

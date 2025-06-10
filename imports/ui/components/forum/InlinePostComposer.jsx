@@ -191,8 +191,8 @@ export const InlinePostComposer = ({
   const shouldShowExpandedForm = isExpanded || isContentFocused || formData.content.length > 0;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md border border-warm-200 dark:border-slate-700 mb-4 transition-all duration-300">
-      <form onSubmit={handleSubmit} className="p-3">
+    <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl shadow-lg border border-warm-200 dark:border-slate-700 mb-3 md:mb-6 transition-all duration-300 hover:shadow-xl">
+      <form onSubmit={handleSubmit} className="p-3 md:p-4">
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-2 mb-3">
             <p className="text-red-800 dark:text-red-300 text-xs">{error}</p>
@@ -202,7 +202,7 @@ export const InlinePostComposer = ({
         {/* Main Content Area */}
         <div className="space-y-3">
           {/* Content Input - Always Visible */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-2 md:space-x-3">
             {/* User Avatar */}
             <div className="flex-shrink-0">
               <UserAvatar 
@@ -211,7 +211,7 @@ export const InlinePostComposer = ({
                 showTooltip={false}
                 getRoleColor={getRoleColor}
                 getUserRole={getUserRole}
-                className="w-8 h-8"
+                className="w-6 h-6 md:w-8 md:h-8"
               />
             </div>
             
@@ -225,7 +225,7 @@ export const InlinePostComposer = ({
                 onFocus={handleContentFocus}
                 placeholder="What's on your mind?"
                 rows={shouldShowExpandedForm ? 3 : 1}
-                className="w-full px-3 py-2 border border-warm-200 dark:border-slate-600 bg-warm-50 dark:bg-slate-700 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 dark:text-white resize-none transition-all duration-300 text-sm placeholder-warm-400 dark:placeholder-slate-500"
+                className="w-full px-3 md:px-4 py-2 md:py-3 border-0 bg-warm-50 dark:bg-slate-700 rounded-lg md:rounded-xl focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 dark:text-white resize-none transition-all duration-300 text-sm placeholder-warm-400 dark:placeholder-slate-500 shadow-inner"
                 required
               />
             </div>
@@ -235,7 +235,7 @@ export const InlinePostComposer = ({
           {shouldShowExpandedForm && (
             <div className="space-y-3 animate-fadeIn">
               {/* Title - Optional */}
-              <div className="ml-11">
+              <div className="ml-8 md:ml-11">
                 <input
                   type="text"
                   id="title"
@@ -248,7 +248,7 @@ export const InlinePostComposer = ({
               </div>
 
               {/* Category & Tags Row */}
-              <div className="ml-11 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="ml-8 md:ml-11 grid grid-cols-1 gap-3">
                 <select
                   id="categoryId"
                   name="categoryId"
@@ -280,8 +280,8 @@ export const InlinePostComposer = ({
 
               {/* Image Preview */}
               {uploadedImages.length > 0 && (
-                <div className="ml-11">
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                <div className="ml-8 md:ml-11">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {uploadedImages.map((image) => (
                       <div key={image.id} className="relative group">
                         <img
@@ -304,7 +304,7 @@ export const InlinePostComposer = ({
 
               {/* Pin Post Option (for admins/moderators) */}
               {(Meteor.user()?.profile?.role === 'admin' || Meteor.user()?.profile?.role === 'moderator') && (
-                <div className="ml-11 flex items-center">
+                <div className="ml-8 md:ml-11 flex items-center">
                   <input
                     type="checkbox"
                     id="pinned"
@@ -333,27 +333,27 @@ export const InlinePostComposer = ({
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-warm-200 dark:border-slate-700">
+        <div className="flex items-center justify-between mt-3 md:mt-4 pt-3 border-t border-warm-200 dark:border-slate-700">
           {/* Left side - Action buttons */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 md:space-x-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center px-2 py-1.5 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
+              className="flex items-center px-2 md:px-3 py-2 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 hover:scale-105"
               title="Add images"
             >
-              <Image className="w-4 h-4 mr-1" />
-              <span className="text-xs">Photo</span>
+              <Image className="w-4 h-4 md:mr-1.5" />
+              <span className="hidden md:inline text-sm font-medium">Photo</span>
             </button>
             
             {shouldShowExpandedForm && (
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex items-center px-2 py-1.5 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
+                className="flex items-center px-2 md:px-3 py-2 text-warm-600 dark:text-slate-400 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 hover:scale-105"
               >
-                <X className="w-4 h-4 mr-1" />
-                <span className="text-xs">Cancel</span>
+                <X className="w-4 h-4 md:mr-1.5" />
+                <span className="hidden md:inline text-sm font-medium">Cancel</span>
               </button>
             )}
           </div>
@@ -362,17 +362,18 @@ export const InlinePostComposer = ({
           <button
             type="submit"
             disabled={isSubmitting || !formData.content.trim() || !formData.categoryId}
-            className="px-4 py-1.5 bg-warm-500 hover:bg-warm-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white rounded-full font-medium shadow hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm"
+            className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-warm-500 to-warm-600 hover:from-warm-600 hover:to-warm-700 dark:from-orange-500 dark:to-orange-600 dark:hover:from-orange-600 dark:hover:to-orange-700 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm transform hover:scale-105 active:scale-95"
           >
             {isSubmitting ? (
               <>
-                <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5"></div>
-                Posting...
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                <span className="hidden sm:inline">Posting...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
               <>
-                <Send className="w-3 h-3 mr-1.5" />
-                Post
+                <Send className="w-4 h-4 md:mr-2" />
+                <span className="hidden sm:inline">Post</span>
               </>
             )}
           </button>
