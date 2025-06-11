@@ -26,15 +26,15 @@ export const ForumHeader = ({
                 </h1>
               </div>
               
-              {/* Mobile Search - Right of title */}
-              <div className="md:hidden flex-shrink-0 w-48">
+              {/* Mobile Search - Simple version (filter moved to separate component) */}
+              <div className="md:hidden w-44">
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 text-sm border-0 border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 bg-warm-50 shadow-inner placeholder-warm-400 dark:placeholder-slate-500"
+                    className="w-full pl-8 pr-3 py-2 text-sm border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 bg-warm-50 shadow-inner placeholder-warm-400 dark:placeholder-slate-500"
                   />
                   <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                     <Search className="w-4 h-4 text-warm-400 dark:text-slate-400" />

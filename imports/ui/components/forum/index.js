@@ -10,3 +10,4 @@ export { InlineReplyBox } from './InlineReplyBox';
 export { NewPostModal } from './NewPostModal';
 export { InlinePostComposer } from './InlinePostComposer';
 export { InfiniteScrollLoader, ProgressivePostsSkeleton } from './InfiniteScrollLoader';
+export { MobileFilterSearch } from './MobileFilterSearch';

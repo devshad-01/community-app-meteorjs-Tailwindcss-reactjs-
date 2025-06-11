@@ -21,7 +21,8 @@ import {
   PostsList,
   PostsSkeleton,
   ProgressivePostsSkeleton,
-  InlinePostComposer
+  InlinePostComposer,
+  MobileFilterSearch
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
 
@@ -330,11 +331,21 @@ export const ForumPage = () => {
         onSortChange={handleSortChange}
       />
 
+      {/* Mobile Filter and Search Component - Below Header */}
+      <MobileFilterSearch
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        categoriesLoading={categoriesLoading}
+      />
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-8">
         {/* Mobile-First Responsive Layout */}
         <div className="flex flex-col lg:grid lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-8">
-          {/* Sidebar - Mobile: Horizontal at top, Desktop: Vertical left */}
-          <div className="lg:col-span-1 order-1 lg:order-none">
+          {/* Sidebar - Desktop Only (Categories moved to header on mobile) */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="lg:sticky lg:top-4">
               <ForumSidebar
                 categories={categories}
@@ -345,8 +356,8 @@ export const ForumPage = () => {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3 order-2 lg:order-none min-w-0 overflow-hidden">
+          {/* Main Content - Full width on mobile, 3/4 on desktop */}
+          <div className="lg:col-span-3 min-w-0 overflow-hidden">
             {/* Inline Post Composer - Only show if user is logged in */}
             {user && !showGeneralChat && (
               <InlinePostComposer
