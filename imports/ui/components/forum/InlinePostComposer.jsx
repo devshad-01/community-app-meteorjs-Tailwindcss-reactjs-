@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Meteor } from 'meteor/meteor';
-import { Send, Image, Tag, Folder, X, Trash2 } from 'lucide-react';
+import { Send, Image, Tag, Folder, X, Trash2, Paperclip } from 'lucide-react';
 import { useToastContext } from '../common/ToastProvider';
 import { UserAvatar } from '../common/UserAvatar';
 
@@ -189,10 +189,81 @@ export const InlinePostComposer = ({
   };
 
   const shouldShowExpandedForm = isExpanded || isContentFocused || formData.content.length > 0;
+  const shouldShowMiniComposer = !shouldShowExpandedForm;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl shadow-lg border border-warm-200 dark:border-slate-700 mb-3 md:mb-6 transition-all duration-300 hover:shadow-xl">
-      <form onSubmit={handleSubmit} className="p-3 md:p-4">
+    <div className={`transition-all duration-300 mb-3 md:mb-6 ${
+      shouldShowExpandedForm 
+        ? 'bg-white dark:bg-slate-800 rounded-lg md:rounded-xl shadow-lg border border-warm-200 dark:border-slate-700 hover:shadow-xl'
+        : ''
+    }`}>
+      {/* Mini Composer - Minimal Mobile Design */}
+      {shouldShowMiniComposer && (
+        <div className="group px-1 py-1 md:p-4">
+          <div 
+            onClick={handleContentFocus}
+            className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:p-3 rounded-full bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm shadow-sm border border-warm-200/50 dark:border-slate-600/50 transition-all duration-300 hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-700/90 cursor-pointer"
+          >
+            {/* User Avatar */}
+            <div className="flex-shrink-0">
+              <UserAvatar 
+                user={Meteor.user()}
+                size="sm"
+                showTooltip={false}
+                getRoleColor={getRoleColor}
+                getUserRole={getUserRole}
+                className="w-6 h-6 md:w-10 md:h-10"
+              />
+            </div>
+            
+            {/* Mini Input */}
+            <input
+              type="text"
+              placeholder="What's on your mind?"
+              readOnly
+              className="flex-1 bg-transparent border-none outline-none text-sm text-warm-700 dark:text-slate-300 placeholder-warm-400 dark:placeholder-slate-500 cursor-pointer"
+            />
+            
+            {/* Quick Actions */}
+            <div className="flex items-center gap-1 md:gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="p-1 md:p-2 text-warm-500 dark:text-orange-400 hover:text-warm-600 dark:hover:text-orange-300 transition-all duration-200 hover:scale-110 rounded-full"
+                title="Add photo"
+              >
+                <Image className="w-4 h-4" />
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleContentFocus}
+                className="p-1 md:p-2 text-warm-500 dark:text-orange-400 hover:text-warm-600 dark:hover:text-orange-300 transition-all duration-200 hover:scale-110 rounded-full"
+                title="Add tags"
+              >
+                <Tag className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Hidden file input for mini composer */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </div>
+      )}
+
+      {/* Full Composer Form */}
+      {shouldShowExpandedForm && (
+        <form onSubmit={handleSubmit} className="p-3 md:p-4">
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-2 mb-3">
             <p className="text-red-800 dark:text-red-300 text-xs">{error}</p>
@@ -378,7 +449,8 @@ export const InlinePostComposer = ({
             )}
           </button>
         </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 };
