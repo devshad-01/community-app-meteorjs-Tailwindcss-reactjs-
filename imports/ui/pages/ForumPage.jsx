@@ -330,9 +330,9 @@ export const ForumPage = () => {
         onSortChange={handleSortChange}
       />
 
-      <div className="max-w-7xl mx-auto px-2 md:px-4 py-2 md:py-4 lg:py-8">
-        {/* Mobile-First Layout */}
-        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-2 md:gap-4 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-8">
+        {/* Mobile-First Responsive Layout */}
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-8">
           {/* Sidebar - Mobile: Horizontal at top, Desktop: Vertical left */}
           <div className="lg:col-span-1 order-1 lg:order-none">
             <div className="lg:sticky lg:top-4">
@@ -346,7 +346,7 @@ export const ForumPage = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3 order-2 lg:order-none min-w-0">
+          <div className="lg:col-span-3 order-2 lg:order-none min-w-0 overflow-hidden">
             {/* Inline Post Composer - Only show if user is logged in */}
             {user && !showGeneralChat && (
               <InlinePostComposer
