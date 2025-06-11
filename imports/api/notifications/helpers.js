@@ -194,5 +194,16 @@ export const NotificationHelpers = {
     }, {
       fields: { _id: 1, username: 1, 'profile.name': 1 }
     }).fetchAsync();
-  }
+  },
+
+  async createNotification(notificationData) {
+    if (!Meteor.isServer) return;
+    
+    try {
+      return await Meteor.callAsync('notifications.create', notificationData);
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      return null;
+    }
+  },
 };

@@ -11,6 +11,7 @@ import { ForumPage } from './pages/ForumPage';
 import { PostDetailPage } from './pages/PostDetailPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { MembersPage } from './pages/MembersPage';
 import { AdminPage } from './pages/admin/AdminPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -84,6 +85,14 @@ export const App = () => {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/members" 
+              element={
+                <ProtectedRoute>
+                  <MembersPage />
                 </ProtectedRoute>
               } 
             />

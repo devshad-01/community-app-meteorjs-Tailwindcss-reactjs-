@@ -16,7 +16,8 @@ export const UserMethods = {
   updateRole: 'users.updateRole',
   deleteUser: 'users.deleteUser',
   sendVerificationEmail: 'users.sendVerificationEmail',
-  sendPasswordResetEmail: 'users.sendPasswordResetEmail'
+  sendPasswordResetEmail: 'users.sendPasswordResetEmail',
+  updatePresence: 'users.updatePresence'
 };
 
 // Export publication names for client use
