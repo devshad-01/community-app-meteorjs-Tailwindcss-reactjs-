@@ -96,7 +96,7 @@ export const RegisterForm = ({ onSuccess }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-warm-50 via-background to-warm-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 border shadow-lg rounded-lg p-6 border-grey-300">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-500 dark:bg-green-600">
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-500 dark:bg-orange-500">
             <UserPlus className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-warm-900 dark:text-white">
@@ -127,7 +127,7 @@ export const RegisterForm = ({ onSuccess }) => {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-green-500 focus:border-warm-500 dark:focus:border-green-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Full name"
                 />
               </div>
@@ -145,7 +145,7 @@ export const RegisterForm = ({ onSuccess }) => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-green-500 focus:border-warm-500 dark:focus:border-green-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
               </div>
@@ -163,7 +163,7 @@ export const RegisterForm = ({ onSuccess }) => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-green-500 focus:border-warm-500 dark:focus:border-green-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Password (min. 6 characters)"
                 />
                 <button
@@ -188,7 +188,7 @@ export const RegisterForm = ({ onSuccess }) => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-green-500 focus:border-warm-500 dark:focus:border-green-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-warm-200 dark:border-gray-600 placeholder-warm-400 dark:placeholder-gray-400 text-warm-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-warm-500 dark:focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Confirm password"
                 />
                 <button
@@ -206,7 +206,7 @@ export const RegisterForm = ({ onSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </button>
@@ -262,7 +262,7 @@ export const RegisterForm = ({ onSuccess }) => {
           <div className="text-center">
             <Link
               to="/login"
-              className="text-warm-600 hover:text-warm-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+              className="text-warm-600 hover:text-warm-700 dark:text-orange-400 dark:hover:text-orange-300 text-sm"
             >
               Already have an account? Sign in
             </Link>
