@@ -218,16 +218,16 @@ export const NavigationBar = () => {
 
   return (
     <nav className="bg-slate-800 border-b border-slate-700/50 shadow-2xl sticky top-0 z-50 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo - Enhanced with better typography */}
-          <div className="flex items-center">
+          <div className="flex items-centre">
             <Link
               to="/"
-              className="flex items-center space-x-2 group py-2 px-3 rounded-xl transition-all duration-300 hover:bg-slate-700/30"
+              className="flex items-center space-x-2 group py-2 px-0 rounded-xl transition-all duration-300 hover:bg-slate-700/30"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center  ">
                 <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover:from-orange-300 group-hover:via-amber-400 group-hover:to-orange-500 transition-all duration-300">
                   Community
                 </span>
@@ -360,18 +360,18 @@ export const NavigationBar = () => {
               </>
             ) : (
               /* Enhanced auth buttons for non-authenticated users */
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center">
                 <Link
                   to="/login"
-                  className="px-6 py-2.5 text-slate-300 hover:text-white font-medium rounded-xl transition-all duration-300 hover:bg-slate-700/40"
+                  className="px-2 py-2.5 text-slate-300 hover:text-white font-medium rounded-xl transition-all duration-300 hover:bg-slate-700/40"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+                  className="px-2 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                 >
-                  Get Started
+                  Register
                 </Link>
               </div>
             )}
