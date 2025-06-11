@@ -335,7 +335,7 @@ export const ForumPage = () => {
         categoriesLoading={categoriesLoading}
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-1 pb-3 sm:py-4 lg:py-8">
         {/* Mobile-First Responsive Layout */}
         <div className="flex flex-col lg:grid lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-8">
           {/* Sidebar - Desktop Only (Categories moved to header on mobile) */}
