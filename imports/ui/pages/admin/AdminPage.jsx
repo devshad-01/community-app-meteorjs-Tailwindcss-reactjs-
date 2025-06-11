@@ -172,7 +172,7 @@ export const AdminPage = () => {
             </div>
 
             {/* --- NEW: Event Management Section --- */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-8">
+            <div className=" rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-8">
               <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Event Management</h2>
               </div>

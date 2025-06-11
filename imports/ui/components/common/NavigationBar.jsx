@@ -135,6 +135,7 @@ export const NavigationBar = () => {
     } finally {
       setShowUserMenu(false)
       setIsMobileMenuOpen(false)
+      
     }
   }
 
