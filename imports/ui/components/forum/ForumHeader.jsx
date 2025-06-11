@@ -25,33 +25,35 @@ export const ForumHeader = ({
     setShowMobileSearch(false);
   };
   return (
-    <section className="bg-white dark:bg-slate-800 shadow-xl border-b border-warm-200 dark:border-slate-700">
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        <div className="flex flex-col space-y-4 md:space-y-6">
-          {/* Mobile: Title and Mobile Filter/Search */}
-          <div className="flex flex-col space-y-4">
-            {/* Title row */}
+    <section className="bg-gradient-to-r from-white via-warm-25 to-white dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 shadow-xl border-b border-warm-200 dark:border-slate-700">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-4 pb-2 sm:py-6 md:py-8">
+        <div className="flex flex-col space-y-3 sm:space-y-4 md:space-y-6">
+          {/* Mobile: Enhanced Title and Mobile Filter/Search */}
+          <div className="flex flex-col space-y-3 sm:space-y-4">
+            {/* Mobile Title Row with improved spacing */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center min-w-0">
-                <MessageSquare className="mr-2 md:mr-4 h-6 w-6 md:h-10 md:w-10 text-warm-500 dark:text-orange-400 flex-shrink-0" />
-                <h1 className="text-xl md:text-4xl font-bold text-warm-900 dark:text-white truncate">
+              <div className="flex items-center min-w-0 flex-1">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-warm-500 to-orange-500 dark:from-orange-500 dark:to-red-500 shadow-lg mr-3 md:mr-4 flex-shrink-0">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
+                </div>
+                <h1 className="text-lg sm:text-xl md:text-4xl font-bold bg-gradient-to-r from-warm-900 to-orange-800 dark:from-white dark:to-slate-200 bg-clip-text text-transparent truncate">
                   <span className="hidden sm:inline">Community Forum</span>
                   <span className="sm:hidden">Forum</span>
                 </h1>
               </div>
             </div>
 
-            {/* Mobile Filter/Search Component */}
+            {/* Mobile Filter/Search - Seamlessly Integrated */}
             <div className="md:hidden">
               {!showMobileSearch ? (
-                /* Filter View */
-                <div className="flex items-center gap-2 bg-warm-50 dark:bg-slate-700 rounded-xl p-3 border border-warm-200 dark:border-slate-600">
+                /* Filter View - Clean Integration */
+                <div className="flex items-center gap-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-lg p-2 border border-warm-200/50 dark:border-slate-600/50">
                   {/* Category Dropdown */}
                   <div className="flex-1 relative">
                     <select
                       value={selectedCategory}
                       onChange={(e) => onCategoryChange(e.target.value)}
-                      className="w-full px-3 py-2.5 pr-8 rounded-full border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-warm-700 dark:text-white text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500"
+                      className="w-full px-3 py-2 pr-8 rounded-lg border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-warm-700 dark:text-white text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 transition-all"
                       disabled={categoriesLoading}
                     >
                       {categoriesLoading ? (
@@ -59,30 +61,29 @@ export const ForumHeader = ({
                       ) : (
                         categories.map(category => (
                           <option key={category._id} value={category._id}>
-                            {category.icon} {category.name}
+                            {category.name}
                           </option>
                         ))
                       )}
                     </select>
                     
-                    {/* Custom dropdown icon */}
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <ChevronDown className="w-4 h-4 text-warm-500 dark:text-slate-400" />
                     </div>
                   </div>
 
-                  {/* Search Toggle Button */}
+                  {/* Search Toggle */}
                   <button
                     onClick={handleMobileSearchToggle}
-                    className="p-2.5 text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                    className="p-2 text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     title="Search topics"
                   >
                     <Search className="w-5 h-5" />
                   </button>
                 </div>
               ) : (
-                /* Search View */
-                <div className="bg-warm-50 dark:bg-slate-700 rounded-xl p-3 border border-warm-200 dark:border-slate-600">
+                /* Search View - Clean Integration */
+                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-lg p-2 border border-warm-200/50 dark:border-slate-600/50">
                   <div className="relative">
                     {/* Back Button */}
                     <button
@@ -99,7 +100,7 @@ export const ForumHeader = ({
                       placeholder="Search topics..."
                       value={searchTerm}
                       onChange={(e) => onSearchChange(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-warm-700 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 placeholder-warm-400 dark:placeholder-slate-500"
+                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-warm-700 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 placeholder-warm-400 dark:placeholder-slate-500 transition-all"
                       autoFocus
                     />
                   </div>
@@ -107,10 +108,20 @@ export const ForumHeader = ({
               )}
             </div>
 
-            {/* Desktop Description */}
-            <p className="text-sm md:text-lg text-warm-600 dark:text-slate-400 hidden md:block">
-              Connect, share, and discuss with fellow community members
-            </p>
+            {/* Enhanced Desktop Description */}
+            <div className="hidden md:block">
+              <p className="text-sm md:text-lg text-warm-600 dark:text-slate-400 leading-relaxed">
+                Connect, share, and discuss with fellow community members
+              </p>
+              <div className="flex items-center space-x-4 mt-2 text-xs text-warm-500 dark:text-slate-500">
+                <span className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>Live discussions</span>
+                </span>
+                <span>•</span>
+                <span>Community guidelines apply</span>
+              </div>
+            </div>
           </div>
 
           {/* Desktop row - Search, Sort Filters, and Chat */}
