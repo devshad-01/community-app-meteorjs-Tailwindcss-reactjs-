@@ -1,32 +1,44 @@
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MessagesCollection } from '../../api/messages';
 
-export const useMembers = (options = {}) => {
+export const useMembers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [limit, setLimit] = useState(20);
 
-  const {
-    members,
-    loading,
-    user,
-    conversations
-  } = useTracker(() => {
+  const result = useTracker(() => {
     const user = Meteor.user();
+    
+    if (!user) {
+      return {
+        user: null,
+        members: [],
+        loading: false,
+        conversations: new Map()
+      };
+    }
     
     // Subscribe to members list
     const membersHandle = Meteor.subscribe('membersList', {
       search: searchTerm,
-      limit: limit,
-      ...options
+      limit: limit
     });
 
     // Subscribe to user conversations
     const conversationsHandle = Meteor.subscribe('userConversations');
 
     const loading = !membersHandle.ready() || !conversationsHandle.ready();
+
+    if (loading) {
+      return {
+        user,
+        members: [],
+        loading: true,
+        conversations: new Map()
+      };
+    }
 
     // Get members
     let membersSelector = {};
@@ -44,48 +56,50 @@ export const useMembers = (options = {}) => {
         'status.lastActivity': -1,
         createdAt: -1 
       }
-    }).fetch().filter(member => member._id !== user?._id);
+    }).fetch().filter(member => member._id !== user._id);
 
     // Get conversations data
-    const allDirectMessages = MessagesCollection.find({
-      type: 'direct',
-      $or: [
-        { senderId: user?._id },
-        { recipientId: user?._id }
-      ]
-    }, { sort: { createdAt: -1 } }).fetch();
-
-    // Build conversations map
     const conversationsMap = new Map();
-    allDirectMessages.forEach(msg => {
-      const otherUserId = msg.senderId === user?._id ? msg.recipientId : msg.senderId;
-      if (!conversationsMap.has(otherUserId)) {
-        const unreadCount = allDirectMessages.filter(m => 
-          m.senderId === otherUserId && 
-          m.recipientId === user?._id && 
-          !m.read
-        ).length;
-        
-        conversationsMap.set(otherUserId, {
-          lastMessage: msg,
-          unreadCount
-        });
-      }
-    });
+    
+    try {
+      const allDirectMessages = MessagesCollection.find({
+        type: 'direct',
+        $or: [
+          { senderId: user._id },
+          { recipientId: user._id }
+        ]
+      }, { sort: { createdAt: -1 } }).fetch();
+
+      // Build conversations map
+      allDirectMessages.forEach(msg => {
+        const otherUserId = msg.senderId === user._id ? msg.recipientId : msg.senderId;
+        if (!conversationsMap.has(otherUserId)) {
+          const unreadCount = allDirectMessages.filter(m => 
+            m.senderId === otherUserId && 
+            m.recipientId === user._id && 
+            !m.read
+          ).length;
+          
+          conversationsMap.set(otherUserId, {
+            lastMessage: msg,
+            unreadCount
+          });
+        }
+      });
+    } catch (error) {
+      console.warn('Error loading conversations:', error);
+    }
 
     return {
       user,
       members,
-      loading,
+      loading: false,
       conversations: conversationsMap
     };
-  }, [searchTerm, selectedFilter, limit, options]);
+  }, [searchTerm, selectedFilter, limit]);
 
   return {
-    members,
-    loading,
-    user,
-    conversations,
+    ...result,
     searchTerm,
     setSearchTerm,
     selectedFilter,

@@ -23,10 +23,10 @@ export const MembersPage = () => {
 
   // Use the custom hook for members data
   const {
-    members,
+    members = [],
     loading,
     user,
-    conversations,
+    conversations = new Map(),
     searchTerm,
     setSearchTerm,
     selectedFilter,
