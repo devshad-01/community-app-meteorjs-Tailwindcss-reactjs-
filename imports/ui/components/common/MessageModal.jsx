@@ -101,21 +101,26 @@ export const MessageModal = ({
   if (!isOpen || !selectedMember) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl h-[80vh] flex flex-col animate-fadeIn">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl h-[85vh] flex flex-col animate-fadeIn border border-slate-200 dark:border-slate-700">
         {/* Chat Header */}
-        <div className="p-4 border-b border-warm-200 dark:border-slate-700 flex items-center justify-between bg-gradient-to-r from-warm-50 to-orange-50 dark:from-slate-700 dark:to-slate-600 rounded-t-xl">
-          <div className="flex items-center space-x-3">
-            <UserAvatar user={selectedMember} size="sm" />
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <UserAvatar user={selectedMember} size="md" />
+              {selectedMember.status?.online && (
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+              )}
+            </div>
             <div>
-              <h3 className="font-medium text-slate-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {selectedMember.profile?.name || selectedMember.username}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {selectedMember.status?.online ? (
                   <span className="flex items-center">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    Online
+                    Online now
                   </span>
                 ) : (
                   'Offline'
@@ -125,27 +130,32 @@ export const MessageModal = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
           >
-            <X className="w-5 h-5 text-slate-500" />
+            <X className="w-6 h-6 text-slate-500" />
           </button>
         </div>
 
         {/* Messages Container */}
         <div 
           id="messages-container"
-          className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900"
+          className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50 dark:bg-slate-900"
         >
           {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="w-6 h-6 border-2 border-warm-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : directMessages.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageSquare className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-500 dark:text-slate-400">
-                Start a conversation with {selectedMember.profile?.name || selectedMember.username}
-              </p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-8">
+                <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-600 dark:text-slate-400 text-lg font-medium mb-2">
+                  Start the conversation
+                </p>
+                <p className="text-slate-500 dark:text-slate-500 text-sm">
+                  Send a message to {selectedMember.profile?.name || selectedMember.username}
+                </p>
+              </div>
             </div>
           ) : (
             directMessages.map(message => (
@@ -153,20 +163,20 @@ export const MessageModal = ({
                 key={message._id}
                 className={`flex ${message.senderId === user._id ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[80%] group ${
+                <div className={`max-w-[75%] group ${
                   message.senderId === user._id
-                    ? 'bg-gradient-to-r from-warm-500 to-orange-500 text-white'
-                    : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white border border-warm-200 dark:border-slate-600'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600'
                 } rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200`}>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   <p className={`text-xs mt-2 ${
                     message.senderId === user._id 
-                      ? 'text-warm-100' 
+                      ? 'text-blue-100' 
                       : 'text-slate-500 dark:text-slate-400'
                   }`}>
                     {formatTimeAgo(message.createdAt)}
                     {message.senderId === user._id && !message.read && (
-                      <span className="ml-2">•</span>
+                      <span className="ml-2 opacity-70">•</span>
                     )}
                   </p>
                 </div>
@@ -176,17 +186,17 @@ export const MessageModal = ({
         </div>
 
         {/* Message Input */}
-        <div className="p-4 border-t border-warm-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-xl">
-          <div className="flex space-x-3">
+        <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div className="flex space-x-4">
             <div className="flex-1 relative">
               <textarea
                 value={messageContent}
                 onChange={(e) => setMessageContent(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={`Send a message to ${selectedMember.profile?.name || selectedMember.username}...`}
+                placeholder={`Message ${selectedMember.profile?.name || selectedMember.username}...`}
                 rows={1}
-                className="w-full px-4 py-3 border border-warm-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-warm-500 focus:border-transparent resize-none transition-all duration-200"
-                style={{ minHeight: '44px', maxHeight: '120px' }}
+                className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200"
+                style={{ minHeight: '48px', maxHeight: '120px' }}
                 onInput={(e) => {
                   e.target.style.height = 'auto';
                   e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
@@ -196,16 +206,16 @@ export const MessageModal = ({
             <button
               onClick={handleSendMessage}
               disabled={!messageContent.trim()}
-              className="bg-gradient-to-r from-warm-500 to-orange-500 hover:from-warm-600 hover:to-orange-600 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:transform-none shadow-lg"
+              className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:transform-none shadow-lg shadow-blue-500/25"
             >
               <Send className="w-5 h-5" />
             </button>
           </div>
           
           {/* Character count */}
-          <div className="flex justify-between items-center mt-2 text-xs text-slate-400">
+          <div className="flex justify-between items-center mt-3 text-xs text-slate-400">
             <span>Press Enter to send, Shift+Enter for new line</span>
-            <span className={messageContent.length > 900 ? 'text-red-500' : ''}>
+            <span className={messageContent.length > 900 ? 'text-red-500 font-medium' : ''}>
               {messageContent.length}/1000
             </span>
           </div>
