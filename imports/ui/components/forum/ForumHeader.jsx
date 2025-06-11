@@ -1,5 +1,5 @@
-import React from 'react';
-import { MessageSquare, MessageCircle, Search, TrendingUp, Clock, MessageCircleMore, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageSquare, MessageCircle, Search, TrendingUp, Clock, MessageCircleMore, Eye, ChevronLeft, ChevronDown } from 'lucide-react';
 
 export const ForumHeader = ({ 
   user, 
@@ -8,15 +8,29 @@ export const ForumHeader = ({
   searchTerm,
   onSearchChange,
   sortBy,
-  onSortChange
+  onSortChange,
+  // Mobile filter props
+  categories = [],
+  selectedCategory,
+  onCategoryChange,
+  categoriesLoading = false
 }) => {
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  const handleMobileSearchToggle = () => {
+    setShowMobileSearch(true);
+  };
+
+  const handleBackToFilter = () => {
+    setShowMobileSearch(false);
+  };
   return (
     <section className="bg-white dark:bg-slate-800 shadow-xl border-b border-warm-200 dark:border-slate-700">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col space-y-4 md:space-y-6">
-          {/* Mobile: Title and Search in same row, Desktop: Title with description */}
+          {/* Mobile: Title and Mobile Filter/Search */}
           <div className="flex flex-col space-y-4">
-            {/* Title row - Mobile: title + search, Desktop: title only */}
+            {/* Title row */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center min-w-0">
                 <MessageSquare className="mr-2 md:mr-4 h-6 w-6 md:h-10 md:w-10 text-warm-500 dark:text-orange-400 flex-shrink-0" />
@@ -25,22 +39,72 @@ export const ForumHeader = ({
                   <span className="sm:hidden">Forum</span>
                 </h1>
               </div>
-              
-              {/* Mobile Search - Simple version (filter moved to separate component) */}
-              <div className="md:hidden w-44">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 text-sm border border-warm-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 bg-warm-50 shadow-inner placeholder-warm-400 dark:placeholder-slate-500"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                    <Search className="w-4 h-4 text-warm-400 dark:text-slate-400" />
+            </div>
+
+            {/* Mobile Filter/Search Component */}
+            <div className="md:hidden">
+              {!showMobileSearch ? (
+                /* Filter View */
+                <div className="flex items-center gap-2 bg-warm-50 dark:bg-slate-700 rounded-xl p-3 border border-warm-200 dark:border-slate-600">
+                  {/* Category Dropdown */}
+                  <div className="flex-1 relative">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => onCategoryChange(e.target.value)}
+                      className="w-full px-3 py-2.5 pr-8 rounded-full border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-warm-700 dark:text-white text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500"
+                      disabled={categoriesLoading}
+                    >
+                      {categoriesLoading ? (
+                        <option>Loading...</option>
+                      ) : (
+                        categories.map(category => (
+                          <option key={category._id} value={category._id}>
+                            {category.icon} {category.name}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                    
+                    {/* Custom dropdown icon */}
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <ChevronDown className="w-4 h-4 text-warm-500 dark:text-slate-400" />
+                    </div>
+                  </div>
+
+                  {/* Search Toggle Button */}
+                  <button
+                    onClick={handleMobileSearchToggle}
+                    className="p-2.5 text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 hover:bg-warm-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                    title="Search topics"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                /* Search View */
+                <div className="bg-warm-50 dark:bg-slate-700 rounded-xl p-3 border border-warm-200 dark:border-slate-600">
+                  <div className="relative">
+                    {/* Back Button */}
+                    <button
+                      onClick={handleBackToFilter}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-1 text-warm-600 dark:text-slate-400 hover:text-warm-700 dark:hover:text-slate-300 transition-colors"
+                      title="Back to filter"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    {/* Search Input */}
+                    <input
+                      type="text"
+                      placeholder="Search topics..."
+                      value={searchTerm}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-warm-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-warm-700 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-500 dark:focus:ring-orange-500 placeholder-warm-400 dark:placeholder-slate-500"
+                      autoFocus
+                    />
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Desktop Description */}

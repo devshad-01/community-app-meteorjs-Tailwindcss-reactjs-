@@ -21,8 +21,7 @@ import {
   PostsList,
   PostsSkeleton,
   ProgressivePostsSkeleton,
-  InlinePostComposer,
-  MobileFilterSearch
+  InlinePostComposer
 } from '../components/forum';
 import { GeneralChat } from '../components/chat';
 
@@ -329,15 +328,10 @@ export const ForumPage = () => {
         onSearchChange={handleSearchChange}
         sortBy={sortBy}
         onSortChange={handleSortChange}
-      />
-
-      {/* Mobile Filter and Search Component - Below Header */}
-      <MobileFilterSearch
+        // Mobile filter props
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
         categoriesLoading={categoriesLoading}
       />
 
