@@ -24,5 +24,5 @@ if (Meteor.isServer) {
     return UserRsvps.find({ userId: this.userId });
   });
 
-  // REMOVED: No longer need 'events.upcoming' and 'events.past' publications
+
 }
