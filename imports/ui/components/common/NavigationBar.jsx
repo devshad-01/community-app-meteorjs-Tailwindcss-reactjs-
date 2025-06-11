@@ -1,392 +1,445 @@
+"use client"
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useTracker } from 'meteor/react-meteor-data';
-import { Meteor } from 'meteor/meteor';
+import { Link, useLocation } from "react-router-dom"
+import { useTracker } from "meteor/react-meteor-data"
+import { Meteor } from "meteor/meteor"
 import {
-  Bell, Calendar, MessageSquare, Settings, LogOut, Menu, X, Home, 
-  ChevronDown, User, Shield, Users, CircleDot
-} from 'lucide-react';
-import { NotificationDropdown } from '../notifications';
-import { NotificationsCollection } from '/imports/api/notifications';
-import { UserAvatar } from './UserAvatar';
+  Bell,
+  Calendar,
+  MessageSquare,
+  LogOut,
+  Menu,
+  X,
+  Home,
+  ChevronDown,
+  User,
+  Shield,
+  Users,
+  CircleDot,
+} from "lucide-react"
+import { NotificationDropdown } from "../notifications"
+import { NotificationsCollection } from "/imports/api/notifications"
+import { UserAvatar } from "./UserAvatar"
 
 export const NavigationBar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const location = useLocation();
-  
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const location = useLocation()
+
   // Refs for click outside detection
-  const notificationRef = useRef(null);
-  const userMenuRef = useRef(null);
+  const notificationRef = useRef(null)
+  const userMenuRef = useRef(null)
 
   const { user, isLoading, unreadNotificationCount } = useTracker(() => {
-    const currentUser = Meteor.user();
-    
+    const currentUser = Meteor.user()
+
     // Subscribe to notifications if user is logged in
-    let unreadCount = 0;
+    let unreadCount = 0
     if (currentUser) {
-      const handle = Meteor.subscribe('userNotifications', { onlyUnread: true });
+      const handle = Meteor.subscribe("userNotifications", { onlyUnread: true })
       if (handle.ready()) {
         unreadCount = NotificationsCollection.find({
           userId: currentUser._id,
-          read: false
-        }).count();
+          read: false,
+        }).count()
       }
     }
-    
+
     return {
       user: currentUser,
       isLoading: Meteor.loggingIn(),
       unreadNotificationCount: unreadCount,
-    };
-  }, []);
+    }
+  }, [])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
+        setShowNotifications(false)
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
+      if (window.innerWidth >= 768 && userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
 
   // Navigation items - only shown when logged in
   const navigationItems = [
-    { 
-      id: 'home', 
-      name: 'Home', 
-      href: '/', 
+    {
+      id: "home",
+      name: "Home",
+      href: "/",
       icon: Home,
-      description: 'Dashboard and overview'
+      description: "Dashboard and overview",
     },
-    { 
-      id: 'events', 
-      name: 'Events', 
-      href: '/events', 
+    {
+      id: "events",
+      name: "Events",
+      href: "/events",
       icon: Calendar,
-      description: 'Community events and meetings'
+      description: "Community events and meetings",
     },
-    { 
-      id: 'forum', 
-      name: 'Forum', 
-      href: '/forum', 
+    {
+      id: "forum",
+      name: "Forum",
+      href: "/forum",
       icon: MessageSquare,
-      description: 'Community discussions'
+      description: "Community discussions",
     },
-    { 
-      id: 'members', 
-      name: 'Members', 
-      href: '/members', 
+    {
+      id: "members",
+      name: "Members",
+      href: "/members",
       icon: Users,
-      description: 'Community members'
+      description: "Community members",
     },
-  ];
+  ]
 
   // Admin-only navigation
   const adminNavigation = [
-    { 
-      id: 'admin', 
-      name: 'Admin Panel', 
-      href: '/admin', 
+    {
+      id: "admin",
+      name: "Admin Panel",
+      href: "/admin",
       icon: Shield,
-      description: 'Administrative controls'
+      description: "Administrative controls",
     },
-  ];
+  ]
 
   const isActive = (href) => {
-    if (href === '/') return location.pathname === '/';
-    return location.pathname.startsWith(href);
-  };
+    if (href === "/") return location.pathname === "/"
+    return location.pathname.startsWith(href)
+  }
 
   const handleLogout = async () => {
     try {
       await new Promise((resolve, reject) => {
         Meteor.logout((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+          if (err) reject(err)
+          else resolve()
+        })
+      })
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error)
     } finally {
-      setShowUserMenu(false);
-      setIsMobileMenuOpen(false);
+      setShowUserMenu(false)
+      setIsMobileMenuOpen(false)
     }
-  };
+  }
 
-  const isAdmin = user?.profile?.role === 'admin';
-  const isAuthenticated = !!user && !isLoading;
+  const isAdmin = user?.profile?.role === "admin"
+  const isAuthenticated = !!user && !isLoading
 
   // Helper functions for user roles and colors
   const getUserRole = (userId) => {
-    const userData = userId ? Meteor.users.findOne(userId) : user;
-    return userData?.profile?.role || 'member';
-  };
+    const userData = userId ? Meteor.users.findOne(userId) : user
+    return userData?.profile?.role || "member"
+  }
 
   const getRoleColor = (role) => {
     const colors = {
-      'admin': 'red',
-      'member': 'purple'
-    };
-    return colors[role] || 'purple';
-  };
+      admin: "red",
+      member: "purple",
+    }
+    return colors[role] || "purple"
+  }
 
   const getUserInitial = () => {
     if (user?.profile?.name) {
-      return user.profile.name.charAt(0).toUpperCase();
+      return user.profile.name.charAt(0).toUpperCase()
     }
     if (user?.username) {
-      return user.username.charAt(0).toUpperCase();
+      return user.username.charAt(0).toUpperCase()
     }
     if (user?.emails?.[0]?.address) {
-      return user.emails[0].address.charAt(0).toUpperCase();
+      return user.emails[0].address.charAt(0).toUpperCase()
     }
-    return 'U';
-  };
+    return "U"
+  }
 
   const getUserDisplayName = () => {
-    return user?.profile?.name || user?.username || 'User';
-  };
+    return user?.profile?.name || user?.username || "User"
+  }
 
   const getUserAvatar = () => {
-    return user?.profile?.avatar || null;
-  };
+    return user?.profile?.avatar || null
+  }
 
-  const NavLink = ({ item, className = "", onClick }) => {
-    const Icon = item.icon;
+  const NavLink = ({ item, className = "", onClick, isMobile = false }) => {
+    const Icon = item.icon
+    const active = isActive(item.href)
+
     return (
       <Link
         to={item.href}
-        className={`group flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium hover:text-white transition-all duration-200 ${className}`}
+        className={`
+          group relative flex items-center space-x-3 px-4 py-3 rounded-xl font-medium 
+          transition-all duration-300 ease-in-out transform hover:scale-[1.02]
+          ${
+            active
+              ? "bg-slate-700/80 text-blue-400 shadow-lg shadow-slate-900/20"
+              : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+          }
+          ${isMobile ? "text-base" : "text-sm"}
+          ${className}
+        `}
         onClick={onClick}
         title={item.description}
       >
-        <Icon className={`w-5 h-5 transition-transform duration-300  ${
-          isActive(item.href) ? 'scale-110 text-white-800' : 'group-hover:scale-105'
-        }`} />
-        <span>{item.name}</span>
+        {/* Active indicator */}
+        {active && (
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-blue-400 rounded-r-full" />
+        )}
+
+        <Icon
+          className={`
+          w-5 h-5 transition-all duration-300 
+          ${active ? "text-blue-400 scale-110" : "group-hover:scale-110 group-hover:text-blue-300"}
+        `}
+        />
+        <span className="font-medium tracking-wide">{item.name}</span>
+
+        {/* Hover effect overlay */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </Link>
-    );
-  };
+    )
+  }
 
   return (
-    <nav className="bg-slate-700 border-b border-slate-700 shadow-lg sticky top-0 z-50">
+    <nav className="bg-slate-800 border-b border-slate-700/50 shadow-2xl sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          
-          {/* Logo */}
+        <div className="flex justify-between items-center h-20">
+          {/* Logo - Enhanced with better typography */}
           <div className="flex items-center">
-            <Link 
-              to="/" 
-              className="flex items-center space-x-2 group"
+            <Link
+              to="/"
+              className="flex items-center space-x-2 group py-2 px-3 rounded-xl transition-all duration-300 hover:bg-slate-700/30"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="flex items-center">
-                <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-600 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-amber-500 transition-all duration-300">
+              <div className="flex items-center space-x-1">
+                <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover:from-orange-300 group-hover:via-amber-400 group-hover:to-orange-500 transition-all duration-300">
                   Community
                 </span>
-                <span className="flex items-center text-xl font-bold text-white group-hover:text-orange-500 transition-colors duration-300">
-                  <CircleDot className="w-5 h-5 mr-0.5 text-orange-400 group-hover:text-orange-500 transition-colors duration-300" />
-                  Hub
-                </span>
-              </span>
+                <div className="flex items-center">
+                  <CircleDot className="w-6 h-6 text-orange-400 group-hover:text-orange-300 transition-all duration-300 group-hover:rotate-180" />
+                  <span className="text-2xl font-bold text-white group-hover:text-orange-300 transition-colors duration-300 ml-1">
+                    Hub
+                  </span>
+                </div>
+              </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation - Only show when authenticated */}
+          {/* Desktop Navigation - Enhanced spacing and effects */}
           {isAuthenticated && (
-            <div className="hidden md:flex items-center space-x-1">
-              {navigationItems.map(item => (
-                <NavLink
-                  key={item.id}
-                  item={item}
-                  className={`text-white ${
-                    isActive(item.href)
-                      ? 'bg-slate-800 text-blue-400 shadow-lg'
-                      : 'hover:bg-slate-800 hover:text-blue-400'
-                  }`}
-                />
+            <div className="hidden md:flex items-center space-x-2">
+              {navigationItems.map((item) => (
+                <NavLink key={item.id} item={item} />
               ))}
 
-              {isAdmin && adminNavigation.map(item => (
-                <NavLink
-                  key={item.id}
-                  item={item}
-                  className={`text-white ${
-                    isActive(item.href)
-                      ? 'bg-slate-800 text-amber-400 shadow-lg'
-                      : 'hover:bg-slate-800 hover:text-amber-400'
-                  }`}
-                />
-              ))}
+              {isAdmin &&
+                adminNavigation.map((item) => (
+                  <NavLink key={item.id} item={item} className="text-amber-300 hover:text-amber-200" />
+                ))}
             </div>
           )}
 
-          {/* Right side actions */}
-          <div className="flex items-center space-x-3">
+          {/* Right side actions - Enhanced with better spacing */}
+          <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {/* Notifications */}
+                {/* Notifications - Enhanced button design */}
                 <div className="relative" ref={notificationRef}>
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200 cursor-pointer"
+                    className="relative p-3 text-slate-300 hover:text-white hover:bg-slate-700/60 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                     title="Notifications"
                   >
                     <Bell className="w-5 h-5" />
                     {unreadNotificationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                        {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                      <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                        {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
                       </span>
                     )}
                   </button>
-                  
-                  <NotificationDropdown 
-                    isOpen={showNotifications}
-                    onClose={() => setShowNotifications(false)}
-                  />
+
+                  <NotificationDropdown isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
                 </div>
 
-                {/* User Menu */}
-                <div className="relative" ref={userMenuRef}>
+                {/* Desktop User Menu - Enhanced design */}
+                <div className="hidden md:flex relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200 cursor-pointer"
+                    className="flex items-center space-x-3 p-2 pr-4 text-slate-300 hover:text-white hover:bg-slate-700/60 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                   >
-                    <UserAvatar 
+                    <UserAvatar
                       user={user}
                       size="sm"
                       showTooltip={false}
                       getRoleColor={getRoleColor}
                       getUserRole={getUserRole}
                     />
-                    <span className="hidden sm:block text-sm font-medium">{getUserDisplayName()}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
-                      showUserMenu ? 'rotate-180' : ''
-                    }`} />
+                
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`}
+                    />
                   </button>
-                  
+
+                  {/* Enhanced dropdown menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden z-50">
-                      <div className="px-4 py-3 border-b border-slate-700 bg-slate-750">
-                        <div className="flex items-center space-x-3">
-                          <UserAvatar 
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
+                      {/* User info section */}
+                      <div className="px-6 py-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-800 to-slate-750">
+                        <div className="flex items-center space-x-4">
+                          <UserAvatar
                             user={user}
                             size="lg"
                             showTooltip={false}
                             getRoleColor={getRoleColor}
                             getUserRole={getUserRole}
                           />
-                          <div>
-                            <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
-                            <p className="text-xs text-slate-400">@{user?.username || 'username'}</p>
-                            <p className="text-xs text-slate-400">{user?.emails?.[0]?.address}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base font-semibold text-white truncate">{getUserDisplayName()}</p>
+                            <p className="text-sm text-slate-400 truncate">@{user?.username || "user"}</p>
+                            <p className="text-xs text-slate-500 truncate">{user?.emails?.[0]?.address}</p>
                           </div>
                         </div>
                         {isAdmin && (
-                          <span className="inline-block mt-2 px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">
-                            Admin
-                          </span>
+                          <div className="mt-3">
+                            <span className="inline-flex items-center px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full border border-amber-500/30">
+                              <Shield className="w-3 h-3 mr-1" />
+                              Administrator
+                            </span>
+                          </div>
                         )}
                       </div>
-                      
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-750 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <User className="w-4 h-4" />
-                        <span className="text-sm">Profile</span>
-                      </Link>
-                      
 
-                      
-                      <div className="border-t border-slate-700">
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-slate-750 transition-colors cursor-pointer"
+                      {/* Menu items */}
+                      <div className="py-2">
+                        <Link
+                          to="/profile"
+                          className="flex items-center space-x-3 px-6 py-3 text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-200"
+                          onClick={() => setShowUserMenu(false)}
                         >
-                          <LogOut className="w-4 h-4" />
-                          <span className="text-sm">Logout</span>
-                        </button>
+                          <User className="w-4 h-4" />
+                          <span className="text-sm font-medium">View Profile</span>
+                        </Link>
+
+                        <div className="border-t border-slate-700/50 mt-2 pt-2">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center space-x-3 px-6 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span className="text-sm font-medium">Sign Out</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Mobile menu button */}
+                {/* Mobile menu button - Enhanced design */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                  className="md:hidden p-3 text-slate-300 hover:text-white hover:bg-slate-700/60 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                 >
-                  {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
               </>
             ) : (
-              /* Auth buttons for non-authenticated users */
+              /* Enhanced auth buttons for non-authenticated users */
               <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-slate-300 hover:text-white font-medium transition-colors duration-200"
+                  className="px-6 py-2.5 text-slate-300 hover:text-white font-medium rounded-xl transition-all duration-300 hover:bg-slate-700/40"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-white hover:bg-slate-300 text-orange-500 font-medium rounded-lg transition-colors duration-200"
+                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                 >
-                  Register
+                  Get Started
                 </Link>
               </div>
             )}
           </div>
         </div>
 
-        {/* Mobile Navigation Menu - Only show when authenticated and menu is open */}
+        {/* Enhanced Mobile Navigation Menu */}
         {isAuthenticated && isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-            <div className="px-2 py-4 space-y-1">
-              {navigationItems.map(item => (
-                <NavLink
-                  key={item.id}
-                  item={item}
-                  className={`text-white ${
-                    isActive(item.href)
-                      ? 'bg-slate-700 text-blue-400'
-                      : 'hover:bg-slate-700 hover:text-blue-400'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+          <div className="md:hidden border-t border-slate-700/50 bg-slate-800/95 backdrop-blur-md">
+            <div className="px-4 py-6 space-y-2">
+              {/* Mobile user info */}
+              <div className="flex items-center space-x-4 px-4 py-4 bg-slate-700/30 rounded-xl mb-4">
+                <UserAvatar
+                  user={user}
+                  size="md"
+                  showTooltip={false}
+                  getRoleColor={getRoleColor}
+                  getUserRole={getUserRole}
                 />
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-white truncate">{getUserDisplayName()}</p>
+                  <p className="text-sm text-slate-400 truncate">@{user?.username || "user"}</p>
+                  {isAdmin && (
+                    <span className="inline-flex items-center mt-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+                      Admin
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Navigation items */}
+              {navigationItems.map((item) => (
+                <NavLink key={item.id} item={item} onClick={() => setIsMobileMenuOpen(false)} isMobile={true} />
               ))}
-              
-              {isAdmin && adminNavigation.map(item => (
-                <NavLink
-                  key={item.id}
-                  item={item}
-                  className={`text-white ${
-                    isActive(item.href)
-                      ? 'bg-slate-700 text-amber-400'
-                      : 'hover:bg-slate-700 hover:text-amber-400'
-                  }`}
+
+              {isAdmin &&
+                adminNavigation.map((item) => (
+                  <NavLink
+                    key={item.id}
+                    item={item}
+                    className="text-amber-300 hover:text-amber-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    isMobile={true}
+                  />
+                ))}
+
+              {/* Mobile user actions */}
+              <div className="mt-6 pt-4 border-t border-orange-300 space-y-2">
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
                   onClick={() => setIsMobileMenuOpen(false)}
-                />
-              ))}
+                >
+                  <User className="w-5 h-5" />
+                  <span>View Profile</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
     </nav>
-  );
-};
+  )
+}
