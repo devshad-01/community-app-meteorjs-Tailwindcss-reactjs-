@@ -118,5 +118,31 @@ Meteor.methods({
     }
 
     return await Accounts.sendResetPasswordEmail(user._id);
+  },
+
+  async 'users.updatePresence'(isOnline) {
+    check(isOnline, Boolean);
+    
+    if (!this.userId) {
+      return; // Don't throw error, just return
+    }
+
+    const updateFields = {
+      'status.lastActivity': new Date()
+    };
+
+    if (isOnline) {
+      updateFields['status.online'] = true;
+    } else {
+      updateFields['status.online'] = false;
+    }
+
+    try {
+      await Meteor.users.updateAsync(this.userId, {
+        $set: updateFields
+      });
+    } catch (error) {
+      console.error('Error updating user presence:', error);
+    }
   }
 });
