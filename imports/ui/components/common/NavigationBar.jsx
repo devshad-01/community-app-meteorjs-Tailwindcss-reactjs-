@@ -268,7 +268,7 @@ export const NavigationBar = () => {
                   >
                     <Bell className="w-5 h-5" />
                     {unreadNotificationCount > 0 && (
-                      <span className="absolute top-1 right-4 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                      <span className="absolute top-0 right-4 w-6 h-6 bg-orange-400 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg">
                         {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
                       </span>
                     )}
