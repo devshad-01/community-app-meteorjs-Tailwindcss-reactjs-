@@ -60,6 +60,12 @@ export const InlinePostComposer = ({
         };
         
         setUploadedImages(prev => [...prev, imageData]);
+        
+        // Auto-expand the composer when image is uploaded
+        setIsContentFocused(true);
+        if (onToggleExpanded) {
+          onToggleExpanded(true);
+        }
       };
       reader.readAsDataURL(file);
     });
@@ -199,10 +205,10 @@ export const InlinePostComposer = ({
     }`}>
       {/* Mini Composer - Minimal Mobile Design */}
       {shouldShowMiniComposer && (
-        <div className="group px-1 py-1 md:p-4">
+        <div className="group px-1 py-0.5 md:p-4">
           <div 
             onClick={handleContentFocus}
-            className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:p-3 rounded-full bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm shadow-sm border border-warm-200/50 dark:border-slate-600/50 transition-all duration-300 hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-700/90 cursor-pointer"
+            className="flex items-center gap-2 md:gap-3 px-2.5 py-1 md:p-3 rounded-full bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm shadow-sm border border-warm-200/50 dark:border-slate-600/50 transition-all duration-300 hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-700/90 cursor-pointer"
           >
             {/* User Avatar */}
             <div className="flex-shrink-0">
