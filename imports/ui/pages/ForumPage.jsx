@@ -328,13 +328,18 @@ export const ForumPage = () => {
         onSearchChange={handleSearchChange}
         sortBy={sortBy}
         onSortChange={handleSortChange}
+        // Mobile filter props
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        categoriesLoading={categoriesLoading}
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-1 pb-3 sm:py-4 lg:py-8">
         {/* Mobile-First Responsive Layout */}
         <div className="flex flex-col lg:grid lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-8">
-          {/* Sidebar - Mobile: Horizontal at top, Desktop: Vertical left */}
-          <div className="lg:col-span-1 order-1 lg:order-none">
+          {/* Sidebar - Desktop Only (Categories moved to header on mobile) */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="lg:sticky lg:top-4">
               <ForumSidebar
                 categories={categories}
@@ -345,8 +350,8 @@ export const ForumPage = () => {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3 order-2 lg:order-none min-w-0 overflow-hidden">
+          {/* Main Content - Full width on mobile, 3/4 on desktop */}
+          <div className="lg:col-span-3 min-w-0 overflow-hidden">
             {/* Inline Post Composer - Only show if user is logged in */}
             {user && !showGeneralChat && (
               <InlinePostComposer

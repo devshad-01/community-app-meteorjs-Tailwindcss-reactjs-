@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Meteor } from 'meteor/meteor';
-import { MessageSquare, Pin } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { ForumPost } from './ForumPost';
 import { InfiniteScrollLoader } from './InfiniteScrollLoader';
 
@@ -93,13 +93,10 @@ export const PostsList = ({
   // For regular posts, we already handled the empty state above
   if (displayedPosts.length === 0 && posts.length === 0) return null;
 
-  const titleIcon = isPinned ? <Pin className="w-5 h-5 mr-2 text-warm-500 dark:text-orange-400" /> : null;
-
   return (
     <div className={isPinned ? "mb-6" : "space-y-4"}>
       {title && (
         <h2 className="text-xl font-semibold text-warm-900 dark:text-white mb-4 flex items-center">
-          {titleIcon}
           {title}
         </h2>
       )}

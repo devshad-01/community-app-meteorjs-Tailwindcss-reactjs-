@@ -37,10 +37,24 @@ export const ForumPost = ({
   
   // Content truncation logic
   const MOBILE_CHAR_LIMIT = 200;
-  const shouldTruncate = post.content && post.content.length > MOBILE_CHAR_LIMIT;
-  const displayContent = shouldTruncate && !isExpanded 
-    ? post.content.substring(0, MOBILE_CHAR_LIMIT).trim() + '...'
-    : post.content;
+  const DESKTOP_CHAR_LIMIT = 400;
+  
+  const shouldTruncateMobile = post.content && post.content.length > MOBILE_CHAR_LIMIT;
+  const shouldTruncateDesktop = post.content && post.content.length > DESKTOP_CHAR_LIMIT;
+  
+  const getMobileContent = () => {
+    if (shouldTruncateMobile && !isExpanded) {
+      return post.content.substring(0, MOBILE_CHAR_LIMIT).trim() + '...';
+    }
+    return post.content;
+  };
+  
+  const getDesktopContent = () => {
+    if (shouldTruncateDesktop && !isExpanded) {
+      return post.content.substring(0, DESKTOP_CHAR_LIMIT).trim() + '...';
+    }
+    return post.content;
+  };
   const baseClasses = isPinned 
     ? "bg-gradient-to-r from-warm-50 to-orange-50 dark:from-warm-900/20 dark:to-orange-900/20 border border-warm-200 dark:border-orange-800 rounded-xl p-3 sm:p-6 hover:shadow-warm transition-all duration-300 ease-in-out will-change-transform"
     : "bg-white dark:bg-slate-800 rounded-xl shadow-warm hover:shadow-warm-lg border border-warm-200 dark:border-slate-700 p-3 sm:p-6 transition-all duration-300 ease-in-out group will-change-transform";
@@ -86,14 +100,30 @@ export const ForumPost = ({
       
       {/* Content */}
       <div className="mb-4">
-        <p className="text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap text-sm sm:text-base break-words">
-          {displayContent}
+        {/* Mobile content */}
+        <p className="sm:hidden text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap text-sm break-words">
+          {getMobileContent()}
         </p>
+        {/* Desktop content */}
+        <p className="hidden sm:block text-warm-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap text-base break-words">
+          {getDesktopContent()}
+        </p>
+        
         {/* Read More/Less button for mobile */}
-        {shouldTruncate && (
+        {shouldTruncateMobile && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-2 text-warm-600 dark:text-orange-400 hover:text-warm-700 dark:hover:text-orange-300 text-sm font-medium transition-colors duration-200 sm:hidden"
+            className="sm:hidden mt-2 text-warm-600 dark:text-orange-400 hover:text-warm-700 dark:hover:text-orange-300 text-sm font-medium transition-colors duration-200"
+          >
+            {isExpanded ? 'Show less' : 'Read more'}
+          </button>
+        )}
+        
+        {/* Read More/Less button for desktop */}
+        {shouldTruncateDesktop && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="hidden sm:block mt-2 text-warm-600 dark:text-orange-400 hover:text-warm-700 dark:hover:text-orange-300 text-sm font-medium transition-colors duration-200"
           >
             {isExpanded ? 'Show less' : 'Read more'}
           </button>
