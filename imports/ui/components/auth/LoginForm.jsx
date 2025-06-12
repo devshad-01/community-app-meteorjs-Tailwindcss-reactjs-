@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Github } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
 
 export const LoginForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export const LoginForm = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { success } = useToast();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -34,6 +36,12 @@ export const LoginForm = ({ onSuccess }) => {
           else resolve();
         });
       });
+      
+      // Store success message for later display
+      localStorage.setItem('authSuccess', JSON.stringify({
+        type: 'login',
+        message: 'Welcome back! You have successfully signed in.'
+      }));
       
       if (onSuccess) onSuccess();
     } catch (err) {
@@ -63,8 +71,16 @@ export const LoginForm = ({ onSuccess }) => {
         setIsLoading(false);
         if (err) {
           setError(err.message || `${provider} login failed`);
-        } else if (onSuccess) {
-          onSuccess();
+        } else {
+          // Store success message for later display
+          localStorage.setItem('authSuccess', JSON.stringify({
+            type: 'login',
+            message: `Welcome back! You have successfully signed in with ${provider}.`
+          }));
+          
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       });
     }

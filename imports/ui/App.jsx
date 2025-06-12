@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
 import { RouteRenderer } from './components/common/RouteRenderer';
 import { ToastProvider } from './components/common/ToastProvider';
+import { AuthSuccessHandler } from './components/common/AuthSuccessHandler';
 import { HomePage } from './pages/HomePage';
 import { EventsPage } from './pages/EventsPage';
 import { ForumPage } from './pages/ForumPage';
@@ -31,6 +32,7 @@ export const App = () => {
 
   return (
     <ToastProvider>
+      <AuthSuccessHandler userId={userId} />
       <Routes>
         {/* Public routes - accessible when not logged in */}
         <Route 

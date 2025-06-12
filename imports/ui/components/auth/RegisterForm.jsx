@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Github, UserPlus } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
 
 export const RegisterForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export const RegisterForm = ({ onSuccess }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { success } = useToast();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -57,6 +59,12 @@ export const RegisterForm = ({ onSuccess }) => {
         });
       });
       
+      // Store success message for later display
+      localStorage.setItem('authSuccess', JSON.stringify({
+        type: 'register',
+        message: 'Welcome to CommunityHub! Your account has been created successfully.'
+      }));
+      
       if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message || 'An error occurred during registration');
@@ -85,8 +93,16 @@ export const RegisterForm = ({ onSuccess }) => {
         setIsLoading(false);
         if (err) {
           setError(err.message || `${provider} registration failed`);
-        } else if (onSuccess) {
-          onSuccess();
+        } else {
+          // Store success message for later display
+          localStorage.setItem('authSuccess', JSON.stringify({
+            type: 'register',
+            message: `Welcome to CommunityHub! Your account has been created successfully with ${provider}.`
+          }));
+          
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       });
     }
