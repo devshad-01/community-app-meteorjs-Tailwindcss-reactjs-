@@ -13,7 +13,7 @@ import {
   UserPlus,
 } from "lucide-react"
 
-export const HomePage = () => {
+export const HomePage = ({ userId }) => {
   const features = [
     {
       icon: Users,

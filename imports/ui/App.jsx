@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
-import { NavigationBar } from './components/common/NavigationBar';
+import { RouteRenderer } from './components/common/RouteRenderer';
 import { ToastProvider } from './components/common/ToastProvider';
 import { HomePage } from './pages/HomePage';
 import { EventsPage } from './pages/EventsPage';
@@ -16,18 +16,12 @@ import { AdminPage } from './pages/admin/AdminPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { Footer } from './components/common/Footer';
 
 export const App = () => {
-  const { user, isLoading } = useTracker(() => {
-    return {
-      user: Meteor.user(),
-      isLoading: Meteor.loggingIn()
-    };
-  }, []);
+  const userId = useTracker(() => Meteor.userId());
 
-  if (isLoading) {
+  // still loading data from backend
+  if (userId === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -37,83 +31,149 @@ export const App = () => {
 
   return (
     <ToastProvider>
-      <div className="app min-h-screen bg-slate-50 dark:bg-slate-900">
-        <NavigationBar />
+      <Routes>
+        {/* Public routes - accessible when not logged in */}
+        <Route 
+          path="/login" 
+          element={
+            userId ? <Navigate to="/" replace /> : (
+              <RouteRenderer userId={userId}>
+                <LoginPage />
+              </RouteRenderer>
+            )
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            userId ? <Navigate to="/" replace /> : (
+              <RouteRenderer userId={userId}>
+                <RegisterPage />
+              </RouteRenderer>
+            )
+          } 
+        />
         
-        <main className="flex-1">
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/" element={<HomePage />} />
-            
-            {/* Protected routes - require authentication */}
-            <Route 
-              path="/events" 
-              element={
-                <ProtectedRoute>
-                  <EventsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/forum" 
-              element={
-                <ProtectedRoute>
-                  <ForumPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/forum/post/:postId" 
-              element={
-                <ProtectedRoute>
-                  <PostDetailPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/chat" 
-              element={
-                <ProtectedRoute>
-                  <ChatPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/members" 
-              element={
-                <ProtectedRoute>
-                  <MembersPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Admin-only routes */}
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* 404 Page for unknown routes */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </main>
+        {/* Protected routes - require authentication */}
+        <Route 
+          path="/events" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <EventsPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        <Route 
+          path="/forum" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <ForumPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        <Route 
+          path="/forum/post/:postId" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <PostDetailPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        <Route 
+          path="/chat" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <ChatPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <ProfilePage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        <Route 
+          path="/members" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <MembersPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
         
-        <Footer />
-      </div>
+        {/* Admin-only routes */}
+        <Route 
+          path="/admin" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId} requireAdmin={true}>
+                <AdminPage />
+              </RouteRenderer>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+        
+        {/* Home route - accessible to all but shows different content */}
+        <Route 
+          path="/" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <HomePage />
+              </RouteRenderer>
+            ) : (
+              <RouteRenderer userId={userId}>
+                <HomePage userId={userId} />
+              </RouteRenderer>
+            )
+          } 
+        />
+        
+        {/* Catch-all route */}
+        <Route 
+          path="*" 
+          element={
+            userId ? (
+              <RouteRenderer userId={userId}>
+                <NotFoundPage />
+              </RouteRenderer>
+            ) : (
+              <RouteRenderer userId={userId}>
+                <NotFoundPage />
+              </RouteRenderer>
+            )
+          } 
+        />
+      </Routes>
     </ToastProvider>
   );
 };

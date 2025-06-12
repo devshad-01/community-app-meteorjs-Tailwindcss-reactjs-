@@ -22,7 +22,7 @@ import { NotificationDropdown } from "../notifications"
 import { NotificationsCollection } from "/imports/api/notifications"
 import { UserAvatar } from "./UserAvatar"
 
-export const NavigationBar = () => {
+export const NavigationBar = ({ userId: passedUserId }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -140,7 +140,7 @@ export const NavigationBar = () => {
   }
 
   const isAdmin = user?.profile?.role === "admin"
-  const isAuthenticated = !!user && !isLoading
+  const isAuthenticated = !!(passedUserId || user) && !isLoading
 
   // Helper functions for user roles and colors
   const getUserRole = (userId) => {
