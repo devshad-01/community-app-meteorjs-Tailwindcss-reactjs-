@@ -30,13 +30,34 @@ export const PostsList = ({
   hasMore = true,
   onLoadMore,
   triggerRef,
-  totalLoaded = 0
+  totalLoaded = 0,
+  // Loading state to prevent showing "no posts" during initial load
+  loading = false
 }) => {
   const [displayedPosts, setDisplayedPosts] = useState([]);
   const [animationIndex, setAnimationIndex] = useState(0);
+  const [showEmptyState, setShowEmptyState] = useState(false);
+
+  // Delay showing empty state to prevent flash during loading
+  useEffect(() => {
+    if (posts.length === 0 && !loading && !isPinned) {
+      const timer = setTimeout(() => {
+        setShowEmptyState(true);
+      }, 500); // Wait 500ms before showing "no posts found"
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowEmptyState(false);
+    }
+  }, [posts.length, loading, isPinned]);
 
   // Progressively show posts with staggered animation
   useEffect(() => {
+    // If we're loading, don't update displayed posts yet
+    if (loading) {
+      return;
+    }
+
     if (posts.length === 0) {
       setDisplayedPosts([]);
       setAnimationIndex(0);
@@ -67,9 +88,13 @@ export const PostsList = ({
 
     // Start showing new posts after a brief delay
     setTimeout(showNextPost, 100);
-  }, [posts, isPinned]);
+  }, [posts, isPinned, loading]);
 
-  if (posts.length === 0 && !isPinned) {
+  // Don't render anything for empty pinned posts (no need to show empty pinned section)
+  if (posts.length === 0 && isPinned) return null;
+  
+  // Only show "no posts found" after delay to prevent flash during loading
+  if (posts.length === 0 && !isPinned && showEmptyState) {
     return (
       <div className="text-center py-12 animate-fadeIn">
         <div className="max-w-md mx-auto">
@@ -87,11 +112,8 @@ export const PostsList = ({
     );
   }
 
-  // Don't render anything for empty pinned posts (no need to show empty pinned section)
-  if (posts.length === 0 && isPinned) return null;
-  
-  // For regular posts, we already handled the empty state above
-  if (displayedPosts.length === 0 && posts.length === 0) return null;
+  // While posts are empty and we haven't shown empty state yet, don't render anything
+  if (posts.length === 0) return null;
 
   return (
     <div className={isPinned ? "mb-6" : "space-y-4"}>

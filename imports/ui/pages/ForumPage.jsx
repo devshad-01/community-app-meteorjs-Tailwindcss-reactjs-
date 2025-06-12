@@ -426,6 +426,7 @@ export const ForumPage = () => {
                     allReplies={allReplies}
                     showMoreReplies={showMoreReplies}
                     toggleShowMoreReplies={toggleShowMoreReplies}
+                    loading={dataLoading}
                   />
                 )}
 
@@ -457,6 +458,7 @@ export const ForumPage = () => {
                   onLoadMore={loadMore}
                   triggerRef={triggerRef}
                   totalLoaded={totalLoaded}
+                  loading={dataLoading}
                 />
               </div>
             )}
